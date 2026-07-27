@@ -24,13 +24,27 @@ LLM_TEMPERATURE = 0.1           # analistas deterministas, no creativos
 # 284.807 transacciones, 492 fraudes (~0,172%).
 # V1..V28 son componentes PCA anonimizados; Time y Amount son originales.
 TARGET_COL = "Class"
-FEATURE_COLS = [f"V{i}" for i in range(1, 29)] + ["Amount", "Time"]
+TIME_COL = "Time"
+
+# 'Time' NO se usa como variable predictora: son segundos transcurridos desde la
+# primera transaccion, asi que en el split temporal los valores de test caen
+# fuera del rango visto en entrenamiento y el arbol no puede extrapolar. Se usa
+# solo para ordenar y para derivar la hora del dia, que si es informativa
+# (el fraude se concentra de madrugada).
+PCA_COLS = [f"V{i}" for i in range(1, 29)]
+FEATURE_COLS = PCA_COLS + ["Amount", "Hour"]
+
 EXPECTED_ROWS = 284_807
 EXPECTED_FRAUD = 492
 
 # --- Detector ---
 RANDOM_STATE = 42
 TEST_SIZE = 0.2
+
+# Numero de casos que un equipo de fraude real revisaria a mano por lote.
+# La metrica que de verdad importa en operacion: de los N mas sospechosos,
+# cuantos eran fraude.
+TOP_N = [50, 100, 200]
 
 # --- Semaforo de riesgo (umbrales sobre la probabilidad del detector) ---
 RISK_THRESHOLDS = {
