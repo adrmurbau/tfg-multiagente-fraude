@@ -1,0 +1,36 @@
+# --- Entorno virtual ---
+.venv/
+venv/
+env/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# --- Datos (no se versionan: licencia + tamano) ---
+data/*
+!data/.gitkeep
+
+# --- Modelos entrenados ---
+models/*
+!models/.gitkeep
+*.pkl
+*.joblib
+*.json.model
+
+# --- Informes generados ---
+reports/*
+!reports/.gitkeep
+
+# --- Credenciales ---
+.env
+kaggle.json
+
+# --- Editor / SO ---
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

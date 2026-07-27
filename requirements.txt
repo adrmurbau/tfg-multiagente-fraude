@@ -1,0 +1,16 @@
+# TFG - Sistema multi-agente de deteccion de fraude bancario
+# Python 3.12 (NO usar 3.13: CrewAI tiene dependencias que aun rompen)
+#
+# Fase 1 = nucleo minimo. Las dependencias de fases posteriores
+# (shap, matplotlib, imbalanced-learn) se anaden cuando toque, para
+# no arriesgar el resolver de pip en el primer arranque.
+
+# --- Capa 2: agentes LLM ---
+crewai>=0.86
+
+# --- Capa 1: detector ML tabular ---
+xgboost>=2.1
+scikit-learn>=1.5
+pandas>=2.2
+numpy>=1.26,<3
+joblib>=1.4
