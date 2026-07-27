@@ -102,19 +102,31 @@ except urllib.error.URLError as e:
 # ----------------------------------------------------------------------
 if modelo_presente:
     titulo("3. OLLAMA - INFERENCIA DE PRUEBA")
+    # Prompt largo a proposito: 8 tokens no bastan para medir throughput.
     prompt = (
-        "Eres un analista de fraude. Responde SOLO con una palabra: "
-        "si una tarjeta hace 40 compras de 1 euro en 3 minutos en paises distintos, "
-        "clasifica el patron como NORMAL o SOSPECHOSO."
+        "Eres un analista de fraude bancario. Una tarjeta realiza 40 compras de "
+        "1 euro en 3 minutos en paises distintos. Clasifica el patron como NORMAL "
+        "o SOSPECHOSO y justifica la decision en unas 100 palabras."
     )
     try:
+        # Calentamiento: la primera llamada tras un 'pull' carga ~5 GB de disco
+        # a VRAM e inicializa el contexto CUDA. Medir ahi da lecturas de ~6 tok/s
+        # que no representan el rendimiento real (que ronda los 75 tok/s).
+        print("      Calentando el modelo (carga en VRAM)...")
+        _get("/api/generate", {
+            "model": LLM_MODEL,
+            "prompt": "ping",
+            "stream": False,
+            "options": {"num_predict": 1},
+        })
+
         print(f"      Prompt: {prompt[:70]}...")
         t0 = time.perf_counter()
         r = _get("/api/generate", {
             "model": LLM_MODEL,
             "prompt": prompt,
             "stream": False,
-            "options": {"temperature": 0.1, "num_predict": 30},
+            "options": {"temperature": 0.1, "num_predict": 120},
         })
         dt = time.perf_counter() - t0
 
