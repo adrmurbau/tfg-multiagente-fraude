@@ -18,9 +18,29 @@ from src.config import TARGET_COL
 # Extraccion de informacion del texto generado por los agentes
 # ----------------------------------------------------------------------
 
-# El '%' y el '.' en las clases excluidas evitan dos falsos positivos reales:
-# leer '100%' como la transaccion 100, y partir '0.9989' en '9989'.
-_RE_ID = re.compile(r"(?<![\w.,%])(\d{1,6})(?![\w.,%])")
+# Identificadores SOLO en contextos donde de verdad se cita una transaccion.
+# La version anterior cogia cualquier numero suelto y marcaba como id ajeno
+# el '4' de "se han identificado 4 casos". Buscar el numero en su contexto es
+# mucho mas fiable que buscar el numero solo.
+_PATRONES_ID = [
+    r"CASO\s+#?(\d{1,6})",              # 'CASO 156'
+    r"[Tt]ransacci[óo]n\s+#?(\d{1,6})",  # 'Transacción 0'
+    r"\bid\s*[:=]?\s*(\d{1,6})\b",       # 'id: 156'
+    r"^\s*\|\s*\*{0,2}(\d{1,6})\*{0,2}\s*\|",  # celda de tabla Markdown
+]
+_RE_IDS = [re.compile(p, re.MULTILINE) for p in _PATRONES_ID]
+
+# Un termino prohibido dentro de una negacion no es una invencion. Los modelos
+# suelen cerrar el informe declarando que han cumplido la norma ("sin
+# mencionar paises, comercios ni historial de cliente"), y esa frase citaba
+# los terminos vetados y hacia saltar la alarma sobre un informe correcto.
+_RE_NEGACION = re.compile(
+    r"(sin (mencionar|citar|incluir|referencias?|hacer)|"
+    r"no (se )?(menciona|incluye|cita|hay|existen?|contiene)|"
+    r"ning[úu]n[ao]?|tampoco|ni\s)",
+    re.IGNORECASE,
+)
+VENTANA_NEGACION = 120  # caracteres antes del termino donde buscar la negacion
 
 # Bloque 'CASO <id> ... VEREDICTO: <X>'. Non-greedy para no tragarse el
 # siguiente caso.
@@ -50,8 +70,21 @@ PATRONES_PROHIBIDOS = [
 
 
 def ids_citados(texto: str) -> set:
-    """Numeros del texto que podrian ser identificadores de transaccion."""
-    return {int(m) for m in _RE_ID.findall(texto)}
+    """Identificadores de transaccion citados en el informe.
+
+    Solo cuenta numeros que aparecen en contextos de identificacion ('CASO
+    156', 'Transacción 0', celda de tabla), no cualquier cifra del texto.
+    """
+    ids = set()
+    for rx in _RE_IDS:
+        ids.update(int(m) for m in rx.findall(texto))
+    return ids
+
+
+def _en_negacion(texto: str, pos: int) -> bool:
+    """¿El termino en esa posicion esta dentro de una frase negativa?"""
+    inicio = max(0, pos - VENTANA_NEGACION)
+    return bool(_RE_NEGACION.search(texto[inicio:pos]))
 
 
 def veredictos_por_caso(texto: str) -> dict:
@@ -84,10 +117,13 @@ def auditar(informe: str, ids_expediente, ids_lote) -> dict:
     cubiertos = sorted(validos & citados)
 
     bajo = informe.lower()
-    conceptos = [
-        (re.search(p, bajo).group(0), motivo)
-        for p, motivo in PATRONES_PROHIBIDOS if re.search(p, bajo)
-    ]
+    conceptos = []
+    for patron, motivo in PATRONES_PROHIBIDOS:
+        # Solo cuenta si ALGUNA aparicion esta fuera de una negacion
+        afirmativas = [m for m in re.finditer(patron, bajo)
+                       if not _en_negacion(bajo, m.start())]
+        if afirmativas:
+            conceptos.append((afirmativas[0].group(0), motivo))
 
     if inventados:
         veredicto = "NO FIABLE - identificadores inventados"

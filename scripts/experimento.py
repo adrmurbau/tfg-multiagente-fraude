@@ -26,6 +26,7 @@ import statistics
 import sys
 import time
 import traceback
+import urllib.request
 from datetime import datetime
 from pathlib import Path
 
@@ -66,6 +67,29 @@ def parsear_args():
     return p.parse_args()
 
 
+def calentar(modelo: str):
+    """Carga el modelo en VRAM antes de cronometrar nada.
+
+    Al cambiar de modelo, Ollama descarga el anterior y carga el nuevo. Sin
+    este paso, la PRIMERA ejecucion de cada modelo carga varios GB de disco y
+    el tiempo medido incluye ese coste, que no es inferencia. En la prueba
+    inicial eso hacia parecer que el modo 'interpreta' era el doble de lento
+    que 'revisa' cuando la unica diferencia era el orden de ejecucion.
+    """
+    from src.config import OLLAMA_HOST
+    payload = json.dumps({
+        "model": modelo, "prompt": "ping",
+        "stream": False, "options": {"num_predict": 1},
+    }).encode()
+    req = urllib.request.Request(f"{OLLAMA_HOST}/api/generate", data=payload,
+                                 headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=300):
+            pass
+    except Exception as e:
+        print(f"      [aviso] no se pudo precalentar {modelo}: {e}")
+
+
 def una_ejecucion(df, modelo, modo, semilla, repeticion, args) -> dict:
     """Ejecuta el departamento una vez y devuelve la fila de resultados."""
     lote = construir_lote(df, n=args.n_lote, n_fraudes=args.fraudes,
@@ -104,6 +128,24 @@ def una_ejecucion(df, modelo, modo, semilla, repeticion, args) -> dict:
         fila["auditoria"] = aud["veredicto"]
         fila["fiable"] = aud["fiable"]
         fila["cobertura"] = round(aud["cobertura"], 3)
+
+        # Si la auditoria falla, hay que poder ver POR QUE. Sin el texto solo
+        # sabes que algo salio mal, no si el modelo alucino de verdad o si el
+        # auditor tropezo con bloques de razonamiento.
+        if not aud["fiable"]:
+            fallos_dir = REPORTS_DIR / "no_fiables"
+            fallos_dir.mkdir(exist_ok=True)
+            nombre = f"{modelo.replace(':', '_').replace('/', '_')}_{modo}_s{semilla}_r{repeticion}.md"
+            (fallos_dir / nombre).write_text(
+                f"# {modelo} | {modo} | semilla {semilla} rep {repeticion}\n\n"
+                f"**Auditoria:** {aud['veredicto']}\n\n"
+                f"- Conceptos detectados: {aud['conceptos_inventados']}\n"
+                f"- Ids inventados: {aud['ids_inventados']}\n"
+                f"- Ids fuera del expediente: {aud['ids_fuera_expediente']}\n\n"
+                f"---\n\n## Informe final\n\n{informe}\n\n"
+                f"---\n\n## Salida del Investigador\n\n{salida_inv}\n",
+                encoding="utf-8",
+            )
 
     except Exception as e:
         fila["segundos"] = round(time.perf_counter() - t0, 1)
@@ -172,6 +214,8 @@ def main():
     filas, i = [], 0
 
     for modelo in args.modelos:
+        print(f"\n  Precalentando {modelo}...", flush=True)
+        calentar(modelo)
         for modo in args.modos:
             for semilla in args.semillas:
                 for rep in range(1, args.repeticiones + 1):

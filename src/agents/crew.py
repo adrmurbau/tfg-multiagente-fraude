@@ -56,6 +56,18 @@ def construir_llm(modelo: str = None) -> LLM:
         model=f"ollama/{modelo or LLM_MODEL}",
         base_url=OLLAMA_HOST,
         temperature=LLM_TEMPERATURE,
+        # Limites duros a nivel de peticion HTTP. El max_execution_time de
+        # CrewAI no siempre corta: un modelo de razonamiento hibrido como
+        # qwen3 puede quedarse generando cadena de pensamiento y bloquear el
+        # lote entero. Aqui la peticion muere y la excepcion queda registrada
+        # como fila con error, sin arrastrar el resto del experimento.
+        timeout=240,
+        # 4096 y no menos: los modelos de razonamiento (qwen3, gpt-oss)
+        # consumen parte del presupuesto en cadena de pensamiento antes de
+        # emitir la respuesta. Con 2048 se quedaban sin margen y CrewAI
+        # recibia una respuesta vacia que reintentaba, duplicando el tiempo.
+        # El limite es igual para todos los modelos, por comparabilidad.
+        max_tokens=4096,
     )
 
 
