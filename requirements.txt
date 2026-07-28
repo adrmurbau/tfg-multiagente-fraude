@@ -14,3 +14,6 @@ scikit-learn>=1.5
 pandas>=2.2
 numpy>=1.26,<3
 joblib>=1.4
+
+# --- Contrastes estadisticos del experimento (Fase 5) ---
+scipy>=1.11

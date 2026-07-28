@@ -62,7 +62,7 @@ def construir_llm(modelo: str = None) -> LLM:
 # ----------------------------------------------------------------------
 # Los seis agentes
 # ----------------------------------------------------------------------
-def construir_agentes(llm: LLM) -> dict:
+def construir_agentes(llm: LLM, verbose: bool = True) -> dict:
     # max_iter bajo y max_execution_time acotado: si el modelo se enreda
     # formateando una llamada a herramienta, preferimos que falle pronto y de
     # forma visible antes que dejarlo reintentando en silencio. Sin este
@@ -70,7 +70,7 @@ def construir_agentes(llm: LLM) -> dict:
     comun = dict(
         llm=llm,
         allow_delegation=False,
-        verbose=True,
+        verbose=verbose,
         max_iter=3,
         max_execution_time=180,   # segundos por agente
     )
@@ -333,7 +333,14 @@ def construir_tareas(ag: dict, modo: str) -> list:
             "  de cliente: esos datos NO existen en este dataset.\n"
             "- No sumes ni calcules importes: si citas un total, copialo del "
             "  expediente.\n"
-            "Escribe en Markdown."
+            + ("- El investigador ha emitido un VEREDICTO por caso. Los "
+               "  CONFIRMADOS van en la tabla principal. Los DESCARTADOS van "
+               "  en una seccion aparte titulada 'Casos descartados en "
+               "  revision', indicando el motivo. No los elimines del informe: "
+               "  un descarte tambien es una decision que debe quedar "
+               "  registrada y ser auditable.\n"
+               if modo == "revisa" else "")
+            + "Escribe en Markdown."
         ),
         expected_output=(
             "Un informe en Markdown con resumen ejecutivo, tabla priorizada, "
@@ -361,7 +368,7 @@ def construir_crew(modo: str = MODO_POR_DEFECTO, modelo: str = None,
         raise ValueError(f"Modo '{modo}' desconocido. Opciones: {MODOS}")
 
     llm = construir_llm(modelo)
-    agentes = construir_agentes(llm)
+    agentes = construir_agentes(llm, verbose=verbose)
     tareas = construir_tareas(agentes, modo)
 
     if nucleo:
