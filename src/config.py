@@ -51,3 +51,29 @@ RISK_THRESHOLDS = {
     "ALTO": 0.80,    # rojo
     "MEDIO": 0.40,   # ambar
 }                     # por debajo de MEDIO -> verde
+
+# --- Modos de autoridad del departamento (experimento del Cap. 5) ---
+# Quien tiene la ultima palabra sobre si un caso llega al informe:
+#
+#   'interpreta' -> el detector decide. Los agentes explican, priorizan y
+#                   redactan, pero no alteran la lista de casos. El
+#                   rendimiento del sistema es, por construccion, el del
+#                   detector: los agentes solo pueden anadir valor
+#                   explicativo, nunca restar recall.
+#
+#   'revisa'     -> el Investigador puede marcar un caso como falso positivo
+#                   y retirarlo del informe. Mas parecido a un equipo real,
+#                   pero introduce el riesgo de que el LLM descarte fraude
+#                   autentico. Es justo lo que hay que medir.
+MODOS = ("interpreta", "revisa")
+MODO_POR_DEFECTO = "interpreta"
+
+# Seleccion de casos a revisar.
+#
+# Un numero fijo es una mala idea: con un corte de 3 casos, un fraude con
+# probabilidad 0,97 se quedo fuera del informe simplemente por ocupar el
+# cuarto puesto. La regla correcta es "todo lo que el detector marca en rojo",
+# con un minimo para que el informe no salga vacio y un techo para acotar el
+# coste de inferencia.
+CASOS_MIN = 3
+CASOS_MAX = 10
