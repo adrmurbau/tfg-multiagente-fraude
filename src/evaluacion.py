@@ -35,8 +35,15 @@ _RE_IDS = [re.compile(p, re.MULTILINE) for p in _PATRONES_ID]
 # mencionar paises, comercios ni historial de cliente"), y esa frase citaba
 # los terminos vetados y hacia saltar la alarma sobre un informe correcto.
 _RE_NEGACION = re.compile(
-    r"(sin (mencionar|citar|incluir|referencias?|hacer)|"
-    r"no (se )?(menciona|incluye|cita|hay|existen?|contiene)|"
+    # 'sin acceso a historial', 'sin mencionar paises'
+    r"(sin\s+(acceso|informaci[óo]n|datos|mencionar|citar|incluir|considerar|"
+    r"referencias?|hacer|conocer|disponer|atender|recurrir|apelar)|"
+    # 'la falta de informacion sobre el historial'
+    r"(falta|ausencia|carencia)\s+de|carece[nr]?\s+de|"
+    # 'no se dispone de historial', 'no hay comercio'
+    r"no\s+(se\s+)?(dispone|dispongo|disponemos|tiene|tenemos|cuenta\s+con|"
+    r"menciona|incluye|cita|hay|existen?|contiene|consta)|"
+    # enumeraciones negativas: 'ni historial de cliente'
     r"ning[úu]n[ao]?|tampoco|ni\s)",
     re.IGNORECASE,
 )
@@ -57,7 +64,12 @@ PATRONES_PROHIBIDOS = [
     (r"\bpa[ií]s(es)?\b", "el dataset no contiene informacion geografica"),
     (r"\bubicaci[óo]n|\bgeolocalizaci[óo]n", "no hay datos de localizacion"),
     (r"\bcomercio|\bestablecimiento|\bcomerciante", "no se identifica el comercio"),
-    (r"\btitular\b", "no hay datos del titular"),
+    # 'titular' a secas NO es invencion: una de las acciones recomendadas es
+    # "contactar con el cliente", asi que referirse al titular de la tarjeta
+    # es inevitable. Solo es invencion si afirma tener DATOS suyos.
+    (r"(datos|nombre|edad|direcci[óo]n|perfil|dni) del titular|"
+     r"titular\s+(se\s+llama|es\s+un|reside|vive)",
+     "no hay datos identificativos del titular"),
     (r"n[úu]mero de (cuenta|tarjeta)|cuenta (bancaria|del cliente)",
      "no hay identificador de cuenta ni de tarjeta"),
     (r"historial (de[l]? )?(cliente|actividad|transacciones|compras)",

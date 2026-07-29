@@ -73,6 +73,51 @@ sin mencionar paises, comercios, cuentas, titulares ni historial de cliente.""",
         "citar los terminos vetados DENTRO de una negacion no es inventarselos",
     ),
     (
+        "Descargo de responsabilidad 'sin acceso a' (qwen3)",
+        """| 156 | 1.0000 | ALTO | 1.18 EUR |
+| 34 | 1.0000 | ALTO | 0.76 EUR |
+| 420 | 0.9989 | ALTO | 39.98 EUR |
+| 352 | 0.9736 | ALTO | 0.76 EUR |
+Los casos han sido analizados basandose unicamente en las variables
+proporcionadas, sin acceso a informacion adicional como historial de
+cliente, ubicaciones o comercios.""",
+        True,
+        "declarar que NO tienes un dato no es inventarselo",
+    ),
+    (
+        "Descargo 'falta de informacion' (llama)",
+        """| 156 | 1.0000 | ALTO | 1.18 EUR |
+| 34 | 1.0000 | ALTO | 0.76 EUR |
+| 420 | 0.9989 | ALTO | 39.98 EUR |
+| 352 | 0.9736 | ALTO | 0.76 EUR |
+La fiabilidad no se puede calcular con exactitud debido a la falta de
+informacion sobre el historial del cliente.""",
+        True,
+        "reconocer una limitacion es buena praxis, no alucinacion",
+    ),
+    (
+        "'sin considerar' + accion 'contactar al titular' (qwen3)",
+        """| 156 | 1.0000 | ALTO | 1.18 EUR |
+| 34 | 1.0000 | ALTO | 0.76 EUR |
+| 420 | 0.9989 | ALTO | 39.98 EUR |
+| 352 | 0.9736 | ALTO | 0.76 EUR |
+Accion recomendada: verificacion directa con el titular de la tarjeta.
+Las conclusiones se derivan de las variables proporcionadas, sin considerar
+informacion externa (paises, historial de clientes, etc.).""",
+        True,
+        "'contactar con el cliente' es una accion que yo mismo permito",
+    ),
+    (
+        "Invencion afirmativa sobre el titular",
+        """| 156 | 1.0000 | ALTO | 1.18 EUR |
+| 34 | 1.0000 | ALTO | 0.76 EUR |
+| 420 | 0.9989 | ALTO | 39.98 EUR |
+| 352 | 0.9736 | ALTO | 0.76 EUR |
+Los datos del titular indican que reside fuera del area habitual.""",
+        False,
+        "aqui si afirma tener informacion identificativa que no existe",
+    ),
+    (
         "Invencion de frecuencia",
         """| 156 | 1.0000 | ALTO | 1.18 EUR |
 | 34 | 1.0000 | ALTO | 0.76 EUR |
