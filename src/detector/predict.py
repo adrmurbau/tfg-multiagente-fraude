@@ -156,24 +156,29 @@ class DetectorFraude:
 
 
     # ------------------------------------------------------------------
-    def seleccionar_casos(self, df: pd.DataFrame) -> pd.DataFrame:
+    def seleccionar_casos(self, df: pd.DataFrame, capacidad: int = None) -> pd.DataFrame:
         """Decide que casos se elevan a revision.
 
         Regla: todos los de riesgo ALTO. Si hay menos de CASOS_MIN se completa
         con los siguientes por puntuacion (para que el informe nunca salga
-        vacio) y se corta en CASOS_MAX (para acotar el coste de inferencia).
+        vacio) y se corta en la capacidad de revision.
 
-        Un corte fijo seria peor: dejaria fuera casos en rojo por el mero
-        hecho de ocupar una posicion baja en el ranking.
+        Un corte fijo por posicion seria peor: dejaria fuera casos en rojo por
+        el mero hecho de ocupar un puesto bajo en el ranking.
+
+        `capacidad` modela la **capacidad de revision manual** del equipo: un
+        departamento real no revisa todo lo que el modelo marca, revisa lo que
+        le da tiempo. Por defecto CASOS_MAX.
         """
         from src.config import CASOS_MAX, CASOS_MIN
 
+        tope = capacidad if capacidad is not None else CASOS_MAX
         p = self.puntuar(df)
         altos = p[p["riesgo"] == "ALTO"].sort_values("prob_fraude", ascending=False)
 
         if len(altos) >= CASOS_MIN:
-            return altos.head(CASOS_MAX)
-        return p.nlargest(CASOS_MIN, "prob_fraude")
+            return altos.head(tope)
+        return p.nlargest(max(CASOS_MIN, min(tope, len(p))), "prob_fraude")
 
 
 # ----------------------------------------------------------------------
@@ -199,3 +204,46 @@ def construir_lote(df: pd.DataFrame, n: int = 500, n_fraudes: int = 5,
         frac=1, random_state=random_state
     )
     return lote.reset_index(drop=True)
+
+
+def construir_turno(df: pd.DataFrame, horas: float = 4.0,
+                    desplazamiento_h: float = 0.0) -> pd.DataFrame:
+    """Extrae una ventana temporal CONTIGUA del periodo de test.
+
+    A diferencia de `construir_lote`, que toma una muestra aleatoria con un
+    numero fijo de fraudes, esto reproduce lo que un departamento recibiria de
+    verdad: **todas** las transacciones de un intervalo, con la proporcion de
+    fraude que tenga la realidad.
+
+    Por que importa el cambio. Un lote de 500 transacciones con 5 fraudes es
+    una construccion artificial: ni el tamano ni la proporcion corresponden a
+    nada. Un turno de 4 horas son ~33.000 transacciones con ~54 fraudes, que es
+    lo que de verdad pasa por un sistema real. Y multiplica por diez el numero
+    de fraudes evaluables, con lo que el recall deja de moverse a saltos de 0,2.
+
+    El coste NO se dispara: puntuar 33.000 transacciones es instantaneo, y a la
+    capa de agentes solo llegan los casos que el detector eleva.
+
+    Args:
+        horas: duracion del turno.
+        desplazamiento_h: desde donde empieza, dentro del periodo de test.
+
+    LIMITACION: el periodo de test dura 7,7 horas, asi que turnos de 4 h
+    partiendo de desplazamientos distintos **se solapan**. No son muestras
+    independientes y hay que declararlo al interpretar la variabilidad entre
+    turnos.
+    """
+    ordenado = df.sort_values("Time")
+    inicio_test = ordenado["Time"].iloc[int(len(ordenado) * 0.8)]
+
+    desde = inicio_test + desplazamiento_h * 3600
+    hasta = desde + horas * 3600
+
+    turno = ordenado[(ordenado["Time"] >= desde) & (ordenado["Time"] < hasta)]
+    if turno.empty:
+        raise ValueError(
+            f"Turno vacio: el periodo de test va de "
+            f"{inicio_test / 3600:.1f}h a {ordenado['Time'].max() / 3600:.1f}h. "
+            f"Reduce --turno-horas o --desplazamiento."
+        )
+    return turno.reset_index(drop=True)

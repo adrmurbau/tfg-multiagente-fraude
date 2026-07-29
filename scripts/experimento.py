@@ -33,10 +33,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.agents.crew import construir_crew  # noqa: E402
-from src.agents.tools import inicializar_contexto  # noqa: E402
+from src.agents.tools import inicializar_contexto, mapa_casos  # noqa: E402
 from src.config import MODOS, REPORTS_DIR  # noqa: E402
 from src.detector.data import cargar_dataset  # noqa: E402
-from src.detector.predict import DetectorFraude, construir_lote  # noqa: E402
+from src.detector.predict import (  # noqa: E402
+    DetectorFraude,
+    construir_lote,
+    construir_turno,
+)
 from src.evaluacion import auditar, medir_sistema  # noqa: E402
 
 CAMPOS = [
@@ -46,7 +50,7 @@ CAMPOS = [
     "n_confirmados", "n_descartados",
     "n_fraude_descartado", "fraude_descartado",
     "n_descarte_correcto",
-    "auditoria", "fiable", "cobertura", "error",
+    "auditoria", "fiable", "cobertura", "cobertura_investigacion", "error",
 ]
 
 
@@ -61,6 +65,16 @@ def parsear_args():
                         "del muestreo del LLM).")
     p.add_argument("--n-lote", type=int, default=500)
     p.add_argument("--fraudes", type=int, default=5)
+    p.add_argument("--turno-horas", type=float, default=None,
+                   help="Usa ventanas temporales REALES del periodo de test. "
+                        "Las semillas pasan a interpretarse como horas de "
+                        "desfase del inicio del turno.")
+    p.add_argument("--iterativo", action="store_true",
+                   help="Una tarea de investigacion por caso, en vez de pedir "
+                        "N parrafos en una sola respuesta. Garantiza cobertura "
+                        "del 100%% a cambio de coste lineal.")
+    p.add_argument("--capacidad", type=int, default=None,
+                   help="Casos que el equipo revisa por turno.")
     p.add_argument("--nucleo", action="store_true", default=True,
                    help="3 agentes en vez de 6 (por defecto, para acotar el tiempo).")
     p.add_argument("--completo", dest="nucleo", action="store_false")
@@ -92,10 +106,16 @@ def calentar(modelo: str):
 
 def una_ejecucion(df, modelo, modo, semilla, repeticion, args) -> dict:
     """Ejecuta el departamento una vez y devuelve la fila de resultados."""
-    lote = construir_lote(df, n=args.n_lote, n_fraudes=args.fraudes,
-                          random_state=semilla)
+    if args.turno_horas:
+        # Con turnos reales, la "semilla" es el desfase en horas del inicio
+        # de la ventana dentro del periodo de test.
+        lote = construir_turno(df, horas=args.turno_horas,
+                               desplazamiento_h=float(semilla))
+    else:
+        lote = construir_lote(df, n=args.n_lote, n_fraudes=args.fraudes,
+                              random_state=semilla)
     detector = DetectorFraude()
-    inicializar_contexto(lote, detector)
+    inicializar_contexto(lote, detector, capacidad=args.capacidad)
 
     fila = {c: None for c in CAMPOS}
     fila.update(modelo=modelo, modo=modo, semilla=semilla, repeticion=repeticion)
@@ -103,7 +123,8 @@ def una_ejecucion(df, modelo, modo, semilla, repeticion, args) -> dict:
     t0 = time.perf_counter()
     try:
         resultado = construir_crew(modo=modo, modelo=modelo, verbose=False,
-                                   nucleo=args.nucleo).kickoff()
+                                   nucleo=args.nucleo,
+                                   iterativo=args.iterativo).kickoff()
         fila["segundos"] = round(time.perf_counter() - t0, 1)
 
         informe = str(resultado)
@@ -111,12 +132,18 @@ def una_ejecucion(df, modelo, modo, semilla, repeticion, args) -> dict:
             salidas = [t.raw for t in resultado.tasks_output]
         except AttributeError:
             salidas = [informe]
-        # La penultima tarea es la del Investigador: sus veredictos son los
-        # originales, los del Reportero vienen reproducidos y duplicarian.
-        salida_inv = salidas[-2] if len(salidas) >= 2 else informe
+        # Con el Investigador iterativo hay N tareas de investigacion. Se unen
+        # todas las salidas menos la ultima (el informe, que las reproduce).
+        salida_inv = "\n\n".join(salidas[:-1]) if len(salidas) > 1 else informe
 
-        met = medir_sistema(lote, detector, salida_inv, modo)
-        aud = auditar(informe, met["ids_expediente"], lote.index)
+        met = medir_sistema(lote, detector, salida_inv, modo,
+                            capacidad=args.capacidad, mapa_casos=mapa_casos())
+        # El universo de identificadores validos son los numeros de caso
+        # (1..N): cualquier otro numero citado es inventado.
+        aud = auditar(informe, met["ids_expediente"], met["ids_expediente"])
+        aud_inv = auditar(salida_inv, met["ids_expediente"],
+                          met["ids_expediente"])
+        fila["cobertura_investigacion"] = round(aud_inv["cobertura"], 3)
 
         fila.update({k: met[k] for k in [
             "fraudes_totales", "casos_elevados", "fraudes_elevados",

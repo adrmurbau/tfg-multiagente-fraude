@@ -22,11 +22,14 @@ from src.config import TARGET_COL
 # La version anterior cogia cualquier numero suelto y marcaba como id ajeno
 # el '4' de "se han identificado 4 casos". Buscar el numero en su contexto es
 # mucho mas fiable que buscar el numero solo.
+# El `\**` tolera la decoracion Markdown: los modelos escriben cosas como
+# "### Transaccion ID: **15854**" y la version anterior no lo reconocia,
+# marcando como INCOMPLETO un informe que si citaba los casos.
 _PATRONES_ID = [
-    r"CASO\s+#?(\d{1,6})",              # 'CASO 156'
-    r"[Tt]ransacci[óo]n\s+#?(\d{1,6})",  # 'Transacción 0'
-    r"\bid\s*[:=]?\s*(\d{1,6})\b",       # 'id: 156'
-    r"^\s*\|\s*\*{0,2}(\d{1,6})\*{0,2}\s*\|",  # celda de tabla Markdown
+    r"CASO\s*#?\s*\**\s*(\d{1,6})",                       # 'CASO 3', 'CASO **3**'
+    r"[Tt]ransacci[óo]n\s*(?:ID)?\s*[:#]?\s*\**\s*(\d{1,6})",  # 'Transacción ID: **15854**'
+    r"\bID\s*[:=]?\s*\**\s*(\d{1,6})",                    # 'ID: 156'
+    r"^\s*\|\s*\**\s*(\d{1,6})\s*\**\s*\|",              # celda de tabla
 ]
 _RE_IDS = [re.compile(p, re.MULTILINE) for p in _PATRONES_ID]
 
@@ -162,7 +165,8 @@ def auditar(informe: str, ids_expediente, ids_lote) -> dict:
 # Metricas del sistema completo
 # ----------------------------------------------------------------------
 def medir_sistema(lote, detector, salida_investigador: str = "",
-                  modo: str = "interpreta") -> dict:
+                  modo: str = "interpreta", capacidad: int = None,
+                  mapa_casos: dict = None) -> dict:
     """Contrasta lo que hizo el sistema con las etiquetas reales.
 
     Distingue tres niveles, y la distincion es el nucleo del experimento:
@@ -172,15 +176,25 @@ def medir_sistema(lote, detector, salida_investigador: str = "",
                         'interpreta' coincide con el anterior; en modo
                         'revisa' puede ser menor, nunca mayor.
       fraude_descartado : el dano concreto que hace el LLM al decidir.
+
+    `mapa_casos` traduce los numeros de caso que maneja el LLM (1..N) a los
+    indices reales del DataFrame. El LLM nunca ve indices crudos porque, con
+    turnos reales, son numeros de 4-5 cifras que corrompe al copiarlos.
     """
-    expediente = detector.seleccionar_casos(lote)
+    expediente = detector.seleccionar_casos(lote, capacidad)
     ids_exp = list(expediente.index)
+
+    # Si no se pasa mapa, se reconstruye: los casos van numerados 1..N en el
+    # mismo orden en que los devuelve seleccionar_casos.
+    mapa = mapa_casos or {n: int(i) for n, i in enumerate(ids_exp, start=1)}
 
     fraudes_totales = int(lote[TARGET_COL].sum())
     fraudes_elevados = int(expediente[TARGET_COL].sum())
 
     veredictos = veredictos_por_caso(salida_investigador) if modo == "revisa" else {}
-    descartados = {i for i, v in veredictos.items() if v == "DESCARTADO"}
+    # Traducir numero de caso -> indice real antes de cruzar con las etiquetas
+    descartados = {mapa[n] for n, v in veredictos.items()
+                   if v == "DESCARTADO" and n in mapa}
 
     # Descartes que eran fraude real: el error caro
     fraude_descartado = sorted(
@@ -200,7 +214,9 @@ def medir_sistema(lote, detector, salida_investigador: str = "",
         "n_lote": len(lote),
         "fraudes_totales": fraudes_totales,
         "casos_elevados": len(ids_exp),
-        "ids_expediente": ids_exp,
+        "ids_expediente": list(mapa.keys()),   # numeros de caso, lo que cita el LLM
+        "indices_expediente": ids_exp,          # indices reales del DataFrame
+        "mapa_casos": mapa,
         "fraudes_elevados": fraudes_elevados,
         "recall_detector": fraudes_elevados / max(fraudes_totales, 1),
         "precision_detector": fraudes_elevados / max(len(ids_exp), 1),

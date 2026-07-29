@@ -37,6 +37,8 @@ from src.agents.tools import (
     PriorizarSospechosasTool,
     RendimientoDetectorTool,
     construir_dossier,
+    construir_dossier_caso,
+    n_casos,
 )
 from src.config import (
     LLM_MODEL,
@@ -61,6 +63,15 @@ def construir_llm(modelo: str = None) -> LLM:
         # qwen3 puede quedarse generando cadena de pensamiento y bloquear el
         # lote entero. Aqui la peticion muere y la excepcion queda registrada
         # como fila con error, sin arrastrar el resto del experimento.
+        # NOTA SOBRE LA VENTANA DE CONTEXTO
+        # Ollama usa num_ctx=4096 por defecto y, al excederlo, TRUNCA POR EL
+        # PRINCIPIO EN SILENCIO. Eso produjo un falso hallazgo: parecia que el
+        # modelo no podia con mas de 18 casos, cuando lo que pasaba es que el
+        # prompt cruzaba los 4096 tokens y se perdian los primeros.
+        #
+        # NO se puede corregir desde aqui: CrewAI enruta por el cliente de
+        # OpenAI, que rechaza `num_ctx` con un TypeError. Hay que hornear la
+        # ventana en el propio modelo con un Modelfile. Ver ollama/README.md.
         timeout=240,
         # 4096 y no menos: los modelos de razonamiento (qwen3, gpt-oss)
         # consumen parte del presupuesto en cadena de pensamiento antes de
@@ -206,7 +217,13 @@ def construir_agentes(llm: LLM, verbose: bool = True) -> dict:
 # ----------------------------------------------------------------------
 # Las tareas
 # ----------------------------------------------------------------------
-def construir_tareas(ag: dict, modo: str) -> list:
+def construir_tareas(ag: dict, modo: str, iterativo: bool = False) -> dict:
+    """Construye las tareas y las devuelve nombradas.
+
+    `iterativo=True` divide la investigacion en UNA TAREA POR CASO en lugar de
+    pedirle al modelo N parrafos en una sola respuesta. Ver el docstring de
+    `construir_dossier_caso` para los datos que motivan el cambio.
+    """
     t_encuadre = Task(
         description=(
             "Consulta las estadisticas del lote con la herramienta disponible. "
@@ -292,38 +309,65 @@ def construir_tareas(ag: dict, modo: str) -> list:
         )
         salida_veredicto = ""
 
-    t_investigar = Task(
-        description=(
-            "Este es el expediente completo, con la descomposicion por "
-            "variables de cada caso:\n\n"
-            f"{dossier}\n\n"
-            "Redacta un parrafo por CADA caso del expediente, explicando en "
-            "lenguaje llano por que el detector lo considera sospechoso. "
-            "Menciona su importe real y las variables de mayor aporte tal y "
-            "como aparecen arriba.\n"
-            "FORMATO OBLIGATORIO: para cada caso, una linea 'CASO <id>' y "
-            "debajo un parrafo de 3 a 5 frases en prosa. PROHIBIDO responder "
-            "con tablas, listas o vinetas: el resultado debe ser texto "
-            "corrido.\n\n"
-            "LO QUE NO EXISTE EN ESTOS DATOS, y por tanto no puedes mencionar: "
-            "paises, ubicaciones, comercios, titulares, numeros de tarjeta, "
-            "cuentas, historial del cliente, transacciones anteriores ni "
-            "frecuencia de uso. El dataset SOLO contiene 28 componentes PCA "
-            "anonimizados, un importe y una hora. Si escribes 'pais de alto "
-            "riesgo' o 'historial sospechoso' estaras inventando.\n"
-            "Los importes estan en EUROS, no en dolares.\n"
-            + instruccion_veredicto
-        ),
-        expected_output=(
-            "Un bloque por transaccion, encabezado por su identificador, con la "
-            "explicacion en lenguaje natural. Cada bloque debe ser PROSA "
-            "explicativa escrita por ti: la salida de la herramienta es tu "
-            "materia prima, no tu respuesta. Un lector no tecnico tiene que "
-            "entenderlo sin ver ninguna tabla." + salida_veredicto
-        ),
-        agent=ag["investigador"],
-        context=[t_priorizar, t_evaluar],
+    PROHIBICIONES = (
+        "LO QUE NO EXISTE EN ESTOS DATOS, y por tanto no puedes mencionar: "
+        "paises, ubicaciones, comercios, titulares, numeros de tarjeta, "
+        "cuentas, historial del cliente, transacciones anteriores ni "
+        "frecuencia de uso. El dataset SOLO contiene 28 componentes PCA "
+        "anonimizados, un importe y una hora. Si escribes 'pais de alto "
+        "riesgo' o 'historial sospechoso' estaras inventando.\n"
+        "Los importes estan en EUROS, no en dolares.\n"
     )
+
+    if iterativo:
+        # UNA TAREA POR CASO. Prompt corto, salida corta, cobertura garantizada.
+        tareas_investigar = [
+            Task(
+                description=(
+                    f"{construir_dossier_caso(n)}\n\n"
+                    f"Redacta UN SOLO parrafo de 3 a 5 frases explicando en "
+                    f"lenguaje llano por que el detector considera sospechoso "
+                    f"el CASO {n}. Menciona su importe y las variables de mayor "
+                    f"aporte tal y como aparecen arriba.\n"
+                    f"FORMATO: empieza con la linea 'CASO {n}' y debajo el "
+                    f"parrafo en prosa. Sin tablas ni vinetas.\n"
+                    + PROHIBICIONES + instruccion_veredicto
+                ),
+                expected_output=(
+                    f"La linea 'CASO {n}' seguida de un parrafo explicativo en "
+                    f"prosa." + salida_veredicto
+                ),
+                agent=ag["investigador"],
+                context=[t_priorizar],
+            )
+            for n in range(1, n_casos() + 1)
+        ]
+    else:
+        tareas_investigar = [Task(
+            description=(
+                "Este es el expediente completo, con la descomposicion por "
+                "variables de cada caso:\n\n"
+                f"{dossier}\n\n"
+                "Redacta un parrafo por CADA caso del expediente, explicando en "
+                "lenguaje llano por que el detector lo considera sospechoso. "
+                "Menciona su importe real y las variables de mayor aporte tal y "
+                "como aparecen arriba.\n"
+                "FORMATO OBLIGATORIO: para cada caso, una linea 'CASO <id>' y "
+                "debajo un parrafo de 3 a 5 frases en prosa. PROHIBIDO responder "
+                "con tablas, listas o vinetas: el resultado debe ser texto "
+                "corrido.\n\n"
+                + PROHIBICIONES + instruccion_veredicto
+            ),
+            expected_output=(
+                "Un bloque por transaccion, encabezado por su identificador, con la "
+                "explicacion en lenguaje natural. Cada bloque debe ser PROSA "
+                "explicativa escrita por ti: la salida de la herramienta es tu "
+                "materia prima, no tu respuesta. Un lector no tecnico tiene que "
+                "entenderlo sin ver ninguna tabla." + salida_veredicto
+            ),
+            agent=ag["investigador"],
+            context=[t_priorizar, t_evaluar],
+        )]
 
     t_informe = Task(
         description=(
@@ -359,15 +403,23 @@ def construir_tareas(ag: dict, modo: str) -> list:
             "casos con accion recomendada y nota de fiabilidad."
         ),
         agent=ag["reportero"],
-        context=[t_encuadre, t_datos, t_priorizar, t_evaluar, t_investigar],
+        context=[t_encuadre, t_datos, t_priorizar, t_evaluar, *tareas_investigar],
     )
 
-    return [t_encuadre, t_datos, t_priorizar, t_evaluar, t_investigar, t_informe]
+    return {
+        "encuadre": t_encuadre,
+        "datos": t_datos,
+        "priorizar": t_priorizar,
+        "evaluar": t_evaluar,
+        "investigar": tareas_investigar,   # lista: 1 tarea, o N si iterativo
+        "informe": t_informe,
+    }
 
 
 # ----------------------------------------------------------------------
 def construir_crew(modo: str = MODO_POR_DEFECTO, modelo: str = None,
-                   verbose: bool = True, nucleo: bool = False) -> Crew:
+                   verbose: bool = True, nucleo: bool = False,
+                   iterativo: bool = False) -> Crew:
     """Ensambla el departamento.
 
     nucleo=True deja solo la cadena imprescindible (Modelador -> Investigador
@@ -375,24 +427,31 @@ def construir_crew(modo: str = MODO_POR_DEFECTO, modelo: str = None,
     analisis de datos y la evaluacion, y con ello aproximadamente la mitad de
     las llamadas al LLM. Util para iterar sobre el diseno sin esperar una
     ejecucion completa en cada cambio.
+
+    iterativo=True reparte la investigacion en una tarea por caso. Elimina el
+    techo de cobertura del Investigador monolitico a cambio de un coste lineal
+    en llamadas al LLM.
     """
     if modo not in MODOS:
         raise ValueError(f"Modo '{modo}' desconocido. Opciones: {MODOS}")
 
     llm = construir_llm(modelo)
     agentes = construir_agentes(llm, verbose=verbose)
-    tareas = construir_tareas(agentes, modo)
+    t = construir_tareas(agentes, modo, iterativo=iterativo)
 
     if nucleo:
-        # Indices 2, 4 y 5 = priorizar, investigar, informe
-        tareas = [tareas[2], tareas[4], tareas[5]]
-        # Reconstruir el contexto: las tareas suprimidas ya no existen
-        tareas[1].context = [tareas[0]]
-        tareas[2].context = [tareas[0], tareas[1]]
+        # Solo Modelador -> Investigador(es) -> Reportero
+        for inv in t["investigar"]:
+            inv.context = [t["priorizar"]]
+        t["informe"].context = [t["priorizar"], *t["investigar"]]
+        tareas = [t["priorizar"], *t["investigar"], t["informe"]]
         agentes = {
             k: v for k, v in agentes.items()
             if k in ("modelador", "investigador", "reportero")
         }
+    else:
+        tareas = [t["encuadre"], t["datos"], t["priorizar"], t["evaluar"],
+                  *t["investigar"], t["informe"]]
 
     return Crew(
         agents=list(agentes.values()),

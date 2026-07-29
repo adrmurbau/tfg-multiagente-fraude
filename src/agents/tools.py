@@ -36,10 +36,18 @@ class _Contexto:
         self.detector: DetectorFraude | None = None
         self.lote: pd.DataFrame | None = None
         self.puntuado: pd.DataFrame | None = None
+        self.capacidad: int | None = None   # casos que el equipo puede revisar
+        # Correspondencia numero de caso (1..N) -> indice real del DataFrame.
+        # Ver `construir_dossier` para el porque.
+        self.mapa: dict[int, int] = {}
 
-    def inicializar(self, lote: pd.DataFrame, detector: DetectorFraude = None):
+    def inicializar(self, lote: pd.DataFrame, detector: DetectorFraude = None,
+                    capacidad: int = None):
         self.detector = detector or DetectorFraude()
         self.lote = lote
+        self.capacidad = capacidad
+        casos = (detector or self.detector).seleccionar_casos(lote, capacidad)
+        self.mapa = {n: int(idx) for n, idx in enumerate(casos.index, start=1)}
         # Se puntua una sola vez: los agentes consultaran muchas veces y no
         # tiene sentido reevaluar el modelo en cada llamada.
         self.puntuado = self.detector.puntuar(lote)
@@ -56,9 +64,13 @@ class _Contexto:
 CTX = _Contexto()
 
 
-def inicializar_contexto(lote: pd.DataFrame, detector: DetectorFraude = None):
-    """Prepara el lote que analizara el departamento."""
-    return CTX.inicializar(lote, detector)
+def inicializar_contexto(lote: pd.DataFrame, detector: DetectorFraude = None,
+                         capacidad: int = None):
+    """Prepara el lote que analizara el departamento.
+
+    `capacidad` = cuantos casos puede revisar el equipo en ese turno.
+    """
+    return CTX.inicializar(lote, detector, capacidad)
 
 
 # ----------------------------------------------------------------------
@@ -119,12 +131,14 @@ class PriorizarSospechosasTool(BaseTool):
         n = max(1, min(int(n), 50))
         top = CTX.puntuado.nlargest(n, "prob_fraude")
 
+        # Se numeran 1..N igual que en el expediente: el LLM nunca ve indices
+        # crudos del DataFrame, que corrompe cuando tienen 4-5 cifras.
         filas = [f"TOP {n} TRANSACCIONES SOSPECHOSAS", ""]
-        filas.append(f"{'id':>6} {'prob':>8} {'riesgo':>7} {'importe':>11} {'hora':>6}")
+        filas.append(f"{'caso':>6} {'prob':>8} {'riesgo':>7} {'importe':>11} {'hora':>6}")
         filas.append("-" * 42)
-        for idx, f in top.iterrows():
+        for pos, (idx, f) in enumerate(top.iterrows(), start=1):
             filas.append(
-                f"{idx:>6} {f['prob_fraude']:>8.4f} {f['riesgo']:>7} "
+                f"{pos:>6} {f['prob_fraude']:>8.4f} {f['riesgo']:>7} "
                 f"{f['Amount']:>11.2f} {f['Hour']:>6.1f}"
             )
 
@@ -164,15 +178,14 @@ class ExplicarTransaccionTool(BaseTool):
                 "Debe ser un numero entero obtenido de priorizar_sospechosas."
             )
 
-        if idx not in CTX.lote.index:
-            disponibles = list(CTX.lote.index[:5])
+        # El argumento es un NUMERO DE CASO (1..N), no un indice del DataFrame
+        if idx not in CTX.mapa:
             return (
-                f"ERROR: no existe la transaccion {idx} en este lote. "
-                f"Identificadores validos, por ejemplo: {disponibles}. "
-                "Usa priorizar_sospechosas para obtener identificadores correctos."
+                f"ERROR: no existe el caso {idx}. Los casos van del 1 al "
+                f"{len(CTX.mapa)}. Usa priorizar_sospechosas para verlos."
             )
 
-        exp = CTX.detector.explicar(CTX.lote, idx)
+        exp = CTX.detector.explicar(CTX.lote, CTX.mapa[idx])
         texto = exp.a_texto()
 
         # Contexto comparativo: sin el, el LLM no sabe si 1.18 EUR es mucho o poco
@@ -252,17 +265,29 @@ def construir_dossier() -> str:
     La conclusion es de diseno, no de modelo: un camino de datos determinista
     no debe atravesar un componente estocastico. Los hechos se calculan aqui y
     se inyectan en el prompt; al LLM se le pide que narre, no que recuerde.
+
+    SEGUNDA LECCION, aprendida al pasar a turnos reales. Los casos se numeran
+    **1..N**, NO con el indice del DataFrame. Con lotes sinteticos los indices
+    eran numeros de 1-3 cifras y no daban problema; con turnos reales pasaron a
+    ser de 4-5 cifras (15902, 24934...) y el modelo empezo a **corromperlos**:
+    escribia 15904 por 15902, 24929 por 24934, 1867 por 1866. Un identificador
+    largo se parte en varios tokens y alterar una cifra es trivial. Los numeros
+    del 1 al 20 son un token unico y no se confunden.
+
+    La correspondencia con el indice real la guarda `CTX.mapa`, fuera del
+    alcance del LLM.
     """
     CTX.exigir()
-    casos = CTX.detector.seleccionar_casos(CTX.lote)
+    casos = CTX.detector.seleccionar_casos(CTX.lote, CTX.capacidad)
 
     bloques = [
         "EXPEDIENTE DE CASOS (datos verificados del detector; no los alteres)",
         "",
     ]
-    for idx, fila in casos.iterrows():
+    for n, idx in enumerate(casos.index, start=1):
+        fila = casos.loc[idx]
         exp = CTX.detector.explicar(CTX.lote, idx)
-        bloques.append(f"--- CASO {idx} ---")
+        bloques.append(f"--- CASO {n} ---")
         bloques.append(f"Probabilidad de fraude: {fila['prob_fraude']:.4f}")
         bloques.append(f"Nivel de riesgo: {fila['riesgo']}")
         bloques.append(f"Importe: {fila['Amount']:.2f} EUR")
@@ -279,10 +304,58 @@ def construir_dossier() -> str:
     return "\n".join(bloques)
 
 
-def ids_de_casos() -> list:
-    """Identificadores de los casos seleccionados, para verificar el informe."""
+def construir_dossier_caso(n: int) -> str:
+    """Expediente de UN SOLO caso, para el Investigador iterativo.
+
+    Existe porque pedirle a un modelo local N parrafos en una sola respuesta
+    tiene un techo medido: cobertura completa y estable hasta 18 casos, y a
+    partir de 20 se vuelve erratica (25 % y 80 % en ejecuciones identicas) sin
+    que el modelo avise de las omisiones.
+
+    Con un caso por llamada la cobertura es del 100 % por construccion: si
+    falta una explicacion, es porque esa llamada fallo, y se puede reintentar
+    de forma aislada. El coste crece linealmente, pero deja de haber un limite
+    superior al numero de casos revisables.
+    """
     CTX.exigir()
-    return list(CTX.detector.seleccionar_casos(CTX.lote).index)
+    if n not in CTX.mapa:
+        raise KeyError(f"No existe el caso {n}. Casos validos: 1..{len(CTX.mapa)}")
+
+    idx = CTX.mapa[n]
+    fila = CTX.puntuado.loc[idx]
+    exp = CTX.detector.explicar(CTX.lote, idx)
+
+    lineas = [
+        f"CASO {n} (datos verificados del detector; no los alteres)",
+        f"Probabilidad de fraude: {fila['prob_fraude']:.4f}",
+        f"Nivel de riesgo: {fila['riesgo']}",
+        f"Importe: {fila['Amount']:.2f} EUR",
+        f"Hora del dia: {fila['Hour']:.1f}h",
+        "Variables de mayor aporte:",
+    ]
+    for var, valor, aporte in exp.contribuciones[:4]:
+        sentido = "hacia FRAUDE" if aporte > 0 else "hacia LEGITIMA"
+        lineas.append(f"  {var} = {valor:.3f} (aporte {aporte:+.3f}, {sentido})")
+    lineas.append(f"Importe medio del lote: {CTX.puntuado['Amount'].mean():.2f} EUR")
+    return "\n".join(lineas)
+
+
+def n_casos() -> int:
+    """Cuantos casos hay en el expediente."""
+    CTX.exigir()
+    return len(CTX.mapa)
+
+
+def ids_de_casos() -> list:
+    """Numeros de caso (1..N) que el LLM debe citar. Para auditar el informe."""
+    CTX.exigir()
+    return list(CTX.mapa.keys())
+
+
+def mapa_casos() -> dict:
+    """Correspondencia numero de caso -> indice real del DataFrame."""
+    CTX.exigir()
+    return dict(CTX.mapa)
 
 
 def herramientas_disponibles() -> dict:

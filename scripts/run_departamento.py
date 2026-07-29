@@ -25,10 +25,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.agents.crew import construir_crew  # noqa: E402
-from src.agents.tools import inicializar_contexto  # noqa: E402
+from src.agents.tools import inicializar_contexto, mapa_casos  # noqa: E402
 from src.config import LLM_MODEL, MODO_POR_DEFECTO, MODOS, REPORTS_DIR  # noqa: E402
 from src.detector.data import cargar_dataset  # noqa: E402
-from src.detector.predict import DetectorFraude, construir_lote  # noqa: E402
+from src.detector.predict import (  # noqa: E402
+    DetectorFraude,
+    construir_lote,
+    construir_turno,
+)
 from src.evaluacion import auditar, medir_sistema  # noqa: E402
 
 
@@ -37,18 +41,38 @@ def parsear_args():
     p.add_argument("--modo", choices=MODOS, default=MODO_POR_DEFECTO,
                    help="interpreta: el detector decide. revisa: el LLM puede descartar.")
     p.add_argument("--modelo", default=None, help="Modelo de Ollama a usar.")
-    p.add_argument("--n-lote", type=int, default=500, help="Tamano del lote.")
+    p.add_argument("--n-lote", type=int, default=500, help="Tamano del lote sintetico.")
     p.add_argument("--fraudes", type=int, default=5, help="Fraudes ocultos en el lote.")
     p.add_argument("--semilla", type=int, default=42)
     p.add_argument("--nucleo", action="store_true",
                    help="Solo Modelador -> Investigador -> Reportero.")
+    # --- Turno real (recomendado) ---
+    p.add_argument("--turno-horas", type=float, default=None,
+                   help="Usa una ventana temporal REAL del periodo de test en "
+                        "lugar de un lote sintetico. Ej: 4 = turno de 4 horas.")
+    p.add_argument("--desplazamiento", type=float, default=0.0,
+                   help="Horas de desfase del inicio del turno dentro del test.")
+    p.add_argument("--iterativo", action="store_true",
+                   help="Una tarea de investigacion por caso, en vez de pedir "
+                        "N parrafos en una sola respuesta. Garantiza cobertura "
+                        "del 100%% a cambio de coste lineal.")
+    p.add_argument("--capacidad", type=int, default=None,
+                   help="Casos que el equipo puede revisar. Por defecto CASOS_MAX.")
     return p.parse_args()
 
 
 def formatear_auditoria(aud: dict) -> str:
     L = ["", "=" * 66, "  AUDITORIA DE FIABILIDAD DEL INFORME", "=" * 66]
     L.append(f"  Casos citados del expediente : {aud['ids_cubiertos']}")
-    L.append(f"  Cobertura                    : {aud['cobertura']:.0%}")
+    if "cobertura_investigacion" in aud:
+        L.append(f"  Cobertura de la INVESTIGACION : "
+                 f"{aud['cobertura_investigacion']:.0%}")
+        L.append(f"  Cobertura del INFORME         : {aud['cobertura']:.0%}")
+        if aud["cobertura_investigacion"] > aud["cobertura"]:
+            L.append("  >> La investigacion fue completa; el Reportero perdio "
+                     "casos al sintetizar.")
+    else:
+        L.append(f"  Cobertura                    : {aud['cobertura']:.0%}")
 
     if aud["ids_inventados"]:
         L.append(f"  [ALERTA] Identificadores que no existen en el lote: "
@@ -75,11 +99,21 @@ def formatear_evaluacion(met: dict, lote, modo: str) -> str:
     L.append(f"  De ellos, fraude autentico      : {met['fraudes_elevados']}")
     L.append(f"  Recall del DETECTOR (capa 1)    : {met['recall_detector']:.2f}")
 
-    if met["falsos_negativos_detector"]:
+    fn = met["falsos_negativos_detector"]
+    if fn:
         L.append("")
-        L.append("  Fraude que el detector NO elevo (los agentes nunca lo vieron):")
-        for idx in met["falsos_negativos_detector"]:
-            L.append(f"    id {idx:>4} | importe {lote.loc[idx, 'Amount']:>9.2f} EUR")
+        L.append(f"  Fraude que el detector NO elevo ({len(fn)} casos que ningun "
+                 f"agente vio):")
+        # Con turnos reales pueden ser decenas: se muestran los de mayor importe,
+        # que son los que mas duelen, y se resume el resto.
+        por_importe = sorted(fn, key=lambda i: -lote.loc[i, "Amount"])
+        for idx in por_importe[:8]:
+            L.append(f"    id {idx:>6} | importe {lote.loc[idx, 'Amount']:>9.2f} EUR")
+        if len(fn) > 8:
+            resto = sum(lote.loc[i, "Amount"] for i in por_importe[8:])
+            L.append(f"    ... y {len(fn) - 8} mas, {resto:,.2f} EUR en total")
+        L.append(f"    Importe total no elevado: "
+                 f"{sum(lote.loc[i, 'Amount'] for i in fn):,.2f} EUR")
 
     if modo == "revisa":
         L.append("")
@@ -114,19 +148,31 @@ def main():
     print(f"  Modo    : {args.modo}")
     print(f"  Modelo  : {args.modelo or LLM_MODEL}")
     print(f"  Agentes : {'3 (nucleo)' if args.nucleo else '6 (completo)'}")
+    print(f"  Investigador: {'ITERATIVO (1 llamada por caso)' if args.iterativo else 'monolitico (N casos en 1 respuesta)'}")
 
-    print("\n  Preparando el lote...")
-    lote = construir_lote(cargar_dataset(), n=args.n_lote,
-                          n_fraudes=args.fraudes, random_state=args.semilla)
+    df = cargar_dataset()
+    if args.turno_horas:
+        print(f"\n  Extrayendo un turno REAL de {args.turno_horas} h "
+              f"(desfase {args.desplazamiento} h)...")
+        lote = construir_turno(df, horas=args.turno_horas,
+                               desplazamiento_h=args.desplazamiento)
+    else:
+        print("\n  Preparando un lote sintetico...")
+        lote = construir_lote(df, n=args.n_lote, n_fraudes=args.fraudes,
+                              random_state=args.semilla)
+
     detector = DetectorFraude()
-    inicializar_contexto(lote, detector)
-    print(f"  {len(lote)} transacciones | "
+    inicializar_contexto(lote, detector, capacidad=args.capacidad)
+    print(f"  {len(lote):,} transacciones | "
           f"{int(lote['Class'].sum())} fraudes ocultos (nadie los ve todavia)")
+    if args.capacidad:
+        print(f"  Capacidad de revision del equipo: {args.capacidad} casos")
 
     print("\n  Arrancando el departamento. Paciencia: LLM en local.\n")
     t0 = time.perf_counter()
     resultado = construir_crew(modo=args.modo, modelo=args.modelo,
-                               nucleo=args.nucleo).kickoff()
+                               nucleo=args.nucleo,
+                                   iterativo=args.iterativo).kickoff()
     dt = time.perf_counter() - t0
 
     informe = str(resultado)
@@ -134,9 +180,10 @@ def main():
         salidas = [t.raw for t in resultado.tasks_output]
     except AttributeError:
         salidas = [informe]
-    # Penultima tarea = Investigador. Sus veredictos son los originales; los
-    # del Reportero vienen reproducidos y duplicarian el recuento.
-    salida_investigador = salidas[-2] if len(salidas) >= 2 else informe
+    # Con el Investigador iterativo hay N tareas de investigacion, no una. Se
+    # unen TODAS las salidas menos la ultima (el informe del Reportero, que
+    # reproduce los veredictos y los duplicaria en el recuento).
+    salida_investigador = "\n\n".join(salidas[:-1]) if len(salidas) > 1 else informe
 
     print("\n" + "=" * 66)
     print("  INFORME FINAL")
@@ -144,8 +191,17 @@ def main():
     print(informe)
     print(f"\n  Tiempo total: {dt / 60:.1f} min")
 
-    met = medir_sistema(lote, detector, salida_investigador, args.modo)
-    aud = auditar(informe, met["ids_expediente"], lote.index)
+    met = medir_sistema(lote, detector, salida_investigador, args.modo,
+                        capacidad=args.capacidad, mapa_casos=mapa_casos())
+    # El universo de identificadores validos son los numeros de caso (1..N):
+    # cualquier otro numero citado es inventado.
+    aud = auditar(informe, met["ids_expediente"], met["ids_expediente"])
+    # Auditoria separada de la INVESTIGACION. Si el investigador cubre el 100 %
+    # y el informe no, la perdida esta en el Reportero, no en la investigacion.
+    aud_inv = auditar(salida_investigador, met["ids_expediente"],
+                      met["ids_expediente"])
+    aud["cobertura_investigacion"] = aud_inv["cobertura"]
+    aud["ids_investigados"] = aud_inv["ids_cubiertos"]
 
     texto_aud = formatear_auditoria(aud)
     texto_eval = formatear_evaluacion(met, lote, args.modo)
