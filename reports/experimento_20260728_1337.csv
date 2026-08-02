@@ -1,0 +1,65 @@
+modelo,modo,semilla,repeticion,segundos,fraudes_totales,casos_elevados,fraudes_elevados,recall_detector,recall_sistema,precision_sistema,n_confirmados,n_descartados,n_fraude_descartado,fraude_descartado,n_descarte_correcto,auditoria,fiable,cobertura,error
+qwen3:14b,interpreta,42,1,75.5,5,4,4,0.8,0.8,1.0,0,0,0,,0,NO FIABLE - invencion semantica,False,1.0,
+qwen3:14b,revisa,42,1,676.2,,,,,,,,,,,,,,,"TimeoutError: Task 'Datos verificados de los casos (unica fuente admisible de cifras):
+
+EXPEDIENTE DE CASOS (datos verificados del detector; no los alteres)
+
+--- CASO 156 ---
+Probabilidad de fraude: 1.0000
+Nivel de riesgo: ALTO
+Importe: 1.18 EUR
+Hora del dia: 16.6h
+Variables de mayor aporte:
+  V14 = -9.151 (aporte +5.100, hacia FRAUDE)
+  V12 = -6.151 (aporte +1.976, hacia FRAUDE)
+  V4 = 6.009 (aporte +1.889, hacia FRAUDE)
+  V10 = -4.063 (aporte +1.457, hacia FRAUDE)
+
+--- CASO 34 ---
+Probabilidad de fraude: 1.0000
+Nivel de riesgo: ALTO
+Importe: 0.76 EUR
+Hora del dia: 17.2h
+Variables de mayor aporte:
+  V14 = -3.942 (aporte +4.908, hacia FRAUDE)
+  V12 = -6.173 (aporte +2.173, hacia FRAUDE)
+  V4 = 6.311 (aporte +1.930, hacia FRAUDE)
+  V8 = 0.939 (aporte -1.189, hacia LEGITIMA)
+
+--- CASO 420 ---
+Probabilidad de fraude: 0.9989
+Nivel de riesgo: ALTO
+Importe: 39.98 EUR
+Hora del dia: 21.3h
+Variables de mayor aporte:
+  V12 = -4.836 (aporte +2.245, hacia FRAUDE)
+  V14 = -2.901 (aporte +1.833, hacia FRAUDE)
+  V10 = -5.529 (aporte +1.758, hacia FRAUDE)
+  V7 = -4.276 (aporte +1.180, hacia FRAUDE)
+
+--- CASO 352 ---
+Probabilidad de fraude: 0.9736
+Nivel de riesgo: ALTO
+Importe: 0.76 EUR
+Hora del dia: 18.8h
+Variables de mayor aporte:
+  V14 = -4.394 (aporte +5.871, hacia FRAUDE)
+  V4 = 0.237 (aporte -1.914, hacia LEGITIMA)
+  V10 = -3.444 (aporte +1.525, hacia FRAUDE)
+  V8 = 0.514 (aporte -1.473, hacia LEGITIMA)
+
+Importe medio del lote: 67.57 EUR
+Total de casos en el expediente: 4
+
+Redacta el informe final para el responsable de riesgos:
+1. Resumen ejecutivo (3 frases).
+2. Tabla de casos priorizados con semaforo: ALTO=rojo, MEDIO=ambar, BAJO=verde.
+3. Un apartado por caso con la explicacion del investigador y una accion recomendada (bloquear tarjeta / contactar con el cliente / archivar).
+4. Nota de fiabilidad.
+
+REGLAS INNEGOCIABLES:
+- Las explicaciones deben salir del analisis del investigador. Si   no dispones de explicacion para un caso, escribe 'Sin analisis   disponible'. NUNCA te la inventes.
+- No menciones paises, comercios, cuentas, titulares ni historial   de cliente: esos datos NO existen en este dataset.
+- No sumes ni calcules importes: si citas un total, copialo del   expediente.
+- El investigador ha emitido un VEREDICTO por caso. Los   CONFIRMADOS van en la tabla principal. Los DESCARTADOS van   en una seccion aparte titulada 'Casos descartados en   revision', indicando el motivo. No los elimines del informe:   un descarte tambien es una decision que debe quedar   registrada y ser auditable.
+Escribe en Markdown.' execution timed out after 180 seconds. Consider increasing max_execution_time or optimizing the task."

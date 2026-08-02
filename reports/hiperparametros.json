@@ -1,0 +1,70 @@
+[
+  {
+    "split": "aleatorio",
+    "mejores_params": {
+      "subsample": 0.7,
+      "scale_pos_weight": 24.0,
+      "n_estimators": 800,
+      "min_child_weight": 3,
+      "max_depth": 6,
+      "learning_rate": 0.05,
+      "gamma": 0.5,
+      "colsample_bytree": 0.9
+    },
+    "auc_pr_cv": 0.8499804404828817,
+    "metricas_referencia": {
+      "auc_pr": 0.8831697275101533,
+      "precision": 0.8723404255319149,
+      "recall": 0.8367346938775511,
+      "precision@50": 1.0,
+      "precision@100": 0.83,
+      "precision@200": 0.44
+    },
+    "metricas_ajustado": {
+      "auc_pr": 0.8801333299114817,
+      "precision": 0.8736842105263158,
+      "recall": 0.8469387755102041,
+      "precision@50": 1.0,
+      "precision@100": 0.83,
+      "precision@200": 0.44
+    },
+    "mejora_auc_pr": -0.0030363975986715808,
+    "veredicto": "La busqueda NO mejora en test: la configuracion inicial era tan buena o mejor. Posible sobreajuste a la validacion cruzada.",
+    "iteraciones": 50,
+    "minutos": 3.1
+  },
+  {
+    "split": "temporal",
+    "mejores_params": {
+      "subsample": 0.6,
+      "scale_pos_weight": 23.4,
+      "n_estimators": 800,
+      "min_child_weight": 10,
+      "max_depth": 3,
+      "learning_rate": 0.05,
+      "gamma": 0,
+      "colsample_bytree": 0.6
+    },
+    "auc_pr_cv": 0.8058165076039905,
+    "metricas_referencia": {
+      "auc_pr": 0.7971525934672379,
+      "precision": 0.8769230769230769,
+      "recall": 0.76,
+      "precision@50": 0.98,
+      "precision@100": 0.6,
+      "precision@200": 0.305
+    },
+    "metricas_ajustado": {
+      "auc_pr": 0.8007288947328918,
+      "precision": 0.8194444444444444,
+      "recall": 0.7866666666666666,
+      "precision@50": 0.98,
+      "precision@100": 0.6,
+      "precision@200": 0.305
+    },
+    "mejora_auc_pr": 0.0035763012656538917,
+    "veredicto": "La busqueda mejora marginalmente. La configuracion inicial ya estaba bien elegida.",
+    "iteraciones": 50,
+    "minutos": 2.4
+  }
+]

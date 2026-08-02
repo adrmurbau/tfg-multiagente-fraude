@@ -1,0 +1,5 @@
+modelo,modo,semilla,repeticion,segundos,fraudes_totales,casos_elevados,fraudes_elevados,recall_detector,recall_sistema,precision_sistema,n_confirmados,n_descartados,n_fraude_descartado,fraude_descartado,n_descarte_correcto,auditoria,fiable,cobertura,error
+llama3.1:8b,interpreta,42,1,21.1,5,4,4,0.8,0.8,1.0,0,0,0,,0,FIABLE,True,1.0,
+llama3.1:8b,revisa,42,1,19.9,5,4,4,0.8,0.6,1.0,3,1,1,352,0,FIABLE,True,1.0,
+qwen2.5:14b,interpreta,42,1,52.1,5,4,4,0.8,0.8,1.0,0,0,0,,0,FIABLE,True,1.0,
+qwen2.5:14b,revisa,42,1,38.6,5,4,4,0.8,0.8,1.0,4,0,0,,0,FIABLE,True,1.0,

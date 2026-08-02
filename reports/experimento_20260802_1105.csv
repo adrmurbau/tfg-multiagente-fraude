@@ -1,0 +1,3 @@
+modelo,modo,semilla,repeticion,segundos,fraudes_totales,casos_elevados,fraudes_elevados,recall_detector,recall_sistema,precision_sistema,n_confirmados,n_descartados,n_fraude_descartado,fraude_descartado,n_descarte_correcto,auditoria,fiable,cobertura,cobertura_investigacion,error
+qwen2.5-14b-ctx16k,revisa,0,1,308.9,54,55,44,0.8148148148148148,0.7592592592592593,0.9761904761904762,42,13,3,1885;5413;12377,10,INCOMPLETO,False,0.0,1.0,
+qwen2.5-14b-ctx16k,revisa,0,2,321.3,54,55,44,0.8148148148148148,0.7777777777777778,0.9767441860465116,43,12,2,1885;12377,10,INCOMPLETO,False,0.0,1.0,

@@ -1,0 +1,7 @@
+modelo,modo,semilla,repeticion,segundos,fraudes_totales,casos_elevados,fraudes_elevados,recall_detector,recall_sistema,precision_sistema,n_confirmados,n_descartados,n_fraude_descartado,fraude_descartado,n_descarte_correcto,auditoria,fiable,cobertura,cobertura_investigacion,error
+qwen2.5:14b,revisa,0,1,301.2,,,,,,,,,,,,,,,,TypeError: medir_sistema() got an unexpected keyword argument 'dossier'
+qwen2.5:14b,revisa,0,2,288.5,,,,,,,,,,,,,,,,TypeError: medir_sistema() got an unexpected keyword argument 'dossier'
+qwen2.5:14b,revisa,0,3,292.0,,,,,,,,,,,,,,,,TypeError: medir_sistema() got an unexpected keyword argument 'dossier'
+qwen2.5:14b,revisa,0,4,300.1,,,,,,,,,,,,,,,,TypeError: medir_sistema() got an unexpected keyword argument 'dossier'
+qwen2.5:14b,revisa,1,1,275.5,,,,,,,,,,,,,,,,TypeError: medir_sistema() got an unexpected keyword argument 'dossier'
+qwen2.5:14b,revisa,1,2,295.6,,,,,,,,,,,,,,,,TypeError: medir_sistema() got an unexpected keyword argument 'dossier'

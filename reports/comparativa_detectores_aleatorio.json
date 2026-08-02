@@ -1,0 +1,41 @@
+{
+  "split": "aleatorio",
+  "n_test": 56962,
+  "fraudes_test": 98,
+  "auc_pr": {
+    "xgboost": 0.8831697275101533,
+    "random_forest": 0.8627338990720682
+  },
+  "bootstrap": {
+    "repeticiones": 2000,
+    "diferencia_media": -0.020119834883210785,
+    "ic95": [
+      -0.04915787320708839,
+      -0.0006593597663488376
+    ],
+    "prob_rf_mejor": 0.017,
+    "significativa": true
+  },
+  "precision_en_n": [
+    {
+      "n": 20,
+      "xgboost": 1.0,
+      "random_forest": 1.0
+    },
+    {
+      "n": 50,
+      "xgboost": 1.0,
+      "random_forest": 0.98
+    },
+    {
+      "n": 100,
+      "xgboost": 0.83,
+      "random_forest": 0.83
+    },
+    {
+      "n": 200,
+      "xgboost": 0.44,
+      "random_forest": 0.44
+    }
+  ]
+}
