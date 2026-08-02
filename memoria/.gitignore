@@ -1,0 +1,8 @@
+node_modules/
+package-lock.json
+package.json
+
+# Ficheros temporales de la previsualización (conversión a PDF e imágenes)
+*.pdf
+*.jpg
+*.png
