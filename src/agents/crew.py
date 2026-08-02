@@ -85,6 +85,26 @@ def construir_llm(modelo: str = None) -> LLM:
 # ----------------------------------------------------------------------
 # Los seis agentes
 # ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Instruccion de idioma
+# ----------------------------------------------------------------------
+# Los prompts estan en castellano, pero ningun modelo garantiza responder en
+# el idioma de la pregunta. qwen2.5:14b es mayoritariamente ingles y chino, y
+# con contextos largos (55 casos) revierte a ingles sin avisar.
+#
+# No es cosmetico: TODOS los patrones de PATRONES_PROHIBIDOS en
+# src/evaluacion.py son regex en castellano. Un informe en ingles atraviesa el
+# detector de invencion semantica sin activar una sola alarma. Se verifico:
+# "originates from a high-risk country ... unusual in the customer's history"
+# se audita como FIABLE, mientras su traduccion literal al castellano se marca
+# como NO FIABLE. La deriva de idioma desactiva la auditoria en silencio.
+IDIOMA = (
+    " Redactas SIEMPRE en castellano, incluidos titulos, etiquetas y "
+    "conclusiones, sea cual sea el idioma del contexto que recibas. "
+    "Los importes van en euros (EUR), nunca en dolares."
+)
+
+
 def construir_agentes(llm: LLM, verbose: bool = True) -> dict:
     # max_iter bajo y max_execution_time acotado: si el modelo se enreda
     # formateando una llamada a herramienta, preferimos que falle pronto y de
@@ -108,7 +128,7 @@ def construir_agentes(llm: LLM, verbose: bool = True) -> dict:
             "Diriges un equipo de analistas en un banco. No revisas casos uno a "
             "uno: tu trabajo es dimensionar el problema y decidir donde poner la "
             "atencion del equipo, que siempre es un recurso escaso."
-        ),
+        ) + IDIOMA,
         tools=[EstadisticasLoteTool()],
         **comun,
     )
@@ -125,7 +145,7 @@ def construir_agentes(llm: LLM, verbose: bool = True) -> dict:
             "no tienen significado de negocio directo; solo el importe y la hora "
             "son interpretables por un humano. No finges entender lo que no se "
             "puede entender."
-        ),
+        ) + IDIOMA,
         tools=[EstadisticasLoteTool(), PriorizarSospechosasTool()],
         **comun,
     )
@@ -141,7 +161,7 @@ def construir_agentes(llm: LLM, verbose: bool = True) -> dict:
             "XGBoost supervisado entrenado con particion temporal, acompanado de "
             "un Isolation Forest no supervisado. Nunca inventas puntuaciones: "
             "siempre las consultas a la herramienta."
-        ),
+        ) + IDIOMA,
         tools=[PriorizarSospechosasTool()],
         **comun,
     )
@@ -158,7 +178,7 @@ def construir_agentes(llm: LLM, verbose: bool = True) -> dict:
             "falsos negativos, que son fraude que se escapa. Sabes que con un "
             "0,17 % de fraude la exactitud no significa nada y que la metrica "
             "honesta es el AUC-PR."
-        ),
+        ) + IDIOMA,
         tools=[RendimientoDetectorTool()],
         **comun,
     )
@@ -178,7 +198,7 @@ def construir_agentes(llm: LLM, verbose: bool = True) -> dict:
             "sin atribuirles un significado de negocio que no tienen. Senalas "
             "los importes pequenos, porque las tarjetas robadas suelen probarse "
             "con micropagos antes del cargo grande."
-        ),
+        ) + IDIOMA,
         # SIN herramientas, deliberadamente. El expediente completo ya viaja
         # en su prompt, asi que la herramienta solo le anadia la tentacion de
         # copiar su salida tabulada en lugar de redactar. Quitandosela, la
@@ -199,7 +219,7 @@ def construir_agentes(llm: LLM, verbose: bool = True) -> dict:
             "no es tecnico. Vas al grano, ordenas por gravedad y cada caso lleva "
             "una accion concreta: bloquear la tarjeta, llamar al cliente o "
             "archivar. No repites el analisis: lo sintetizas."
-        ),
+        ) + IDIOMA,
         tools=[],
         **comun,
     )
@@ -373,15 +393,24 @@ def construir_tareas(ag: dict, modo: str, iterativo: bool = False) -> dict:
         description=(
             "Datos verificados de los casos (unica fuente admisible de cifras):\n\n"
             f"{dossier}\n\n"
+            f"El expediente contiene EXACTAMENTE {n_casos()} casos, numerados "
+            f"del 1 al {n_casos()}.\n\n"
             "Redacta el informe final para el responsable de riesgos:\n"
             "1. Resumen ejecutivo (3 frases).\n"
-            "2. Tabla de casos priorizados con semaforo: ALTO=rojo, "
-            "MEDIO=ambar, BAJO=verde.\n"
-            "3. Un apartado por caso con la explicacion del investigador y una "
-            "accion recomendada (bloquear tarjeta / contactar con el cliente / "
-            "archivar).\n"
+            f"2. Tabla de casos priorizados con UNA FILA POR CADA UNO de los "
+            f"{n_casos()} casos, sin excepcion. Columnas: caso, importe, "
+            f"veredicto, accion recomendada (bloquear tarjeta / contactar con "
+            f"el cliente / archivar).\n"
+            "3. Una linea por caso con la explicacion del investigador.\n"
             "4. Nota de fiabilidad.\n\n"
             "REGLAS INNEGOCIABLES:\n"
+            f"- La tabla debe tener las {n_casos()} filas. NO resumas, NO "
+            f"escribas 'ejemplos', NO uses puntos suspensivos ni expresiones "
+            f"como 'y los demas'. Un informe que omite casos es un informe "
+            f"invalido: cada caso omitido es una decision sin registrar.\n"
+            "- Si el informe resulta largo, esta bien. La exhaustividad importa "
+            "  mas que la brevedad.\n"
+            "- Redacta en CASTELLANO, incluidos titulos y encabezados de tabla.\n"
             "- Las explicaciones deben salir del analisis del investigador. Si "
             "  no dispones de explicacion para un caso, escribe 'Sin analisis "
             "  disponible'. NUNCA te la inventes.\n"

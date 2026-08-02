@@ -33,7 +33,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.agents.crew import construir_crew  # noqa: E402
-from src.agents.tools import inicializar_contexto, mapa_casos  # noqa: E402
+from src.agents.tools import (  # noqa: E402
+    NIVELES_DOSSIER,
+    inicializar_contexto,
+    mapa_casos,
+)  # noqa: E402
 from src.config import MODOS, REPORTS_DIR  # noqa: E402
 from src.detector.data import cargar_dataset  # noqa: E402
 from src.detector.predict import (  # noqa: E402
@@ -75,6 +79,14 @@ def parsear_args():
                         "del 100%% a cambio de coste lineal.")
     p.add_argument("--capacidad", type=int, default=None,
                    help="Casos que el equipo revisa por turno.")
+    p.add_argument("--dossier", choices=NIVELES_DOSSIER, default="completo",
+                   help="Informacion del detector que ve la capa 2. completo: probabilidad y "
+                        "nivel de riesgo. sin_nivel: solo probabilidad. ciego: solo "
+                        "contribuciones, importe y hora. Sirve para separar si el "
+                        "modelo razona o copia la etiqueta de riesgo.")
+    p.add_argument("--umbral", type=float, default=None,
+                   help="Corte de probabilidad. Bajarlo sube el recall y genera "
+                        "falsos positivos que la capa 2 puede filtrar.")
     p.add_argument("--nucleo", action="store_true", default=True,
                    help="3 agentes en vez de 6 (por defecto, para acotar el tiempo).")
     p.add_argument("--completo", dest="nucleo", action="store_false")
@@ -115,7 +127,8 @@ def una_ejecucion(df, modelo, modo, semilla, repeticion, args) -> dict:
         lote = construir_lote(df, n=args.n_lote, n_fraudes=args.fraudes,
                               random_state=semilla)
     detector = DetectorFraude()
-    inicializar_contexto(lote, detector, capacidad=args.capacidad)
+    inicializar_contexto(lote, detector, capacidad=args.capacidad,
+                         umbral=args.umbral, dossier=args.dossier)
 
     fila = {c: None for c in CAMPOS}
     fila.update(modelo=modelo, modo=modo, semilla=semilla, repeticion=repeticion)
@@ -136,8 +149,12 @@ def una_ejecucion(df, modelo, modo, semilla, repeticion, args) -> dict:
         # todas las salidas menos la ultima (el informe, que las reproduce).
         salida_inv = "\n\n".join(salidas[:-1]) if len(salidas) > 1 else informe
 
+        # `dossier` NO se pasa aqui: solo afecta a lo que ve el modelo, no a
+        # como se mide el resultado. La medicion es identica en los tres
+        # niveles, que es justo lo que hace comparable la ablacion.
         met = medir_sistema(lote, detector, salida_inv, modo,
-                            capacidad=args.capacidad, mapa_casos=mapa_casos())
+                            capacidad=args.capacidad, mapa_casos=mapa_casos(),
+                            umbral=args.umbral)
         # El universo de identificadores validos son los numeros de caso
         # (1..N): cualquier otro numero citado es inventado.
         aud = auditar(informe, met["ids_expediente"], met["ids_expediente"])

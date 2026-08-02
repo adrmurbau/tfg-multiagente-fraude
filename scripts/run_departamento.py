@@ -25,7 +25,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.agents.crew import construir_crew  # noqa: E402
-from src.agents.tools import inicializar_contexto, mapa_casos  # noqa: E402
+from src.agents.tools import (  # noqa: E402
+    NIVELES_DOSSIER,
+    inicializar_contexto,
+    mapa_casos,
+)  # noqa: E402
 from src.config import LLM_MODEL, MODO_POR_DEFECTO, MODOS, REPORTS_DIR  # noqa: E402
 from src.detector.data import cargar_dataset  # noqa: E402
 from src.detector.predict import (  # noqa: E402
@@ -58,6 +62,15 @@ def parsear_args():
                         "del 100%% a cambio de coste lineal.")
     p.add_argument("--capacidad", type=int, default=None,
                    help="Casos que el equipo puede revisar. Por defecto CASOS_MAX.")
+    p.add_argument("--dossier", choices=NIVELES_DOSSIER, default="completo",
+                   help="Informacion del detector que ve la capa 2. completo: probabilidad y "
+                        "nivel de riesgo. sin_nivel: solo probabilidad. ciego: solo "
+                        "contribuciones, importe y hora. Sirve para separar si el "
+                        "modelo razona o copia la etiqueta de riesgo.")
+    p.add_argument("--umbral", type=float, default=None,
+                   help="Baja el corte de probabilidad por debajo del ALTO (0.80) "
+                        "para maximizar recall. Ej: 0.05 -> mas fraude capturado "
+                        "y mas falsas alarmas que la capa 2 puede filtrar.")
     return p.parse_args()
 
 
@@ -86,6 +99,11 @@ def formatear_auditoria(aud: dict) -> str:
             L.append(f"      '{termino}' -> {motivo}")
     if aud["menciona_dolares"]:
         L.append("  [AVISO] Menciona dolares; el dataset esta en euros.")
+    if aud.get("idioma_incorrecto"):
+        L.append("  [AVISO] El informe ha derivado al INGLES pese a pedirse en "
+                 "castellano.")
+        L.append("          Sintoma de que el modelo ha dejado de seguir el "
+                 "prompt. Revisar el entregable.")
 
     L.append("")
     L.append(f"  VEREDICTO DE LA AUDITORIA: {aud['veredicto']}")
@@ -162,11 +180,17 @@ def main():
                               random_state=args.semilla)
 
     detector = DetectorFraude()
-    inicializar_contexto(lote, detector, capacidad=args.capacidad)
+    inicializar_contexto(lote, detector, capacidad=args.capacidad,
+                         umbral=args.umbral, dossier=args.dossier)
     print(f"  {len(lote):,} transacciones | "
           f"{int(lote['Class'].sum())} fraudes ocultos (nadie los ve todavia)")
     if args.capacidad:
         print(f"  Capacidad de revision del equipo: {args.capacidad} casos")
+    if args.umbral is not None:
+        print(f"  Umbral rebajado a {args.umbral} (por defecto ALTO = 0.80)")
+    if args.dossier != "completo":
+        print(f"  Expediente en modo '{args.dossier}': la capa 2 NO ve "
+              f"{'el nivel de riesgo' if args.dossier == 'sin_nivel' else 'probabilidad ni nivel de riesgo'}")
 
     print("\n  Arrancando el departamento. Paciencia: LLM en local.\n")
     t0 = time.perf_counter()
@@ -192,7 +216,8 @@ def main():
     print(f"\n  Tiempo total: {dt / 60:.1f} min")
 
     met = medir_sistema(lote, detector, salida_investigador, args.modo,
-                        capacidad=args.capacidad, mapa_casos=mapa_casos())
+                        capacidad=args.capacidad, mapa_casos=mapa_casos(),
+                        umbral=args.umbral)
     # El universo de identificadores validos son los numeros de caso (1..N):
     # cualquier otro numero citado es inventado.
     aud = auditar(informe, met["ids_expediente"], met["ids_expediente"])

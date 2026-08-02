@@ -25,9 +25,14 @@ from src.config import TARGET_COL
 # El `\**` tolera la decoracion Markdown: los modelos escriben cosas como
 # "### Transaccion ID: **15854**" y la version anterior no lo reconocia,
 # marcando como INCOMPLETO un informe que si citaba los casos.
+# Las variantes en ingles (CASE, TRANSACTION) no son un capricho: los modelos
+# derivan de idioma y, sin ellas, un informe correcto redactado en ingles se
+# audita como INCOMPLETO porque no se le reconoce ni un solo identificador.
 _PATRONES_ID = [
     r"CASO\s*#?\s*\**\s*(\d{1,6})",                       # 'CASO 3', 'CASO **3**'
+    r"CASE\s*#?\s*\**\s*(\d{1,6})",                       # deriva a ingles
     r"[Tt]ransacci[óo]n\s*(?:ID)?\s*[:#]?\s*\**\s*(\d{1,6})",  # 'Transacción ID: **15854**'
+    r"[Tt]ransaction\s*(?:ID)?\s*[:#]?\s*\**\s*(\d{1,6})",
     r"\bID\s*[:=]?\s*\**\s*(\d{1,6})",                    # 'ID: 156'
     r"^\s*\|\s*\**\s*(\d{1,6})\s*\**\s*\|",              # celda de tabla
 ]
@@ -47,7 +52,12 @@ _RE_NEGACION = re.compile(
     r"no\s+(se\s+)?(dispone|dispongo|disponemos|tiene|tenemos|cuenta\s+con|"
     r"menciona|incluye|cita|hay|existen?|contiene|consta)|"
     # enumeraciones negativas: 'ni historial de cliente'
-    r"ning[úu]n[ao]?|tampoco|ni\s)",
+    r"ning[úu]n[ao]?|tampoco|ni\s|"
+    # Equivalentes en ingles: los modelos derivan de idioma y sin esto la
+    # ventana de negacion no reconoce "without access to transaction history".
+    r"without\s+(access|information|data|mentioning|citing|considering)|"
+    r"(lack|absence)\s+of|no\s+(access|information|data|history|record)|"
+    r"there\s+is\s+no|not\s+available|unavailable|cannot\s+(access|determine))",
     re.IGNORECASE,
 )
 VENTANA_NEGACION = 120  # caracteres antes del termino donde buscar la negacion
@@ -55,9 +65,15 @@ VENTANA_NEGACION = 120  # caracteres antes del termino donde buscar la negacion
 # Bloque 'CASO <id> ... VEREDICTO: <X>'. Non-greedy para no tragarse el
 # siguiente caso.
 _RE_VEREDICTO = re.compile(
-    r"CASO\s+(\d+)(.*?)VEREDICTO:\s*(CONFIRMADO|DESCARTADO)",
+    r"CAS[OE]\s+(\d+)(.*?)(?:VEREDICTO|VERDICT):\s*"
+    r"(CONFIRMADO|DESCARTADO|CONFIRMED|DISCARDED|DISMISSED)",
     re.DOTALL | re.IGNORECASE,
 )
+# Normaliza los veredictos en ingles al vocabulario del sistema.
+_TRAD_VEREDICTO = {
+    "CONFIRMED": "CONFIRMADO", "DISCARDED": "DESCARTADO",
+    "DISMISSED": "DESCARTADO",
+}
 
 # Conceptos que NO existen en el dataset ULB: solo hay 28 componentes PCA
 # anonimizados, un importe y una hora. Los patrones son especificos a
@@ -81,7 +97,45 @@ PATRONES_PROHIBIDOS = [
      "no hay relacion entre transacciones"),
     (r"corto per[íi]odo|pocos minutos|en cuesti[óo]n de (minutos|segundos)",
      "no se calcula frecuencia entre transacciones"),
+    # --- Equivalentes en INGLES ---------------------------------------
+    # Sin estos, un informe que derive a ingles atraviesa la auditoria de
+    # invencion semantica sin activar una sola alarma. Verificado: la frase
+    # "originates from a high-risk country and the merchant is unusual in the
+    # customer's transaction history" se auditaba como FIABLE, mientras su
+    # traduccion literal se marcaba como NO FIABLE. La deriva de idioma
+    # desactivaba la comprobacion en silencio.
+    (r"\bcountr(y|ies)\b", "el dataset no contiene informacion geografica"),
+    (r"\blocation\b|\bgeolocation\b", "no hay datos de localizacion"),
+    (r"\bmerchant\b|\bstore\b|\bvendor\b", "no se identifica el comercio"),
+    (r"(name|age|address|profile|identity) of the (holder|cardholder|customer)|"
+     r"cardholder\s+(is|lives|resides)",
+     "no hay datos identificativos del titular"),
+    (r"(account|card) number|bank account", "no hay identificador de cuenta ni de tarjeta"),
+    (r"(customer|transaction|purchase|spending)\s+history|"
+     r"history of (the )?(customer|transactions)",
+     "no hay historial: cada fila es independiente"),
+    (r"(previous|prior|earlier|recent)\s+transactions",
+     "no hay relacion entre transacciones"),
+    (r"within (a few|minutes|seconds)|short (time )?(period|window)",
+     "no se calcula frecuencia entre transacciones"),
 ]
+
+# Marcadores de idioma. No se busca detectar el idioma con precision, solo
+# saber si el informe ha derivado al ingles: eso invalida la lectura del
+# entregable y, sobre todo, es sintoma de que el modelo ha dejado de seguir
+# las instrucciones del prompt.
+_PALABRAS_ES = re.compile(
+    r"\b(que|de|la|el|los|las|una|por|con|para|como|este|esta|se|es|son|"
+    r"transacci[óo]n|importe|riesgo|fraude|caso)\b", re.IGNORECASE)
+_PALABRAS_EN = re.compile(
+    r"\b(the|and|is|are|of|to|with|for|this|that|was|were|amount|"
+    r"transaction|risk|fraud|case|suspicious)\b", re.IGNORECASE)
+
+
+def parece_ingles(texto: str) -> bool:
+    """¿El informe ha derivado al ingles pese a pedirse en castellano?"""
+    es, en = len(_PALABRAS_ES.findall(texto)), len(_PALABRAS_EN.findall(texto))
+    return en > es
 
 
 def ids_citados(texto: str) -> set:
@@ -109,8 +163,8 @@ def veredictos_por_caso(texto: str) -> dict:
     no dice nada; saber que uno de ellos era fraude real lo dice todo.
     """
     return {
-        int(idx): veredicto.upper()
-        for idx, _, veredicto in _RE_VEREDICTO.findall(texto)
+        int(idx): _TRAD_VEREDICTO.get(v.upper(), v.upper())
+        for idx, _, v in _RE_VEREDICTO.findall(texto)
     }
 
 
@@ -140,6 +194,8 @@ def auditar(informe: str, ids_expediente, ids_lote) -> dict:
         if afirmativas:
             conceptos.append((afirmativas[0].group(0), motivo))
 
+    en_ingles = parece_ingles(informe)
+
     if inventados:
         veredicto = "NO FIABLE - identificadores inventados"
     elif conceptos:
@@ -158,6 +214,7 @@ def auditar(informe: str, ids_expediente, ids_lote) -> dict:
         "cobertura": len(cubiertos) / max(len(validos), 1),
         "conceptos_inventados": conceptos,
         "menciona_dolares": "$" in informe or "dolar" in bajo,
+        "idioma_incorrecto": en_ingles,
     }
 
 
@@ -166,7 +223,7 @@ def auditar(informe: str, ids_expediente, ids_lote) -> dict:
 # ----------------------------------------------------------------------
 def medir_sistema(lote, detector, salida_investigador: str = "",
                   modo: str = "interpreta", capacidad: int = None,
-                  mapa_casos: dict = None) -> dict:
+                  mapa_casos: dict = None, umbral: float = None) -> dict:
     """Contrasta lo que hizo el sistema con las etiquetas reales.
 
     Distingue tres niveles, y la distincion es el nucleo del experimento:
@@ -181,7 +238,7 @@ def medir_sistema(lote, detector, salida_investigador: str = "",
     indices reales del DataFrame. El LLM nunca ve indices crudos porque, con
     turnos reales, son numeros de 4-5 cifras que corrompe al copiarlos.
     """
-    expediente = detector.seleccionar_casos(lote, capacidad)
+    expediente = detector.seleccionar_casos(lote, capacidad, umbral)
     ids_exp = list(expediente.index)
 
     # Si no se pasa mapa, se reconstruye: los casos van numerados 1..N en el

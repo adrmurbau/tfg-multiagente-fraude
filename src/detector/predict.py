@@ -47,11 +47,23 @@ class Explicacion:
     hora: float
     contribuciones: list = field(default_factory=list)  # [(variable, valor, aporte)]
 
-    def a_texto(self) -> str:
-        """Version narrativa, pensada para meterse en el prompt de un agente."""
-        lineas = [
-            f"Transaccion #{self.indice}",
-            f"  Probabilidad de fraude: {self.probabilidad:.4f} (riesgo {self.riesgo})",
+    def a_texto(self, nivel: str = "completo") -> str:
+        """Version narrativa, pensada para meterse en el prompt de un agente.
+
+        `nivel` controla cuanta puntuacion del detector se revela, para poder
+        hacer ablacion sobre la informacion que recibe la capa 2:
+          completo  -> probabilidad y nivel de riesgo
+          sin_nivel -> solo probabilidad
+          ciego     -> ninguna; unicamente importe, hora y contribuciones
+        Ver NIVELES_DOSSIER en src/agents/tools.py para el motivo.
+        """
+        lineas = [f"Transaccion #{self.indice}"]
+        if nivel == "completo":
+            lineas.append(f"  Probabilidad de fraude: {self.probabilidad:.4f} "
+                          f"(riesgo {self.riesgo})")
+        elif nivel == "sin_nivel":
+            lineas.append(f"  Probabilidad de fraude: {self.probabilidad:.4f}")
+        lineas += [
             f"  Importe: {self.importe:.2f} EUR | Hora del dia: {self.hora:.1f}h",
             "  Variables que mas empujan la decision:",
         ]
@@ -156,7 +168,8 @@ class DetectorFraude:
 
 
     # ------------------------------------------------------------------
-    def seleccionar_casos(self, df: pd.DataFrame, capacidad: int = None) -> pd.DataFrame:
+    def seleccionar_casos(self, df: pd.DataFrame, capacidad: int = None,
+                          umbral: float = None) -> pd.DataFrame:
         """Decide que casos se elevan a revision.
 
         Regla: todos los de riesgo ALTO. Si hay menos de CASOS_MIN se completa
@@ -169,12 +182,31 @@ class DetectorFraude:
         `capacidad` modela la **capacidad de revision manual** del equipo: un
         departamento real no revisa todo lo que el modelo marca, revisa lo que
         le da tiempo. Por defecto CASOS_MAX.
+
+        `umbral` permite bajar el corte por debajo del ALTO (0,80) para
+        maximizar recall a costa de falsos positivos. Es el escenario donde la
+        capa 2 puede aportar valor: si el LLM filtra esas falsas alarmas sin
+        descartar fraude real, recupera la precision sin perder recall.
+
+        En el turno de 4 h: umbral 0,80 -> 42 casos, 41 fraude (prec. 0,98,
+        recall 0,76). Umbral 0,05 -> 55 casos, 44 fraude (prec. 0,80,
+        recall 0,82). Tres fraudes mas a cambio de 10 falsas alarmas.
         """
         from src.config import CASOS_MAX, CASOS_MIN
 
         tope = capacidad if capacidad is not None else CASOS_MAX
         p = self.puntuar(df)
-        altos = p[p["riesgo"] == "ALTO"].sort_values("prob_fraude", ascending=False)
+        # kind="mergesort" (estable): hay probabilidades empatadas exactas, y
+        # el quicksort por defecto las desempata de forma no reproducible. Sin
+        # esto, el numero de caso que ve el LLM puede apuntar a una transaccion
+        # distinta en cada ejecucion, y la evaluacion contra etiquetas cruzaria
+        # veredictos con las filas equivocadas.
+        if umbral is not None:
+            altos = p[p["prob_fraude"] >= umbral].sort_values(
+                "prob_fraude", ascending=False, kind="mergesort")
+        else:
+            altos = p[p["riesgo"] == "ALTO"].sort_values(
+                "prob_fraude", ascending=False, kind="mergesort")
 
         if len(altos) >= CASOS_MIN:
             return altos.head(tope)
@@ -190,7 +222,7 @@ def construir_lote(df: pd.DataFrame, n: int = 500, n_fraudes: int = 5,
     etiquetas viajan en el lote pero NI el detector NI los agentes las miran:
     se reservan para que el Evaluador mida el acierto del sistema al final.
     """
-    periodo_test = df.sort_values("Time").iloc[int(len(df) * 0.8):]
+    periodo_test = df.sort_values("Time", kind="mergesort").iloc[int(len(df) * 0.8):]
 
     fraudes = periodo_test[periodo_test[TARGET_COL] == 1]
     n_fraudes = min(n_fraudes, len(fraudes))
@@ -233,7 +265,7 @@ def construir_turno(df: pd.DataFrame, horas: float = 4.0,
     independientes y hay que declararlo al interpretar la variabilidad entre
     turnos.
     """
-    ordenado = df.sort_values("Time")
+    ordenado = df.sort_values("Time", kind="mergesort")
     inicio_test = ordenado["Time"].iloc[int(len(ordenado) * 0.8)]
 
     desde = inicio_test + desplazamiento_h * 3600

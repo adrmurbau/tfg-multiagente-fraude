@@ -27,6 +27,30 @@ from src.detector.predict import DetectorFraude
 
 
 # ----------------------------------------------------------------------
+# Niveles de informacion del expediente
+# ----------------------------------------------------------------------
+# Un experimento en modo `revisa` con umbral permisivo dio un resultado que
+# invitaba a concluir que el modelo redescubria, razonando sobre las
+# contribuciones SHAP, la frontera de confianza del detector. No era cierto:
+# el expediente incluye la linea "Nivel de riesgo", calculada con el corte
+# 0,80, y los descartes cuadraban exactamente con esa etiqueta. En 3 de 4
+# turnos el modelo descarto justo los casos no marcados como ALTO.
+#
+# El diseno del expediente entregaba la respuesta en la entrada, de modo que
+# el experimento no distinguia entre RAZONAR y OBEDECER una etiqueta. Estos
+# tres niveles permiten separarlo mediante ablacion:
+#
+#   completo  : probabilidad + nivel de riesgo + contribuciones  (original)
+#   sin_nivel : probabilidad + contribuciones                    (sin la etiqueta)
+#   ciego     : solo contribuciones, importe y hora              (sin puntuacion)
+#
+# Si la discriminacion se mantiene en `ciego`, el modelo razona sobre la
+# evidencia. Si se pierde, no aporta criterio propio. Ambos resultados son
+# publicables.
+NIVELES_DOSSIER = ("completo", "sin_nivel", "ciego")
+
+
+# ----------------------------------------------------------------------
 # Contexto compartido
 # ----------------------------------------------------------------------
 class _Contexto:
@@ -37,16 +61,24 @@ class _Contexto:
         self.lote: pd.DataFrame | None = None
         self.puntuado: pd.DataFrame | None = None
         self.capacidad: int | None = None   # casos que el equipo puede revisar
+        self.umbral: float | None = None    # corte de probabilidad (None = ALTO)
+        self.dossier: str = "completo"      # ver NIVELES_DOSSIER
         # Correspondencia numero de caso (1..N) -> indice real del DataFrame.
         # Ver `construir_dossier` para el porque.
         self.mapa: dict[int, int] = {}
 
     def inicializar(self, lote: pd.DataFrame, detector: DetectorFraude = None,
-                    capacidad: int = None):
+                    capacidad: int = None, umbral: float = None,
+                    dossier: str = "completo"):
+        if dossier not in NIVELES_DOSSIER:
+            raise ValueError(f"dossier debe ser uno de {NIVELES_DOSSIER}, no {dossier!r}")
         self.detector = detector or DetectorFraude()
         self.lote = lote
         self.capacidad = capacidad
-        casos = (detector or self.detector).seleccionar_casos(lote, capacidad)
+        self.umbral = umbral
+        self.dossier = dossier
+        casos = (detector or self.detector).seleccionar_casos(
+            lote, capacidad, umbral)
         self.mapa = {n: int(idx) for n, idx in enumerate(casos.index, start=1)}
         # Se puntua una sola vez: los agentes consultaran muchas veces y no
         # tiene sentido reevaluar el modelo en cada llamada.
@@ -65,12 +97,13 @@ CTX = _Contexto()
 
 
 def inicializar_contexto(lote: pd.DataFrame, detector: DetectorFraude = None,
-                         capacidad: int = None):
+                         capacidad: int = None, umbral: float = None,
+                         dossier: str = "completo"):
     """Prepara el lote que analizara el departamento.
 
     `capacidad` = cuantos casos puede revisar el equipo en ese turno.
     """
-    return CTX.inicializar(lote, detector, capacidad)
+    return CTX.inicializar(lote, detector, capacidad, umbral, dossier)
 
 
 # ----------------------------------------------------------------------
@@ -88,22 +121,24 @@ class EstadisticasLoteTool(BaseTool):
     def _run(self) -> str:
         CTX.exigir()
         p = CTX.puntuado
-        conteo = p["riesgo"].value_counts()
+        base = [f"LOTE BAJO ANALISIS", f"  Transacciones            : {len(p):,}"]
 
-        return (
-            f"LOTE BAJO ANALISIS\n"
-            f"  Transacciones            : {len(p):,}\n"
-            f"  Riesgo ALTO (rojo)       : {conteo.get('ALTO', 0)}\n"
-            f"  Riesgo MEDIO (ambar)     : {conteo.get('MEDIO', 0)}\n"
-            f"  Riesgo BAJO (verde)      : {conteo.get('BAJO', 0)}\n"
-            f"  Probabilidad maxima      : {p['prob_fraude'].max():.4f}\n"
-            f"  Probabilidad media       : {p['prob_fraude'].mean():.4f}\n"
-            f"  Importe total del lote   : {p['Amount'].sum():,.2f} EUR\n"
-            f"  Importe en riesgo        : "
-            f"{p.loc[p['riesgo'] != 'BAJO', 'Amount'].sum():,.2f} EUR\n"
-            f"  Importe medio            : {p['Amount'].mean():.2f} EUR\n"
-            f"  Franja horaria           : {p['Hour'].min():.1f}h - {p['Hour'].max():.1f}h"
-        )
+        # El reparto por semaforo revela el corte 0,80. Se omite cuando el
+        # experimento oculta la etiqueta, o la ablacion no serviria de nada.
+        if CTX.dossier == "completo":
+            conteo = p["riesgo"].value_counts()
+            base += [f"  Riesgo ALTO (rojo)       : {conteo.get('ALTO', 0)}",
+                     f"  Riesgo MEDIO (ambar)     : {conteo.get('MEDIO', 0)}",
+                     f"  Riesgo BAJO (verde)      : {conteo.get('BAJO', 0)}"]
+        if CTX.dossier in ("completo", "sin_nivel"):
+            base += [f"  Probabilidad maxima      : {p['prob_fraude'].max():.4f}",
+                     f"  Probabilidad media       : {p['prob_fraude'].mean():.4f}"]
+        base += [
+            f"  Importe total del lote   : {p['Amount'].sum():,.2f} EUR",
+            f"  Importe medio            : {p['Amount'].mean():.2f} EUR",
+            f"  Franja horaria           : {p['Hour'].min():.1f}h - {p['Hour'].max():.1f}h",
+        ]
+        return "\n".join(base)
 
 
 # ----------------------------------------------------------------------
@@ -134,17 +169,28 @@ class PriorizarSospechosasTool(BaseTool):
         # Se numeran 1..N igual que en el expediente: el LLM nunca ve indices
         # crudos del DataFrame, que corrompe cuando tienen 4-5 cifras.
         filas = [f"TOP {n} TRANSACCIONES SOSPECHOSAS", ""]
-        filas.append(f"{'caso':>6} {'prob':>8} {'riesgo':>7} {'importe':>11} {'hora':>6}")
-        filas.append("-" * 42)
-        for pos, (idx, f) in enumerate(top.iterrows(), start=1):
-            filas.append(
-                f"{pos:>6} {f['prob_fraude']:>8.4f} {f['riesgo']:>7} "
-                f"{f['Amount']:>11.2f} {f['Hour']:>6.1f}"
-            )
-
-        altos = int((top["riesgo"] == "ALTO").sum())
-        filas.append("")
-        filas.append(f"De estas {n}, {altos} superan el umbral de riesgo ALTO (0.80).")
+        # La herramienta respeta el nivel de informacion del expediente: si el
+        # experimento oculta la etiqueta de riesgo, no puede reaparecer aqui.
+        if CTX.dossier == "completo":
+            filas.append(f"{'caso':>6} {'prob':>8} {'riesgo':>7} {'importe':>11} {'hora':>6}")
+            filas.append("-" * 42)
+            for pos, (idx, f) in enumerate(top.iterrows(), start=1):
+                filas.append(f"{pos:>6} {f['prob_fraude']:>8.4f} {f['riesgo']:>7} "
+                             f"{f['Amount']:>11.2f} {f['Hour']:>6.1f}")
+            altos = int((top["riesgo"] == "ALTO").sum())
+            filas.append("")
+            filas.append(f"De estas {n}, {altos} superan el umbral de riesgo ALTO (0.80).")
+        elif CTX.dossier == "sin_nivel":
+            filas.append(f"{'caso':>6} {'prob':>8} {'importe':>11} {'hora':>6}")
+            filas.append("-" * 34)
+            for pos, (idx, f) in enumerate(top.iterrows(), start=1):
+                filas.append(f"{pos:>6} {f['prob_fraude']:>8.4f} "
+                             f"{f['Amount']:>11.2f} {f['Hour']:>6.1f}")
+        else:
+            filas.append(f"{'caso':>6} {'importe':>11} {'hora':>6}")
+            filas.append("-" * 25)
+            for pos, (idx, f) in enumerate(top.iterrows(), start=1):
+                filas.append(f"{pos:>6} {f['Amount']:>11.2f} {f['Hour']:>6.1f}")
         return "\n".join(filas)
 
 
@@ -186,7 +232,7 @@ class ExplicarTransaccionTool(BaseTool):
             )
 
         exp = CTX.detector.explicar(CTX.lote, CTX.mapa[idx])
-        texto = exp.a_texto()
+        texto = exp.a_texto(CTX.dossier)
 
         # Contexto comparativo: sin el, el LLM no sabe si 1.18 EUR es mucho o poco
         media = CTX.puntuado["Amount"].mean()
@@ -251,6 +297,20 @@ class RendimientoDetectorTool(BaseTool):
 
 
 # ----------------------------------------------------------------------
+def _lineas_puntuacion(fila) -> list:
+    """Lineas de puntuacion del expediente segun el nivel de informacion.
+
+    Aisla en un solo punto que ve el modelo, para que la ablacion sea
+    consistente entre el expediente por lotes y el de caso unico.
+    """
+    if CTX.dossier == "completo":
+        return [f"Probabilidad de fraude: {fila['prob_fraude']:.4f}",
+                f"Nivel de riesgo: {fila['riesgo']}"]
+    if CTX.dossier == "sin_nivel":
+        return [f"Probabilidad de fraude: {fila['prob_fraude']:.4f}"]
+    return []   # ciego: ni probabilidad ni etiqueta
+
+
 def construir_dossier() -> str:
     """Expediente completo de los casos a revisar, calculado sin LLM.
 
@@ -278,7 +338,7 @@ def construir_dossier() -> str:
     alcance del LLM.
     """
     CTX.exigir()
-    casos = CTX.detector.seleccionar_casos(CTX.lote, CTX.capacidad)
+    casos = CTX.detector.seleccionar_casos(CTX.lote, CTX.capacidad, CTX.umbral)
 
     bloques = [
         "EXPEDIENTE DE CASOS (datos verificados del detector; no los alteres)",
@@ -288,8 +348,7 @@ def construir_dossier() -> str:
         fila = casos.loc[idx]
         exp = CTX.detector.explicar(CTX.lote, idx)
         bloques.append(f"--- CASO {n} ---")
-        bloques.append(f"Probabilidad de fraude: {fila['prob_fraude']:.4f}")
-        bloques.append(f"Nivel de riesgo: {fila['riesgo']}")
+        bloques.extend(_lineas_puntuacion(fila))
         bloques.append(f"Importe: {fila['Amount']:.2f} EUR")
         bloques.append(f"Hora del dia: {fila['Hour']:.1f}h")
         bloques.append("Variables de mayor aporte:")
@@ -327,8 +386,7 @@ def construir_dossier_caso(n: int) -> str:
 
     lineas = [
         f"CASO {n} (datos verificados del detector; no los alteres)",
-        f"Probabilidad de fraude: {fila['prob_fraude']:.4f}",
-        f"Nivel de riesgo: {fila['riesgo']}",
+        *_lineas_puntuacion(fila),
         f"Importe: {fila['Amount']:.2f} EUR",
         f"Hora del dia: {fila['Hour']:.1f}h",
         "Variables de mayor aporte:",
