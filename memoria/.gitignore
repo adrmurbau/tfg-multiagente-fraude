@@ -6,3 +6,7 @@ package.json
 *.pdf
 *.jpg
 *.png
+
+# Temporales de LibreOffice, que aparecen al convertir el .docx para revisarlo
+.~lock.*#
+*.tmp
