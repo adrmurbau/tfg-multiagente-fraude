@@ -63,13 +63,18 @@ class _Contexto:
         self.capacidad: int | None = None   # casos que el equipo puede revisar
         self.umbral: float | None = None    # corte de probabilidad (None = ALTO)
         self.dossier: str = "completo"      # ver NIVELES_DOSSIER
+        # Sustituye a CASOS_MIN. En operacion continua debe valer 0: ver el
+        # docstring de DetectorFraude.seleccionar_casos. Debe viajar en el
+        # contexto, porque si no el crew recibe un expediente distinto del
+        # que cuenta quien lo invoca.
+        self.minimo: int | None = None
         # Correspondencia numero de caso (1..N) -> indice real del DataFrame.
         # Ver `construir_dossier` para el porque.
         self.mapa: dict[int, int] = {}
 
     def inicializar(self, lote: pd.DataFrame, detector: DetectorFraude = None,
                     capacidad: int = None, umbral: float = None,
-                    dossier: str = "completo"):
+                    dossier: str = "completo", minimo: int = None):
         if dossier not in NIVELES_DOSSIER:
             raise ValueError(f"dossier debe ser uno de {NIVELES_DOSSIER}, no {dossier!r}")
         self.detector = detector or DetectorFraude()
@@ -77,8 +82,9 @@ class _Contexto:
         self.capacidad = capacidad
         self.umbral = umbral
         self.dossier = dossier
+        self.minimo = minimo
         casos = (detector or self.detector).seleccionar_casos(
-            lote, capacidad, umbral)
+            lote, capacidad, umbral, minimo)
         self.mapa = {n: int(idx) for n, idx in enumerate(casos.index, start=1)}
         # Se puntua una sola vez: los agentes consultaran muchas veces y no
         # tiene sentido reevaluar el modelo en cada llamada.
@@ -98,12 +104,12 @@ CTX = _Contexto()
 
 def inicializar_contexto(lote: pd.DataFrame, detector: DetectorFraude = None,
                          capacidad: int = None, umbral: float = None,
-                         dossier: str = "completo"):
+                         dossier: str = "completo", minimo: int = None):
     """Prepara el lote que analizara el departamento.
 
     `capacidad` = cuantos casos puede revisar el equipo en ese turno.
     """
-    return CTX.inicializar(lote, detector, capacidad, umbral, dossier)
+    return CTX.inicializar(lote, detector, capacidad, umbral, dossier, minimo)
 
 
 # ----------------------------------------------------------------------
@@ -338,7 +344,8 @@ def construir_dossier() -> str:
     alcance del LLM.
     """
     CTX.exigir()
-    casos = CTX.detector.seleccionar_casos(CTX.lote, CTX.capacidad, CTX.umbral)
+    casos = CTX.detector.seleccionar_casos(CTX.lote, CTX.capacidad,
+                                          CTX.umbral, CTX.minimo)
 
     bloques = [
         "EXPEDIENTE DE CASOS (datos verificados del detector; no los alteres)",
@@ -396,6 +403,70 @@ def construir_dossier_caso(n: int) -> str:
         lineas.append(f"  {var} = {valor:.3f} (aporte {aporte:+.3f}, {sentido})")
     lineas.append(f"Importe medio del lote: {CTX.puntuado['Amount'].mean():.2f} EUR")
     return "\n".join(lineas)
+
+
+def construir_tabla_casos(veredictos: dict = None) -> str:
+    """Tabla final del informe, calculada sin LLM.
+
+    Es la ultima aplicacion del principio que ya resolvio la fabricacion de
+    transacciones: un camino de datos determinista no debe atravesar un
+    componente estocastico.
+
+    ## El problema que resuelve
+
+    Se le pedia al Reportero una tabla con una fila por caso. Con expedientes
+    de 32 a 55 casos, el informe cubria SIEMPRE unos catorce, con
+    independencia del tamano:
+
+        expediente 55 -> 26 % de cobertura -> 14,2 casos
+        expediente 53 -> 27 %              -> 14,5
+        expediente 42 -> 35 %              -> 14,5
+        expediente 32 -> 45 %              -> 14,5
+
+    No era truncamiento de contexto: al ampliar la ventana a 16k la cobertura
+    BAJO al 11 %, porque el modelo dispone de mas espacio y lo emplea en
+    escribir un resumen ejecutivo con ejemplos en lugar de enumerar. Es una
+    decision de estilo, y por eso pedirlo mejor en el prompt no lo arregla.
+
+    ## La solucion
+
+    La tabla se construye aqui, con los datos del detector y los veredictos ya
+    extraidos del texto del Investigador. La cobertura pasa a ser del 100 % por
+    construccion. Al modelo se le sigue pidiendo la parte narrativa, que es lo
+    que sabe hacer.
+
+    Args:
+        veredictos: {numero_de_caso: "CONFIRMADO" | "DESCARTADO"}. Los casos
+            sin veredicto se marcan como pendientes, que es informacion util:
+            senala exactamente donde fallo la investigacion.
+    """
+    CTX.exigir()
+    casos = CTX.detector.seleccionar_casos(CTX.lote, CTX.capacidad,
+                                          CTX.umbral, CTX.minimo)
+    veredictos = veredictos or {}
+
+    cabecera = ["| Caso | Importe (EUR) | Hora | Veredicto | Accion recomendada |",
+                "|---|---|---|---|---|"]
+    filas = []
+    for n, idx in enumerate(casos.index, start=1):
+        fila = casos.loc[idx]
+        v = veredictos.get(n)
+        if v == "DESCARTADO":
+            veredicto, accion = "Descartado", "Archivar"
+        elif v == "CONFIRMADO":
+            veredicto, accion = "Confirmado", "Bloquear tarjeta"
+        else:
+            veredicto, accion = "Sin veredicto", "Revisar manualmente"
+        filas.append(f"| {n} | {fila['Amount']:.2f} | {fila['Hour']:.1f}h | "
+                     f"{veredicto} | {accion} |")
+
+    conf = sum(1 for v in veredictos.values() if v == "CONFIRMADO")
+    desc = sum(1 for v in veredictos.values() if v == "DESCARTADO")
+    sin = len(casos) - conf - desc
+
+    pie = ["", f"**{len(casos)} casos en el expediente**: {conf} confirmados, "
+               f"{desc} descartados" + (f", {sin} sin veredicto" if sin else "") + "."]
+    return "\n".join(cabecera + filas + pie)
 
 
 def n_casos() -> int:

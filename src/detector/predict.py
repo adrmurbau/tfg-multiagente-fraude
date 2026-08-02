@@ -169,7 +169,7 @@ class DetectorFraude:
 
     # ------------------------------------------------------------------
     def seleccionar_casos(self, df: pd.DataFrame, capacidad: int = None,
-                          umbral: float = None) -> pd.DataFrame:
+                          umbral: float = None, minimo: int = None) -> pd.DataFrame:
         """Decide que casos se elevan a revision.
 
         Regla: todos los de riesgo ALTO. Si hay menos de CASOS_MIN se completa
@@ -191,8 +191,20 @@ class DetectorFraude:
         En el turno de 4 h: umbral 0,80 -> 42 casos, 41 fraude (prec. 0,98,
         recall 0,76). Umbral 0,05 -> 55 casos, 44 fraude (prec. 0,80,
         recall 0,82). Tres fraudes mas a cambio de 10 falsas alarmas.
+
+        `minimo` sustituye a CASOS_MIN. Existe por un fallo que solo aparece al
+        cambiar de regimen de operacion: CASOS_MIN = 3 rellena el expediente
+        con los siguientes casos por puntuacion cuando no hay suficientes en
+        rojo, para que el informe nunca salga vacio. En lotes de 4 h eso no se
+        activa jamas. En ventanas de 5 minutos se activaria en el 52 % de
+        ellas, generando informes sobre tres transacciones legitimas cada vez
+        que no ocurre nada -y ensenando al analista a ignorar el sistema-.
+        Con `minimo=0` el expediente puede quedar vacio, que en procesamiento
+        continuo es la respuesta correcta.
         """
         from src.config import CASOS_MAX, CASOS_MIN
+        if minimo is None:
+            minimo = CASOS_MIN
 
         tope = capacidad if capacidad is not None else CASOS_MAX
         p = self.puntuar(df)
@@ -208,9 +220,9 @@ class DetectorFraude:
             altos = p[p["riesgo"] == "ALTO"].sort_values(
                 "prob_fraude", ascending=False, kind="mergesort")
 
-        if len(altos) >= CASOS_MIN:
+        if len(altos) >= minimo:
             return altos.head(tope)
-        return p.nlargest(max(CASOS_MIN, min(tope, len(p))), "prob_fraude")
+        return p.nlargest(max(minimo, min(tope, len(p))), "prob_fraude")
 
 
 # ----------------------------------------------------------------------

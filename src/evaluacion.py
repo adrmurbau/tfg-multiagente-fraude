@@ -223,7 +223,8 @@ def auditar(informe: str, ids_expediente, ids_lote) -> dict:
 # ----------------------------------------------------------------------
 def medir_sistema(lote, detector, salida_investigador: str = "",
                   modo: str = "interpreta", capacidad: int = None,
-                  mapa_casos: dict = None, umbral: float = None) -> dict:
+                  mapa_casos: dict = None, umbral: float = None,
+                  minimo: int = None) -> dict:
     """Contrasta lo que hizo el sistema con las etiquetas reales.
 
     Distingue tres niveles, y la distincion es el nucleo del experimento:
@@ -238,7 +239,7 @@ def medir_sistema(lote, detector, salida_investigador: str = "",
     indices reales del DataFrame. El LLM nunca ve indices crudos porque, con
     turnos reales, son numeros de 4-5 cifras que corrompe al copiarlos.
     """
-    expediente = detector.seleccionar_casos(lote, capacidad, umbral)
+    expediente = detector.seleccionar_casos(lote, capacidad, umbral, minimo)
     ids_exp = list(expediente.index)
 
     # Si no se pasa mapa, se reconstruye: los casos van numerados 1..N en el

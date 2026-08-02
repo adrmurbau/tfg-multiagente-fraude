@@ -1,0 +1,110 @@
+{
+  "ventana_min": 30.0,
+  "turno_horas": 4.0,
+  "umbral": 0.8,
+  "sin_llm": true,
+  "modelo": "llama3.1:8b",
+  "ocupacion": 0.014611805555555555,
+  "ventanas_totales": 8,
+  "ventanas_con_casos": 8,
+  "ventanas_desbordadas": 0,
+  "latencia_media_min": 13.203750000000001,
+  "registro": [
+    {
+      "ventana": 0,
+      "transacciones": 4263,
+      "fraudes_reales": 5,
+      "casos_elevados": 4,
+      "fraude_elevado": 3,
+      "seg_deteccion": 0.082,
+      "seg_llm": 20.0,
+      "estado": "estimado",
+      "latencia_media_min": 14.77,
+      "latencia_max_min": 17.43
+    },
+    {
+      "ventana": 1,
+      "transacciones": 4421,
+      "fraudes_reales": 8,
+      "casos_elevados": 7,
+      "fraude_elevado": 7,
+      "seg_deteccion": 0.05,
+      "seg_llm": 35.0,
+      "estado": "estimado",
+      "latencia_media_min": 10.83,
+      "latencia_max_min": 14.25
+    },
+    {
+      "ventana": 2,
+      "transacciones": 4009,
+      "fraudes_reales": 8,
+      "casos_elevados": 5,
+      "fraude_elevado": 5,
+      "seg_deteccion": 0.046,
+      "seg_llm": 25.0,
+      "estado": "estimado",
+      "latencia_media_min": 18.91,
+      "latencia_max_min": 26.28
+    },
+    {
+      "ventana": 3,
+      "transacciones": 4150,
+      "fraudes_reales": 9,
+      "casos_elevados": 9,
+      "fraude_elevado": 9,
+      "seg_deteccion": 0.047,
+      "seg_llm": 45.0,
+      "estado": "estimado",
+      "latencia_media_min": 10.94,
+      "latencia_max_min": 25.73
+    },
+    {
+      "ventana": 4,
+      "transacciones": 4409,
+      "fraudes_reales": 6,
+      "casos_elevados": 4,
+      "fraude_elevado": 4,
+      "seg_deteccion": 0.049,
+      "seg_llm": 20.0,
+      "estado": "estimado",
+      "latencia_media_min": 6.68,
+      "latencia_max_min": 10.25
+    },
+    {
+      "ventana": 5,
+      "transacciones": 3884,
+      "fraudes_reales": 13,
+      "casos_elevados": 10,
+      "fraude_elevado": 10,
+      "seg_deteccion": 0.046,
+      "seg_llm": 50.0,
+      "estado": "estimado",
+      "latencia_media_min": 16.37,
+      "latencia_max_min": 30.33
+    },
+    {
+      "ventana": 6,
+      "transacciones": 3785,
+      "fraudes_reales": 4,
+      "casos_elevados": 2,
+      "fraude_elevado": 2,
+      "seg_deteccion": 0.045,
+      "seg_llm": 10.0,
+      "estado": "estimado",
+      "latencia_media_min": 10.21,
+      "latencia_max_min": 10.85
+    },
+    {
+      "ventana": 7,
+      "transacciones": 3870,
+      "fraudes_reales": 1,
+      "casos_elevados": 1,
+      "fraude_elevado": 1,
+      "seg_deteccion": 0.045,
+      "seg_llm": 5.0,
+      "estado": "estimado",
+      "latencia_media_min": 16.92,
+      "latencia_max_min": 16.92
+    }
+  ]
+}

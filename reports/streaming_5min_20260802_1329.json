@@ -1,0 +1,160 @@
+{
+  "ventana_min": 5.0,
+  "turno_horas": 4.0,
+  "umbral": 0.8,
+  "sin_llm": false,
+  "modelo": "qwen2.5-14b-ctx16k",
+  "ocupacion": 0.35831205128205124,
+  "ventanas_totales": 13,
+  "ventanas_con_casos": 6,
+  "ventanas_desbordadas": 4,
+  "latencia_media_min": 5.728,
+  "registro": [
+    {
+      "ventana": 0,
+      "transacciones": 678,
+      "fraudes_reales": 0,
+      "casos_elevados": 1,
+      "fraude_elevado": 0,
+      "seg_deteccion": 0.061,
+      "seg_llm": 312.9,
+      "estado": "procesada",
+      "recall_sistema": 0.0
+    },
+    {
+      "ventana": 1,
+      "transacciones": 710,
+      "fraudes_reales": 0,
+      "casos_elevados": 0,
+      "fraude_elevado": 0,
+      "seg_deteccion": 0.029,
+      "seg_llm": 0.0,
+      "estado": "sin casos"
+    },
+    {
+      "ventana": 2,
+      "transacciones": 781,
+      "fraudes_reales": 2,
+      "casos_elevados": 1,
+      "fraude_elevado": 1,
+      "seg_deteccion": 0.03,
+      "seg_llm": 304.3,
+      "estado": "procesada",
+      "recall_sistema": 1.0,
+      "latencia_media_min": 7.17,
+      "latencia_max_min": 7.17
+    },
+    {
+      "ventana": 3,
+      "transacciones": 695,
+      "fraudes_reales": 2,
+      "casos_elevados": 2,
+      "fraude_elevado": 2,
+      "seg_deteccion": 0.031,
+      "seg_llm": 402.0,
+      "estado": "procesada",
+      "recall_sistema": 1.0,
+      "latencia_media_min": 9.81,
+      "latencia_max_min": 11.18
+    },
+    {
+      "ventana": 4,
+      "transacciones": 694,
+      "fraudes_reales": 0,
+      "casos_elevados": 0,
+      "fraude_elevado": 0,
+      "seg_deteccion": 0.029,
+      "seg_llm": 0.0,
+      "estado": "sin casos"
+    },
+    {
+      "ventana": 5,
+      "transacciones": 705,
+      "fraudes_reales": 1,
+      "casos_elevados": 0,
+      "fraude_elevado": 0,
+      "seg_deteccion": 0.029,
+      "seg_llm": 0.0,
+      "estado": "sin casos"
+    },
+    {
+      "ventana": 6,
+      "transacciones": 773,
+      "fraudes_reales": 0,
+      "casos_elevados": 0,
+      "fraude_elevado": 0,
+      "seg_deteccion": 0.031,
+      "seg_llm": 0.0,
+      "estado": "sin casos"
+    },
+    {
+      "ventana": 7,
+      "transacciones": 778,
+      "fraudes_reales": 1,
+      "casos_elevados": 0,
+      "fraude_elevado": 0,
+      "seg_deteccion": 0.03,
+      "seg_llm": 0.0,
+      "estado": "sin casos"
+    },
+    {
+      "ventana": 8,
+      "transacciones": 709,
+      "fraudes_reales": 0,
+      "casos_elevados": 0,
+      "fraude_elevado": 0,
+      "seg_deteccion": 0.029,
+      "seg_llm": 0.0,
+      "estado": "sin casos"
+    },
+    {
+      "ventana": 9,
+      "transacciones": 725,
+      "fraudes_reales": 4,
+      "casos_elevados": 4,
+      "fraude_elevado": 4,
+      "seg_deteccion": 0.03,
+      "seg_llm": 39.6,
+      "estado": "procesada",
+      "recall_sistema": 1.0,
+      "latencia_media_min": 3.93,
+      "latencia_max_min": 4.33
+    },
+    {
+      "ventana": 10,
+      "transacciones": 725,
+      "fraudes_reales": 3,
+      "casos_elevados": 3,
+      "fraude_elevado": 3,
+      "seg_deteccion": 0.029,
+      "seg_llm": 36.8,
+      "estado": "procesada",
+      "recall_sistema": 1.0,
+      "latencia_media_min": 1.84,
+      "latencia_max_min": 1.95
+    },
+    {
+      "ventana": 11,
+      "transacciones": 711,
+      "fraudes_reales": 0,
+      "casos_elevados": 0,
+      "fraude_elevado": 0,
+      "seg_deteccion": 0.03,
+      "seg_llm": 0.0,
+      "estado": "sin casos"
+    },
+    {
+      "ventana": 12,
+      "transacciones": 692,
+      "fraudes_reales": 1,
+      "casos_elevados": 1,
+      "fraude_elevado": 1,
+      "seg_deteccion": 0.029,
+      "seg_llm": 301.4,
+      "estado": "procesada",
+      "recall_sistema": 1.0,
+      "latencia_media_min": 5.89,
+      "latencia_max_min": 5.89
+    }
+  ]
+}

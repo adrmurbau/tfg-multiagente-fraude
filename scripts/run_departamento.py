@@ -27,6 +27,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src.agents.crew import construir_crew  # noqa: E402
 from src.agents.tools import (  # noqa: E402
     NIVELES_DOSSIER,
+    construir_tabla_casos,
     inicializar_contexto,
     mapa_casos,
 )  # noqa: E402
@@ -37,7 +38,7 @@ from src.detector.predict import (  # noqa: E402
     construir_lote,
     construir_turno,
 )
-from src.evaluacion import auditar, medir_sistema  # noqa: E402
+from src.evaluacion import auditar, medir_sistema, veredictos_por_caso  # noqa: E402
 
 
 def parsear_args():
@@ -81,6 +82,9 @@ def formatear_auditoria(aud: dict) -> str:
         L.append(f"  Cobertura de la INVESTIGACION : "
                  f"{aud['cobertura_investigacion']:.0%}")
         L.append(f"  Cobertura del INFORME         : {aud['cobertura']:.0%}")
+        if "cobertura_narrativa" in aud:
+            L.append(f"  Cobertura del texto del modelo: "
+                     f"{aud['cobertura_narrativa']:.0%}  (la tabla se ensambla aparte)")
         if aud["cobertura_investigacion"] > aud["cobertura"]:
             L.append("  >> La investigacion fue completa; el Reportero perdio "
                      "casos al sintetizar.")
@@ -199,7 +203,7 @@ def main():
                                    iterativo=args.iterativo).kickoff()
     dt = time.perf_counter() - t0
 
-    informe = str(resultado)
+    informe_narrativo = str(resultado)
     try:
         salidas = [t.raw for t in resultado.tasks_output]
     except AttributeError:
@@ -207,7 +211,18 @@ def main():
     # Con el Investigador iterativo hay N tareas de investigacion, no una. Se
     # unen TODAS las salidas menos la ultima (el informe del Reportero, que
     # reproduce los veredictos y los duplicaria en el recuento).
-    salida_investigador = "\n\n".join(salidas[:-1]) if len(salidas) > 1 else informe
+    salida_investigador = ("\n\n".join(salidas[:-1]) if len(salidas) > 1
+                           else informe_narrativo)
+
+    # La tabla se calcula aqui, no la escribe el modelo. Ver el docstring de
+    # construir_tabla_casos: el Reportero cubria siempre unos catorce casos
+    # con independencia de que el expediente tuviera 32 o 55, porque resume
+    # en lugar de enumerar. Ensamblando la tabla en Python la cobertura es del
+    # 100 % por construccion, y al modelo se le deja lo que sabe hacer.
+    tabla = construir_tabla_casos(veredictos_por_caso(salida_investigador))
+    informe = (informe_narrativo
+               + "\n\n---\n\n## Casos del expediente\n\n"
+               + tabla)
 
     print("\n" + "=" * 66)
     print("  INFORME FINAL")
@@ -221,6 +236,12 @@ def main():
     # El universo de identificadores validos son los numeros de caso (1..N):
     # cualquier otro numero citado es inventado.
     aud = auditar(informe, met["ids_expediente"], met["ids_expediente"])
+    # La cobertura NARRATIVA -la del texto que escribe el modelo, sin la tabla
+    # ensamblada- se sigue midiendo aparte: es el dato que documenta el cupo
+    # del Reportero, y perderlo al arreglar el sintoma seria un error.
+    aud_narrativa = auditar(informe_narrativo, met["ids_expediente"],
+                            met["ids_expediente"])
+    aud["cobertura_narrativa"] = aud_narrativa["cobertura"]
     # Auditoria separada de la INVESTIGACION. Si el investigador cubre el 100 %
     # y el informe no, la perdida esta en el Reportero, no en la investigacion.
     aud_inv = auditar(salida_investigador, met["ids_expediente"],
