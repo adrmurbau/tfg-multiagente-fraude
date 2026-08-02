@@ -1,0 +1,82 @@
+{
+  "split": "temporal",
+  "resultados": [
+    {
+      "estrategia": "Sin tratamiento",
+      "auc_pr": 0.6989860708978509,
+      "roc_auc": 0.9848853575216364,
+      "p_at_n": {
+        "20": 0.9,
+        "50": 0.94,
+        "100": 0.58,
+        "200": 0.295
+      },
+      "n_test": 56962,
+      "fraudes_test": 75,
+      "correcto": true
+    },
+    {
+      "estrategia": "Ponderacion del gradiente",
+      "auc_pr": 0.8003025560579613,
+      "roc_auc": 0.9857792934531029,
+      "p_at_n": {
+        "20": 1.0,
+        "50": 1.0,
+        "100": 0.59,
+        "200": 0.31
+      },
+      "n_test": 56962,
+      "fraudes_test": 75,
+      "correcto": true
+    },
+    {
+      "estrategia": "SMOTE tras la division",
+      "auc_pr": 0.7992604918379814,
+      "roc_auc": 0.9753387124181858,
+      "p_at_n": {
+        "20": 1.0,
+        "50": 1.0,
+        "100": 0.6,
+        "200": 0.3
+      },
+      "n_test": 56962,
+      "fraudes_test": 75,
+      "correcto": true,
+      "n_train_tras_smote": 454856
+    },
+    {
+      "estrategia": "SMOTE antes de partir (reportado)",
+      "auc_pr": 0.9999902707922002,
+      "roc_auc": 0.999991128844814,
+      "p_at_n": {
+        "20": 1.0,
+        "50": 1.0,
+        "100": 1.0,
+        "200": 1.0
+      },
+      "n_test": 113726,
+      "fraudes_test": 56863,
+      "correcto": false
+    },
+    {
+      "estrategia": "SMOTE antes de partir (particion original, tambien contaminada)",
+      "auc_pr": 0.9994666034455507,
+      "roc_auc": 0.9999992968516532,
+      "p_at_n": {
+        "20": 1.0,
+        "50": 1.0,
+        "100": 0.75,
+        "200": 0.375
+      },
+      "n_test": 56962,
+      "fraudes_test": 75,
+      "correcto": false
+    }
+  ],
+  "inflacion_auc_pr": 0.19968771473423885,
+  "inflacion_relativa": 0.24951527796916922,
+  "mejor_sin_fuga": "Ponderacion del gradiente",
+  "auc_pr_mejor_sin_fuga": 0.8003025560579613,
+  "auc_pr_reportado_con_fuga": 0.9999902707922002,
+  "nota": "La inflacion se mide contra el mejor procedimiento sin fuga. El modelo con fuga no admite evaluacion honesta en ninguna particion, porque el remuestreo previo las contamino todas."
+}

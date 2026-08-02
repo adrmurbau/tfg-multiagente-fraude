@@ -22,18 +22,17 @@ models/*
 *.json.model
 
 # --- Informes generados ---
-# Los informes individuales NO se versionan: son decenas y ocupan mucho.
-# Los DATOS EXPERIMENTALES si, y deliberadamente: la memoria cita cada uno
-# como fuente de sus cifras, y son irrepetibles porque el LLM es estocastico.
-# Pesan pocos kilobytes en total.
-reports/*
-!reports/.gitkeep
-!reports/experimento_*.csv
-!reports/experimento_*.md
-!reports/analisis_*.md
-!reports/metricas_detector.*
-!reports/hiperparametros.*
-!reports/comparativa_detectores_*.json
+# Se ignora SOLO lo que sobra, no al reves. Una version anterior listaba los
+# ficheros a conservar uno por uno, y cada experimento nuevo quedaba fuera
+# hasta acordarse de anadir su patron.
+#
+# Los DATOS EXPERIMENTALES se versionan deliberadamente: la memoria cita cada
+# uno como fuente de sus cifras y son irrepetibles, porque el LLM es
+# estocastico y una ejecucion perdida no se reproduce. Pesan pocos kilobytes.
+#
+# Los informes individuales no: son decenas y ocupan mucho.
+reports/informe_*.md
+reports/no_fiables/
 
 # --- Credenciales ---
 .env
