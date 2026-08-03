@@ -1,0 +1,44 @@
+{
+  "backend": "ollama",
+  "modelo": "qwen2.5-14b-ctx16k",
+  "casos_investigados": 10,
+  "casos_expediente": 55,
+  "veredictos": {
+    "1": "CONFIRMADO",
+    "2": "CONFIRMADO",
+    "3": "CONFIRMADO",
+    "4": "CONFIRMADO",
+    "5": "CONFIRMADO",
+    "6": "CONFIRMADO",
+    "7": "CONFIRMADO",
+    "8": "CONFIRMADO",
+    "9": "CONFIRMADO",
+    "10": "CONFIRMADO"
+  },
+  "descartes_correctos": 0,
+  "fraude_destruido": 0,
+  "seg_por_caso": [
+    2.9,
+    3.4,
+    3.1,
+    3.6,
+    2.8,
+    3.7,
+    3.7,
+    3.2,
+    3.7,
+    3.3
+  ],
+  "salidas": [
+    "CASO 1\n\nEl detector marca esta transacción como sospechosa debido a su importe extremadamente bajo de solo 1,00 EUR en comparación con el importe medio del lote que es significativamente mayor. Además, las variables PCA anonimizadas V14, V12 y V4 presentan valores que contribuyen notablemente hacia la clasificación como fraude, lo cual sugiere patrones atípicos asociados a actividades fraudulentas.\n\nVEREDICTO: CONFIRMADO",
+    "CASO 2\n\nEl detector marca esta transacción como sospechosa debido a su importe significativamente bajo de 1,18 EUR en comparación con el importe medio del lote de 84,25 EUR. Además, las variables PCA anonimizadas V14, V12 y V4 muestran valores extremos que contribuyen positivamente al riesgo de fraude, sugiriendo patrones atípicos en los datos. Estas anomalías indican un comportamiento no típico que merece una revisión más detallada.\n\nVEREDICTO: CONFIRMADO",
+    "CASO 3\n\nEl detector marca esta transacción como sospechosa debido a su importe extremadamente bajo de solo 1.00 EUR, en contraste con el importe medio del lote que es significativamente mayor (84.25 EUR). Además, las variables PCA V14, V12 y V4 presentan valores anormales que contribuyen notablemente al riesgo de fraude, sugiriendo patrones atípicos en los datos que son típicos de transacciones fraudulentas.\n\nVEREDICTO: CONFIRMADO",
+    "CASO 4\n\nEl detector marca esta transacción como sospechosa debido a su importe significativamente bajo de 0,77 EUR en comparación con el importe medio del lote de 84,25 EUR. Además, las variables PCA anonimizadas V14, V12 y V10 muestran valores negativos que contribuyen positivamente al riesgo de fraude, sugiriendo patrones atípicos en la transacción. La variable V4 también presenta un valor alto y positivo, lo cual refuerza la clasificación del caso como fraudulenta.\n\nVEREDICTO: CONFIRMADO",
+    "CASO 5\n\nEl detector marca esta transacción como sospechosa debido a su importe elevado de 94,82 EUR y al patrón atípico en las variables PCA V14, V12, V10 y V4, que muestran valores anormales que contribuyen significativamente hacia la clasificación de fraude. Estas características indican un comportamiento fuera de lo común para este tipo de transacciones.\n\nVEREDICTO: CONFIRMADO",
+    "CASO 6\n\nEl detector marca esta transacción como sospechosa debido a su importe extremadamente bajo de solo 1,00 EUR en comparación con el importe medio del lote que es de 84,25 EUR. Además, las variables PCA anonimizadas V14, V12 y V4 presentan valores anormales que contribuyen significativamente al riesgo de fraude, sugiriendo patrones atípicos en la transacción. El aporte positivo hacia el fraude de estas variables eleva aún más la probabilidad de que se trate de una actividad fraudulenta.\n\nVEREDICTO: CONFIRMADO",
+    "CASO 7\n\nEl detector marca esta transacción como sospechosa debido a que su importe de 51,37 EUR es significativamente menor al importe medio del lote de transacciones similares, lo cual podría indicar una compra inusual. Además, las variables PCA anonimizadas V14, V12 y V10 presentan valores negativos con un alto aporte hacia la clasificación como fraude, sugiriendo patrones atípicos en el comportamiento de la transacción. La variable V4 también contribuye positivamente al riesgo, añadiendo más peso a la sospecha.\n\nVEREDICTO: CONFIRMADO",
+    "CASO 8\n\nEl detector marca esta transacción como sospechosa debido a su importe significativamente bajo de 0.77 EUR en comparación con el importe medio del lote, que es de 84.25 EUR. Además, las variables PCA anonimizadas V14, V12 y V4 muestran valores extremos que contribuyen notablemente hacia la clasificación de fraude, lo cual sugiere patrones atípicos en el comportamiento financiero asociado a esta transacción.\n\nVEREDICTO: CONFIRMADO",
+    "CASO 9\n\nEl detector marca esta transacción como sospechosa debido a su bajo importe de solo 0,77 EUR en comparación con el importe medio del lote que es de 84,25 EUR. Además, las variables PCA V14 y V12 muestran valores negativos significativos que incrementan la probabilidad hacia fraude, mientras que V4 también contribuye positivamente al riesgo. Aunque V8 muestra un valor que disminuye ligeramente el riesgo, la combinación de estas variables eleva notablemente la probabilidad de fraude a 1.0000.\n\nVEREDICTO: CONFIRMADO",
+    "CASO 10\n\nEl detector considera sospechosa la transacción por varias razones, entre ellas el importe de 122.68 EUR que supera el importe medio del lote y las variables PCA V14, V12 y V10, que muestran valores negativos con un alto aporte hacia la clasificación como fraude. Aunque la variable V8 muestra un valor positivo que podría indicar una transacción legítima, el peso de las otras variables supera significativamente este efecto.\n\nVEREDICTO: CONFIRMADO"
+  ]
+}

@@ -98,6 +98,20 @@ def construir_llm(modelo: str = None) -> LLM:
 # "originates from a high-risk country ... unusual in the customer's history"
 # se audita como FIABLE, mientras su traduccion literal al castellano se marca
 # como NO FIABLE. La deriva de idioma desactiva la auditoria en silencio.
+# Se declara a nivel de modulo, y no dentro de construir_tareas, porque
+# scripts/investigador_solo.py necesita el MISMO texto literal para que la
+# comparacion entre motores sea valida. Duplicarlo alli invitaria a que las
+# dos versiones divergieran sin que nadie se diera cuenta.
+PROHIBICIONES = (
+    "LO QUE NO EXISTE EN ESTOS DATOS, y por tanto no puedes mencionar: "
+    "paises, ubicaciones, comercios, titulares, numeros de tarjeta, "
+    "cuentas, historial del cliente, transacciones anteriores ni "
+    "frecuencia de uso. El dataset SOLO contiene 28 componentes PCA "
+    "anonimizados, un importe y una hora. Si escribes 'pais de alto "
+    "riesgo' o 'historial sospechoso' estaras inventando.\n"
+    "Los importes estan en EUROS, no en dolares.\n"
+)
+
 IDIOMA = (
     " Redactas SIEMPRE en castellano, incluidos titulos, etiquetas y "
     "conclusiones, sea cual sea el idioma del contexto que recibas. "
@@ -329,15 +343,6 @@ def construir_tareas(ag: dict, modo: str, iterativo: bool = False) -> dict:
         )
         salida_veredicto = ""
 
-    PROHIBICIONES = (
-        "LO QUE NO EXISTE EN ESTOS DATOS, y por tanto no puedes mencionar: "
-        "paises, ubicaciones, comercios, titulares, numeros de tarjeta, "
-        "cuentas, historial del cliente, transacciones anteriores ni "
-        "frecuencia de uso. El dataset SOLO contiene 28 componentes PCA "
-        "anonimizados, un importe y una hora. Si escribes 'pais de alto "
-        "riesgo' o 'historial sospechoso' estaras inventando.\n"
-        "Los importes estan en EUROS, no en dolares.\n"
-    )
 
     if iterativo:
         # UNA TAREA POR CASO. Prompt corto, salida corta, cobertura garantizada.
