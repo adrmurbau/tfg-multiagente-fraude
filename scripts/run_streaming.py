@@ -66,13 +66,25 @@ from src.evaluacion import medir_sistema, veredictos_por_caso  # noqa: E402
 MAX_EXECUTION_TIME = 180   # segundos por agente
 TIMEOUT_HTTP = 240         # segundos por peticion al modelo
 
-# Coste por ventana en modo --sin-llm. NO es 5 s por caso, como suponia una
-# version anterior de este guion: la medida real sobre seis ventanas dio entre
-# 37 y 402 segundos SIN relacion con el numero de casos, porque el coste lo
-# domina el arranque del crew y no la carga. Se usa la mediana observada, y el
-# resultado se etiqueta como ESTIMADO en todas las salidas para que nadie lo
-# confunda con una medicion.
-COSTE_ESTIMADO_POR_VENTANA = 300.0
+# Modelo de coste para el modo --sin-llm, medido sobre ocho ventanas:
+#
+#     coste ≈ (casos + 2) * 6,8 s
+#
+# Las dos tareas fijas son el Modelador y el Reportero; el resto, una por caso
+# investigado. El tiempo por tarea resulto muy estable, entre 6,0 y 7,6 s.
+#
+# Historia de esta constante, porque ilustra un fallo que merece recordarse.
+# La primera version suponia 5 s por caso, inventado. La medida real dio entre
+# 37 y 402 s sin relacion aparente con la carga, y se atribuyo a que el coste
+# lo dominaba el arranque del crew. Era falso: las ventanas lentas procesaban
+# 60 casos en lugar de 1 o 2, porque el parametro `minimo` no se propagaba al
+# contexto que alimenta a los agentes. Corregido eso, el coste resulto lineal
+# y la dispersion bajo de x12 a x2.
+#
+# Aun asi el resultado se etiqueta como ESTIMADO en todas las salidas: un
+# modelo ajustado sobre ocho medidas no es una medicion.
+TAREAS_FIJAS = 2
+SEG_POR_TAREA = 6.8
 
 
 def parsear_args():
@@ -153,7 +165,7 @@ def main():
             continue
 
         if args.sin_llm:
-            fila["seg_llm"] = COSTE_ESTIMADO_POR_VENTANA
+            fila["seg_llm"] = (len(casos) + TAREAS_FIJAS) * SEG_POR_TAREA
             fila["estado"] = "ESTIMADO"
         else:
             from src.agents.crew import construir_crew
@@ -284,8 +296,8 @@ def main():
             print("  ocupacion sin perder trabajo util.")
 
     if args.sin_llm:
-        print("\n  AVISO: los tiempos y la ocupacion son ESTIMADOS "
-              f"({COSTE_ESTIMADO_POR_VENTANA:.0f} s por ventana con casos),")
+        print("\n  AVISO: los tiempos y la ocupacion son ESTIMADOS con el modelo "
+              f"(casos + {TAREAS_FIJAS}) x {SEG_POR_TAREA} s,")
         print("  no medidos. Solo la latencia y las tasas de llegada son reales.")
 
     sello = datetime.now().strftime("%Y%m%d_%H%M")
@@ -296,6 +308,7 @@ def main():
         "umbral": args.umbral,
         "sin_llm": args.sin_llm,
         "coste_estimado": args.sin_llm,
+        "modelo_coste": {"tareas_fijas": TAREAS_FIJAS, "seg_por_tarea": SEG_POR_TAREA},
         "max_execution_time": MAX_EXECUTION_TIME,
         "modelo": args.modelo or LLM_MODEL,
         "ocupacion": coste_total / max(tiempo_real, 1),

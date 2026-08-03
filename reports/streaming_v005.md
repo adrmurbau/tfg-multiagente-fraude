@@ -3,35 +3,35 @@
 - Transacciones: 1436
 - Casos: 3
 
-# Informe Final de Fraudes
+# Informe Final de Casos de Fraude
 
 ## Resumen Ejecutivo
 
-- Se han identificado tres casos con un alto nivel de riesgo y una probabilidad de fraude del 100% o muy cercana a ella.
-- El importe total de los lotes sospechosos es de 124.2 EUR, siendo el caso más significativo un monto de 122.68 EUR.
-- Se recomienda tomar medidas inmediatas para mitigar estos riesgos.
+- Se han identificado tres casos con un alto nivel de riesgo de fraude.
+- El importe total del lote es de 104.33 EUR, siendo el caso 1 el más significativo con 122.68 EUR.
+- Recomendaciones específicas para cada caso basadas en la probabilidad y variables atípicas.
 
 ## Tabla de Casos Priorizados
 
 | Caso | Importe (EUR) | Veredicto | Acción Recomendada |
 |------|---------------|-----------|---------------------|
-| 1    | 122.68        | ALTO      | Bloquear tarjeta     |
-| 2    | 0.76          | ALTO      | Contactar con el cliente |
-| 3    | 0.76          | ALTO      | Contactar con el cliente |
+| 1    | 122.68        | FRAUDE    | Bloquear tarjeta     |
+| 2    | 0.76          | FRAUDE    | Contactar con el cliente |
+| 3    | 0.76          | FRAUDE    | Contactar con el cliente |
 
 ## Explicación del Investigador
 
 ### CASO 1
-El detector considera esta transacción muy sospechosa debido a que presenta valores atípicos en las variables V14, V12 y V10, lo cual empuja significativamente la probabilidad hacia el fraude. Aunque el importe de 122.68 EUR no es especialmente bajo, estos componentes anómalos son los principales factores que hacen que la transacción sea considerada de alto riesgo.
+El detector considera altamente sospechoso este caso debido a valores muy atípicos en las variables V14, V12 y V10, que empujan fuertemente hacia la clasificación de fraude. Estas variables presentan valores negativos significativos con un alto impacto positivo en la probabilidad de fraude. Además, el importe de 122.68 EUR es considerablemente mayor al importe medio del lote, lo que también aumenta las sospechas.
 
 ### CASO 2
-El detector considera este caso sospechoso debido a que el importe de la transacción es muy bajo, solo 0.76 EUR, lo cual puede ser un indicativo de prueba para tarjetas robadas. Además, las variables V14 y V12 presentan valores muy atípicos que empujan fuertemente hacia una clasificación de fraude, mientras que el valor en la variable V4 también contribuye significativamente a esta conclusión. Aunque la variable V8 muestra un efecto contrario, no es suficiente para contrarrestar los demás indicadores.
+El detector considera este caso de alto riesgo debido a que el importe es muy bajo, solo 0,76 EUR, lo cual puede ser una prueba para tarjetas robadas antes de realizar cargos mayores. Además, las variables V14 y V12 presentan valores muy atípicos que empujan la transacción hacia un fraude, mientras que el valor en V4 también contribuye significativamente a esta clasificación. Aunque la variable V8 tiende a contrarrestar esto con un efecto contrario, no es suficiente para rebajar el riesgo del caso.
 
 ### CASO 3
-El detector considera este caso muy sospechoso debido a que el importe de la transacción es muy bajo, solo 0.76 EUR, lo cual puede ser una prueba para ver si la tarjeta está siendo utilizada correctamente antes de realizar cargos mayores. Además, los valores atípicos en las variables V14 (-6,800) y V12 (-6,285) empujan fuertemente hacia el fraude, mientras que las variables V28 (0,676) y V8 (1,131) intentan contrarrestarlo pero no son suficientes para rebajar la probabilidad de fraude.
+El detector considera este caso muy sospechoso debido a que el importe de la transacción es muy bajo, solo 0,76 EUR, lo cual puede ser una prueba para tarjetas robadas antes de realizar cargos mayores. Además, las variables V14 y V12 presentan valores muy atípicos que empujan hacia un fraude, con aportes significativos de +4,551 y +2,112 respectivamente. Aunque las variables V28 y V8 también tienen cierto peso en la decisión, su efecto es menor y apunta más hacia una transacción legítima, con aportes de -1,704 y -1,413 respectivamente.
 
 ## Nota de Fiabilidad
-Este informe se basa en los datos verificados proporcionados por el detector de fraudes. Cada caso ha sido analizado individualmente y las acciones recomendadas están diseñadas para mitigar riesgos de manera efectiva.
+Este informe se basa únicamente en los datos verificados proporcionados por el detector. No se han realizado suposiciones adicionales ni se ha utilizado información externa no incluida en el dataset.
 
 ---
 

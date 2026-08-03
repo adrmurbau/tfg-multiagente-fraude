@@ -3,15 +3,32 @@
 - Transacciones: 1381
 - Casos: 2
 
-CASO 31
+# Informe Final de Fraude
 
-El detector considera sospechoso este caso debido principalmente al importe y ciertos valores atípicos en las variables PCA. La transacción tiene un importe de 379.29 EUR, que es significativamente mayor a la media del lote (92.85 EUR). Aunque generalmente los montos más altos no son automáticamente indicativos de fraude, este caso presenta valores atípicos en las variables V4 y V10.
+## Resumen Ejecutivo
 
-La variable V4 tiene un valor muy alto, lo que empuja hacia una mayor probabilidad de fraude. Esto sugiere comportamientos poco comunes o inusuales asociados con esta transacción. Además, el valor atípico en la variable V10 también contribuye a señalar la transacción como sospechosa.
+1. Se han identificado dos casos con un alto nivel de riesgo y una probabilidad muy cercana a 1 de ser fraude.
+2. Ambos casos presentan importes significativamente inferiores al importe medio del lote, lo que sugiere posibles pruebas preliminares de tarjetas robadas antes de cargos mayores.
+3. Se recomienda tomar medidas inmediatas para mitigar el riesgo en ambos casos.
 
-Sin embargo, otros componentes PCA presentan valores que contrarrestan parcialmente este efecto. Las variables V14 y V11 muestran valores bajos que empujan hacia una clasificación legítima, lo cual ayuda a mantener el riesgo en un nivel bajo. Sin embargo, la combinación de estos factores atípicos junto con el importe elevado lleva al detector a considerar este caso como sospechoso.
+## Tabla de Casos Priorizados
 
-En resumen, aunque hay indicadores que apuntan hacia una transacción legítima, los valores anómalos en las variables V4 y V10, junto con el importe significativamente mayor a la media del lote, hacen que el detector vea cierta inconsistencia en esta transacción y por lo tanto la clasifique como sospechosa.
+| Caso | Importe (EUR) | Veredicto | Acción Recomendada |
+|------|---------------|-----------|---------------------|
+| 1    | 10.70         | ALTO      | Bloquear tarjeta     |
+| 2    | 9.29          | ALTO      | Bloquear tarjeta     |
+
+## Explicación del Investigador
+
+**Caso 1:**
+El detector considera este caso sospechoso debido a que el importe de la transacción, 10.70 EUR, es significativamente menor en comparación con el importe medio del lote (92.85 EUR), lo cual puede indicar una prueba preliminar de tarjeta robada antes de un cargo mayor. Además, las variables V14 (-7.624), V12 (-4.165) y V10 (-4.760) presentan valores muy atípicos que empujan la transacción hacia el fraude, mientras que la variable V8 (1.245) es la única que tiende a contrarrestar esta tendencia, aunque en menor medida.
+
+**Caso 2:**
+El detector considera este caso muy sospechoso debido a que el importe de la transacción, 9.29 EUR, es significativamente menor al importe medio del lote (92.85 EUR), lo cual puede indicar una prueba de tarjeta robada antes de un cargo mayor. Además, las variables V14 (-4.978) y V10 (-3.509) muestran valores muy atípicos que empujan la transacción hacia el fraude, mientras que V26 (-0.264) es menos indicativa de fraude pero no logra contrarrestar completamente los otros factores.
+
+## Nota de Fiabilidad
+
+Este informe se basa en datos verificados por el detector y las explicaciones proporcionadas por el investigador. No se han realizado suposiciones adicionales ni se han omitido casos.
 
 ---
 
@@ -19,63 +36,5 @@ En resumen, aunque hay indicadores que apuntan hacia una transacción legítima,
 |---|---|---|---|---|
 | 1 | 10.70 | 18.0h | Sin veredicto | Revisar manualmente |
 | 2 | 9.29 | 17.9h | Sin veredicto | Revisar manualmente |
-| 3 | 4.49 | 17.9h | Sin veredicto | Revisar manualmente |
-| 4 | 101.36 | 17.9h | Sin veredicto | Revisar manualmente |
-| 5 | 17.90 | 18.0h | Sin veredicto | Revisar manualmente |
-| 6 | 149.00 | 17.9h | Sin veredicto | Revisar manualmente |
-| 7 | 2500.00 | 17.9h | Sin veredicto | Revisar manualmente |
-| 8 | 4.54 | 18.0h | Sin veredicto | Revisar manualmente |
-| 9 | 494.00 | 18.0h | Sin veredicto | Revisar manualmente |
-| 10 | 37.93 | 17.9h | Sin veredicto | Revisar manualmente |
-| 11 | 176.98 | 17.9h | Sin veredicto | Revisar manualmente |
-| 12 | 104.86 | 17.9h | Sin veredicto | Revisar manualmente |
-| 13 | 318.00 | 17.9h | Sin veredicto | Revisar manualmente |
-| 14 | 182.50 | 17.9h | Sin veredicto | Revisar manualmente |
-| 15 | 15.00 | 17.8h | Sin veredicto | Revisar manualmente |
-| 16 | 70.84 | 17.9h | Sin veredicto | Revisar manualmente |
-| 17 | 126.72 | 17.9h | Sin veredicto | Revisar manualmente |
-| 18 | 248.84 | 18.0h | Sin veredicto | Revisar manualmente |
-| 19 | 432.95 | 17.9h | Sin veredicto | Revisar manualmente |
-| 20 | 11.50 | 18.0h | Sin veredicto | Revisar manualmente |
-| 21 | 18.96 | 17.9h | Sin veredicto | Revisar manualmente |
-| 22 | 3995.94 | 18.0h | Sin veredicto | Revisar manualmente |
-| 23 | 258.67 | 17.9h | Sin veredicto | Revisar manualmente |
-| 24 | 8.99 | 18.0h | Sin veredicto | Revisar manualmente |
-| 25 | 1.40 | 17.9h | Sin veredicto | Revisar manualmente |
-| 26 | 23.80 | 17.9h | Sin veredicto | Revisar manualmente |
-| 27 | 1.98 | 17.9h | Sin veredicto | Revisar manualmente |
-| 28 | 8.99 | 17.9h | Sin veredicto | Revisar manualmente |
-| 29 | 3.99 | 17.9h | Sin veredicto | Revisar manualmente |
-| 30 | 459.24 | 17.9h | Sin veredicto | Revisar manualmente |
-| 31 | 379.29 | 17.8h | Sin veredicto | Revisar manualmente |
-| 32 | 5.95 | 18.0h | Sin veredicto | Revisar manualmente |
-| 33 | 1.00 | 17.9h | Sin veredicto | Revisar manualmente |
-| 34 | 200.00 | 18.0h | Sin veredicto | Revisar manualmente |
-| 35 | 15.00 | 18.0h | Sin veredicto | Revisar manualmente |
-| 36 | 12.14 | 17.9h | Sin veredicto | Revisar manualmente |
-| 37 | 2494.40 | 17.9h | Sin veredicto | Revisar manualmente |
-| 38 | 1.00 | 17.9h | Sin veredicto | Revisar manualmente |
-| 39 | 23.74 | 17.9h | Sin veredicto | Revisar manualmente |
-| 40 | 89.40 | 18.0h | Sin veredicto | Revisar manualmente |
-| 41 | 53.00 | 18.0h | Sin veredicto | Revisar manualmente |
-| 42 | 43.00 | 18.0h | Sin veredicto | Revisar manualmente |
-| 43 | 5.90 | 18.0h | Sin veredicto | Revisar manualmente |
-| 44 | 550.00 | 17.9h | Sin veredicto | Revisar manualmente |
-| 45 | 175.40 | 17.9h | Sin veredicto | Revisar manualmente |
-| 46 | 697.50 | 18.0h | Sin veredicto | Revisar manualmente |
-| 47 | 24.15 | 17.9h | Sin veredicto | Revisar manualmente |
-| 48 | 2.69 | 18.0h | Sin veredicto | Revisar manualmente |
-| 49 | 237.00 | 18.0h | Sin veredicto | Revisar manualmente |
-| 50 | 37.93 | 17.9h | Sin veredicto | Revisar manualmente |
-| 51 | 514.90 | 17.9h | Sin veredicto | Revisar manualmente |
-| 52 | 450.00 | 18.0h | Sin veredicto | Revisar manualmente |
-| 53 | 336.82 | 18.0h | Sin veredicto | Revisar manualmente |
-| 54 | 29.10 | 17.9h | Sin veredicto | Revisar manualmente |
-| 55 | 3.89 | 18.0h | Sin veredicto | Revisar manualmente |
-| 56 | 127.69 | 18.0h | Sin veredicto | Revisar manualmente |
-| 57 | 546.00 | 17.8h | Sin veredicto | Revisar manualmente |
-| 58 | 418.24 | 17.9h | Sin veredicto | Revisar manualmente |
-| 59 | 99.00 | 17.9h | Sin veredicto | Revisar manualmente |
-| 60 | 1.00 | 18.0h | Sin veredicto | Revisar manualmente |
 
-**60 casos en el expediente**: 0 confirmados, 0 descartados, 60 sin veredicto.
+**2 casos en el expediente**: 0 confirmados, 0 descartados, 2 sin veredicto.
