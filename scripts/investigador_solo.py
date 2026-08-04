@@ -49,6 +49,7 @@ Uso:
 
 import argparse
 import json
+import re
 import shutil
 import sys
 import time
@@ -82,6 +83,17 @@ def parsear_args():
                         "tanto no discriminan. cola: los de menor probabilidad, "
                         "donde se producen los descartes y donde los modelos se "
                         "diferencian. Por defecto cola.")
+    p.add_argument("--casos", default=None,
+                   help="Numeros de caso concretos, separados por comas, en "
+                        "lugar de una zona. A 2,5 h por caso con AirLLM no se "
+                        "puede recorrer el expediente entero, y la mayoria de "
+                        "la cola son legitimas que todo modelo descarta y que "
+                        "por tanto no distinguen nada. Dirigir la ejecucion a "
+                        "los casos que SI son fraude cuesta lo mismo y "
+                        "responde a la pregunta. Debe declararse como seleccion "
+                        "deliberada al informar: la cifra resultante ya no es "
+                        "una tasa sobre la cola sino la respuesta a si el "
+                        "modelo salva esos casos concretos.")
     p.add_argument("--max-tokens", type=int, default=220,
                    help="Tokens de respuesta por caso.")
     p.add_argument("--disco-minimo-gb", type=int, default=50,
@@ -120,7 +132,7 @@ def construir_prompt(n: int, dossier_caso: str) -> str:
     El formato del que depende toda la medicion procede, por tanto, de la
     parte del prompt que menos parece contener instrucciones.
     """
-    from src.agents.crew import IDIOMA, PROHIBICIONES
+    from src.agents.prompts import IDIOMA, PROHIBICIONES
 
     veredicto = (
         "Para CADA caso emite ademas un veredicto: CONFIRMADO si las "
@@ -173,12 +185,60 @@ def generar_ollama(modelo: str, prompt: str, max_tokens: int) -> str:
 class MotorAirLLM:
     """Envoltorio sobre AirLLM. El modelo se carga una sola vez."""
 
+    # Tope de tokens de entrada. El valor de 2048 de la primera version era
+    # arbitrario y recortaba el dossier en silencio.
+    MAX_ENTRADA = 8192
+
     def __init__(self, repo: str, compresion: str = "4bit", hf_token: str = None):
         try:
             from airllm import AutoModel
         except ImportError:
             print("\n  Falta airllm. Instalalo con:\n      pip install airllm\n")
             sys.exit(1)
+
+        # Comprobacion previa de la GPU. AirLLM descarga el modelo ANTES de
+        # tocarla, de modo que un PyTorch inservible no se manifiesta hasta
+        # haber bajado gigabytes.
+        #
+        # No basta con torch.cuda.is_available(). Con una RTX 5060 Ti
+        # -Blackwell, sm_120- las ruedas de cu121 devuelven True, dan el nombre
+        # correcto de la tarjeta y fallan luego al lanzar cualquier nucleo,
+        # porque no traen codigo compilado para esa capacidad. La unica
+        # comprobacion fiable es ejecutar una operacion de verdad.
+        try:
+            import torch
+        except ImportError:
+            print("\n  Falta PyTorch.\n")
+            sys.exit(1)
+
+        problema = None
+        if not torch.cuda.is_available():
+            problema = "PyTorch no ve ninguna GPU"
+        else:
+            try:
+                torch.zeros(8, 8, device="cuda") @ torch.zeros(8, 8, device="cuda")
+                torch.cuda.synchronize()
+            except Exception as e:
+                cap = "%d%d" % torch.cuda.get_device_capability(0)
+                problema = (f"la GPU es sm_{cap} y esta compilacion solo trae "
+                            f"{' '.join(torch.cuda.get_arch_list())}\n"
+                            f"    ({type(e).__name__}: {str(e)[:90]})")
+
+        if problema:
+            print(f"\n  PyTorch {torch.__version__} no puede usar la GPU:")
+            print(f"    {problema}\n")
+            print("  Instala la rueda que corresponda a la tarjeta. Para las")
+            print("  Blackwell (serie RTX 50) hace falta CUDA 12.8:\n")
+            print("      pip install --force-reinstall torch --index-url "
+                  "https://download.pytorch.org/whl/cu128\n")
+            print("  Conviene hacerlo en un entorno APARTE del principal, para")
+            print("  no sustituir el PyTorch del que dependen los demas")
+            print("  resultados del trabajo.\n")
+            sys.exit(1)
+
+        print(f"  GPU: {torch.cuda.get_device_name(0)} "
+              f"({torch.cuda.get_device_properties(0).total_memory / GB:.0f} GB, "
+              f"sm_%d%d)" % torch.cuda.get_device_capability(0))
 
         kw = {}
         if compresion != "ninguna":
@@ -206,15 +266,72 @@ class MotorAirLLM:
         print(f"  Modelo listo en {(time.perf_counter()-t0)/60:.1f} min\n")
 
     def generar(self, prompt: str, max_tokens: int) -> str:
-        tok = self.modelo.tokenizer(
-            [prompt], return_tensors="pt", return_attention_mask=False,
-            truncation=True, max_length=2048, padding=False)
-        salida = self.modelo.generate(
-            tok["input_ids"].cuda(), max_new_tokens=max_tokens,
-            use_cache=True, return_dict_in_generate=True)
-        texto = self.modelo.tokenizer.decode(salida.sequences[0])
-        # El modelo devuelve el prompt seguido de la continuacion; se recorta.
-        return texto[len(prompt):] if texto.startswith(prompt) else texto
+        """Genera la respuesta, aplicando la plantilla de conversacion.
+
+        La plantilla NO es un adorno. Qwen2.5-72B-Instruct espera sus marcas
+        <|im_start|> y <|im_end|>; sin ellas no interpreta el texto como una
+        peticion sino como un documento que hay que continuar.
+
+        La primera version pasaba el prompt en crudo. Las respuestas salian en
+        castellano y con sentido -de ahi que pareciesen validas- pero empezaban
+        rematando la ultima frase de las instrucciones, "Nada mas.", "No
+        escribas nada mas.", y despues se repetian, porque nada marcaba el
+        final. Ollama aplica la plantilla por su cuenta, asi que omitirla aqui
+        comparaba dos regimenes distintos y no dos modelos.
+        """
+        tk = self.modelo.tokenizer
+        if getattr(tk, "chat_template", None):
+            entrada = tk.apply_chat_template(
+                [{"role": "user", "content": prompt}],
+                tokenize=False, add_generation_prompt=True)
+        else:
+            print("  [AVISO] El tokenizador no trae plantilla de conversacion. "
+                  "Se envia el prompt en crudo y el resultado NO es comparable "
+                  "con los de Ollama.")
+            entrada = prompt
+
+        tok = tk([entrada], return_tensors="pt", truncation=True,
+                 max_length=self.MAX_ENTRADA, padding=False)
+        n_entrada = tok["input_ids"].shape[1]
+        if n_entrada >= self.MAX_ENTRADA:
+            print(f"  [AVISO] La entrada alcanzo el tope de {self.MAX_ENTRADA} "
+                  "tokens y se ha recortado: el modelo no ha visto el dossier "
+                  "completo.")
+
+        gen = dict(max_new_tokens=max_tokens, use_cache=True,
+                   return_dict_in_generate=True)
+        # Sin eos_token_id el modelo agota siempre los max_new_tokens. A 42
+        # segundos por token eso no es solo lento: es lo que producia la
+        # repeticion que rompia la extraccion de veredictos.
+        if tk.eos_token_id is not None:
+            gen["eos_token_id"] = tk.eos_token_id
+            gen["pad_token_id"] = tk.pad_token_id or tk.eos_token_id
+        if "attention_mask" in tok:
+            gen["attention_mask"] = tok["attention_mask"].cuda()
+
+        salida = self.modelo.generate(tok["input_ids"].cuda(), **gen)
+        # Se decodifican SOLO los tokens nuevos. Recortar por longitud de
+        # cadena fallaba en cuanto la plantilla anadia marcas al principio.
+        return tk.decode(salida.sequences[0][n_entrada:],
+                         skip_special_tokens=True).strip()
+
+
+def recortar_en_veredicto(texto: str) -> str:
+    """Devuelve el texto hasta el final de su primer veredicto.
+
+    Los modelos tienden a seguir escribiendo despues de haber contestado:
+    repiten el caso, abren una cabecera 'CASO n' que ya no cierran, inventan
+    un encabezado de correo. Ese arrastre es inofensivo leido de uno en uno,
+    pero al concatenar varias salidas convierte la cabecera huerfana de una en
+    el prefijo del veredicto de la siguiente.
+
+    Recortar en el veredicto no descarta informacion util: todo lo que va
+    despues es, por construccion, posterior a la respuesta pedida.
+    """
+    m = re.search(r"(?:VEREDICTO|VERDICT):\s*"
+                  r"(?:CONFIRMADO|DESCARTADO|CONFIRMED|DISCARDED|DISMISSED)",
+                  texto, re.IGNORECASE)
+    return texto[:m.end()] if m else texto
 
 
 # ----------------------------------------------------------------------
@@ -256,7 +373,15 @@ def main():
     # y donde los modelos se diferencian. Validando el arnes con los diez
     # primeros salieron diez confirmaciones de diez, que es el resultado
     # correcto y a la vez completamente inutil para comparar motores.
-    if args.zona == "cabeza":
+    if args.casos:
+        casos_n = sorted(int(x) for x in args.casos.replace(" ", "").split(","))
+        fuera = [c for c in casos_n if c not in mapa]
+        if fuera:
+            print(f"\n  Los casos {fuera} no existen: el expediente tiene "
+                  f"{n_total}.\n")
+            sys.exit(1)
+        n = len(casos_n)
+    elif args.zona == "cabeza":
         casos_n = list(range(1, n + 1))
     else:
         casos_n = list(range(n_total - n + 1, n_total + 1))
@@ -264,9 +389,15 @@ def main():
     print(f"\n  Turno: {len(turno):,} transacciones, "
           f"{int(turno[TARGET_COL].sum())} fraudes")
     print(f"  Expediente: {n_total} casos")
-    print(f"  Se investigan {n} de la {args.zona}: casos "
-          f"{casos_n[0]} a {casos_n[-1]}")
-    if args.zona == "cabeza":
+    if args.casos:
+        print(f"  Se investigan {n} casos elegidos: "
+              f"{', '.join(str(c) for c in casos_n)}")
+        print("  [NOTA] Seleccion deliberada, no una zona. Al informar la cifra")
+        print("  debe decirse cuales se eligieron y por que.")
+    else:
+        print(f"  Se investigan {n} de la {args.zona}: casos "
+              f"{casos_n[0]} a {casos_n[-1]}")
+    if args.zona == "cabeza" and not args.casos:
         print("  [AVISO] La cabeza no discrimina entre modelos: son los casos")
         print("  evidentes y todos los confirman. Usa --zona cola para comparar.")
     print()
@@ -274,7 +405,7 @@ def main():
     motor = (MotorAirLLM(args.modelo, args.compresion, args.hf_token)
              if args.backend == "airllm" else None)
 
-    salidas, tiempos = [], []
+    salidas, tiempos, ver = [], [], {}
     for i in casos_n:
         prompt = construir_prompt(i, construir_dossier_caso(i))
         t0 = time.perf_counter()
@@ -286,10 +417,23 @@ def main():
         tiempos.append(dt)
         salidas.append(texto)
 
-        v = veredictos_por_caso(texto).get(i, "sin veredicto")
-        print(f"  [caso {i:>3}] {dt:>7.1f} s | {len(texto):>5} car. | {v}")
+        # El veredicto se extrae de CADA salida por separado, que es como se
+        # genero. Agregarlo concatenando las tres y analizando el resultado
+        # perdia veredictos: si una salida termina con una cabecera 'CASO n'
+        # colgante -algo habitual cuando el modelo se repite-, la expresion
+        # regular la empareja con el VEREDICTO de la salida SIGUIENTE, y el
+        # ultimo caso se queda sin ninguno. Ocurrio con AirLLM: los tres casos
+        # llevaban su veredicto y el recuento dijo 2 de 3.
+        v = veredictos_por_caso(texto).get(i)
+        if v:
+            ver[i] = v
+        print(f"  [caso {i:>3}] {dt:>7.1f} s | {len(texto):>5} car. | "
+              f"{v or 'sin veredicto'}")
 
-    texto_completo = "\n\n".join(salidas)
+    # Para medir se concatenan las salidas RECORTADAS en su veredicto, de modo
+    # que ninguna cabecera colgante contamine a la siguiente. medir_sistema
+    # vuelve a analizar el texto por su cuenta y sufriria el mismo problema.
+    texto_completo = "\n\n".join(recortar_en_veredicto(s) for s in salidas)
 
     # Se mide con la MISMA funcion que el sistema completo. El expediente se
     # recorta a los casos investigados para que las cifras sean coherentes.
@@ -300,7 +444,7 @@ def main():
                         mapa_casos={k: mapa[k] for k in casos_n},
                         umbral=args.umbral)
 
-    ver = veredictos_por_caso(texto_completo)
+    # ver ya se acumulo caso a caso en el bucle; no se recalcula aqui.
     print("\n" + "=" * 70)
     print("  RESULTADOS")
     print("=" * 70 + "\n")

@@ -98,25 +98,12 @@ def construir_llm(modelo: str = None) -> LLM:
 # "originates from a high-risk country ... unusual in the customer's history"
 # se audita como FIABLE, mientras su traduccion literal al castellano se marca
 # como NO FIABLE. La deriva de idioma desactiva la auditoria en silencio.
-# Se declara a nivel de modulo, y no dentro de construir_tareas, porque
+# Ambas cadenas viven en src/agents/prompts.py, no aqui, porque
 # scripts/investigador_solo.py necesita el MISMO texto literal para que la
-# comparacion entre motores sea valida. Duplicarlo alli invitaria a que las
-# dos versiones divergieran sin que nadie se diera cuenta.
-PROHIBICIONES = (
-    "LO QUE NO EXISTE EN ESTOS DATOS, y por tanto no puedes mencionar: "
-    "paises, ubicaciones, comercios, titulares, numeros de tarjeta, "
-    "cuentas, historial del cliente, transacciones anteriores ni "
-    "frecuencia de uso. El dataset SOLO contiene 28 componentes PCA "
-    "anonimizados, un importe y una hora. Si escribes 'pais de alto "
-    "riesgo' o 'historial sospechoso' estaras inventando.\n"
-    "Los importes estan en EUROS, no en dolares.\n"
-)
-
-IDIOMA = (
-    " Redactas SIEMPRE en castellano, incluidos titulos, etiquetas y "
-    "conclusiones, sea cual sea el idioma del contexto que recibas. "
-    "Los importes van en euros (EUR), nunca en dolares."
-)
+# comparacion entre motores sea valida y debe poder leerlo sin importar
+# CrewAI: el entorno que ejecuta AirLLM no lo tiene instalado. Duplicarlas
+# invitaria a que las dos versiones divergieran sin que nadie lo notase.
+from src.agents.prompts import IDIOMA, PROHIBICIONES  # noqa: F401,E402
 
 
 def construir_agentes(llm: LLM, verbose: bool = True) -> dict:

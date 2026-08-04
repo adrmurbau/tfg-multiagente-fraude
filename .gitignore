@@ -43,3 +43,4 @@ kaggle.json
 .idea/
 Thumbs.db
 desktop.ini
+.venv-airllm/

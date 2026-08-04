@@ -1,0 +1,29 @@
+{
+  "backend": "airllm",
+  "modelo": "Qwen/Qwen2.5-72B-Instruct",
+  "compresion": "4bit",
+  "casos_investigados": 3,
+  "casos_expediente": 55,
+  "zona": "cola",
+  "casos": [
+    53,
+    54,
+    55
+  ],
+  "veredictos": {
+    "53": "DESCARTADO",
+    "54": "DESCARTADO"
+  },
+  "descartes_correctos": 2,
+  "fraude_destruido": 0,
+  "seg_por_caso": [
+    9207.4,
+    9228.0,
+    9225.1
+  ],
+  "salidas": [
+    " No hay nada mas en la respuesta. No añadas introducciones ni firmas. No hay dos puntos al final de la respuesta.\nCASO 53\nA pesar de que el importe de la transacción es de 0,00 EUR, el detector la considera sospechosa principalmente debido a las altas puntuaciones de las variables V14 y V4, que contribuyen significativamente hacia el fraude. Estas variables tienen valores muy distintos de cero, lo que sugiere patrones atípicos en la transacción. Sin embargo, las variables V18 y V10 muestran valores que indican una transacción legítima, lo que reduce el nivel de riesgo general. VEREDICTO: DESCARTADO\nTo: \nFrom: \nDate: \nSubject: \nMessage: \n\n---\n\nCASO 53\nA pesar de que el importe de la transacción es de 0,00 EUR, el detector la considera sospechosa principalmente debido a",
+    " No escribas nada mas. Respeta el formato.\nCASO 54\nCASO 54 El detector considera el caso 54 sospechoso principalmente debido al elevado importe de 912.00 EUR, que se aleja significativamente del importe medio del lote (84.25 EUR) y contribuye a aumentar la probabilidad de fraude. Sin embargo, las variables V14, V11 y V10 tienen un fuerte aporte negativo, orientando la transacción hacia una calificación de legítima, lo que reduce la probabilidad de fraude a un nivel bajo. A pesar del importe elevado, las características principales indican una transacción probablemente legítima. VEREDICTO: DESCARTADO\nVeredicto: DESCARTADO\nCASO 54\nCASO 54 El detector considera el caso 54 sospechoso principalmente debido al elevado importe de 912.00",
+    " Nada mas.\nCASO 55\nCASO 55: A pesar de su bajo nivel de riesgo y un importe modesto de 2.22 EUR, el detector considera esta transacción sospechosa debido principalmente a las altas puntuaciones de las variables V14 y V4, que suman un fuerte aporte hacia el fraude (+3.004 y +2.180 respectivamente). Estos valores contrastan con las variables V1 y V7, que aportan significativamente en sentido contrario (-2.603 y -1.660). Dado que el importe medio del lote es considerablemente más alto (84.25 EUR), una transacción de este monto podría ser vista como atípica. VEREDICTO: DESCARTADO\nCASO 55\nA pesar de su bajo nivel de riesgo y un importe modesto de 2.22 EUR, el detector considera esta trans"
+  ]
+}

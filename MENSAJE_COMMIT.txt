@@ -1,0 +1,53 @@
+Plantilla de conversacion en AirLLM y veredictos caso a caso
+
+La primera ejecucion con Qwen2.5-72B-Instruct -461 minutos, 3 casos- dejo al
+descubierto tres fallos, dos de ellos silenciosos.
+
+1. AirLLM no aplicaba la plantilla de conversacion del modelo. Sin las marcas
+   <|im_start|> y <|im_end|>, Qwen2.5-72B-Instruct no interpreta el texto como
+   una peticion sino como un documento que hay que continuar. Las respuestas
+   empezaban rematando la ultima frase de las instrucciones -"Nada mas.", "No
+   escribas nada mas."- y luego se repetian, porque nada marcaba el final.
+   Salian en castellano y con sentido, de ahi que pareciesen validas. Ollama
+   aplica la plantilla por su cuenta, de modo que la comparacion enfrentaba dos
+   regimenes distintos y no dos modelos.
+
+2. Los veredictos se extraian concatenando las salidas y analizando el
+   resultado. Cuando una salida termina con una cabecera 'CASO n' colgante
+   -habitual cuando el modelo se repite-, la expresion regular la empareja con
+   el VEREDICTO de la salida SIGUIENTE y el ultimo caso se queda sin ninguno.
+   Los tres casos llevaban su veredicto y el recuento dijo 2 de 3.
+
+   No se perdio un veredicto cualquiera: se perdio el del caso 55, que es el
+   unico de los tres que corresponde a un fraude real (identificador 1885). La
+   cifra publicada, FRAUDE DESTRUIDO = 0, era en realidad 1. El fallo ocultaba
+   justo el dato que daba sentido al experimento.
+
+   Ahora el veredicto se extrae de cada salida por separado, que es como se
+   genero, y para medir se concatenan las salidas recortadas en su veredicto.
+
+3. Sin eos_token_id el modelo agotaba siempre los max_new_tokens. A 42 segundos
+   por token eso no es solo lento: es lo que producia la repeticion del punto
+   anterior. Se anaden tambien mascara de atencion, decodificacion de los
+   tokens nuevos por posicion en lugar de por longitud de cadena, y un tope de
+   entrada de 8192 tokens con aviso al recortar, en lugar de los 2048 mudos de
+   la version anterior.
+
+Se anade --casos para dirigir la ejecucion a numeros de caso concretos. A 2,5
+horas por caso no se puede recorrer el expediente, y la cola esta compuesta
+casi por completo de transacciones legitimas que todo modelo descarta y que por
+tanto no distinguen nada. Los unicos casos de la cola que son fraude real son
+el 50 (identificador 12377) y el 55 (identificador 1885), exactamente los dos
+que qwen2.5:14b destruye. Dirigir alli la comparacion cuesta lo mismo y si
+responde a la pregunta. El guion avisa de que se trata de una seleccion
+deliberada, porque la cifra resultante deja de ser una tasa sobre la cola.
+
+Comprobado que el refactor no altera el comportamiento: la ejecucion de
+control con qwen2.5-14b sobre los casos 44-55 reproduce 12 de 12 veredictos,
+10 descartes acertados y los mismos dos fraudes destruidos, 1885 y 12377.
+
+Resultado provisional del objetivo 4, sobre los tres casos que ambos modelos
+han visto: identicos. Los dos descartan 53, 54 y 55, y ambos destruyen por
+tanto el fraude 1885. El coste, en cambio, difiere en un factor de unas 2500
+veces: 9220 segundos por caso frente a 3,7. Extrapolado al expediente completo,
+141 horas para analizar un turno de cuatro.

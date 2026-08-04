@@ -19,7 +19,28 @@ las herramientas de CrewAI se instancian sueltas y no reciben dependencias.
 from typing import Type
 
 import pandas as pd
-from crewai.tools import BaseTool
+try:
+    from crewai.tools import BaseTool
+except ModuleNotFoundError:
+    # Este modulo contiene dos cosas distintas: la construccion del expediente
+    # -logica del dominio, en Python plano- y cuatro envoltorios de CrewAI que
+    # la exponen como herramientas a los agentes.
+    #
+    # scripts/investigador_solo.py necesita lo primero y no lo segundo, y en el
+    # entorno de AirLLM CrewAI no esta instalado: instalarlo arrastraria su
+    # propia version fijada de PyTorch y podria sustituir la compilacion con
+    # CUDA que ese entorno existe para tener.
+    #
+    # El sustituto permite DEFINIR las clases pero no instanciarlas, de modo
+    # que si algun dia falta CrewAI donde si hace falta, el fallo sea inmediato
+    # y explicito en lugar de una degradacion silenciosa.
+    class BaseTool:
+        def __init__(self, *args, **kwargs):
+            raise RuntimeError(
+                "CrewAI no esta instalado en este entorno. Las funciones de "
+                "expediente de src/agents/tools.py si funcionan sin el; las "
+                "herramientas de agente, no."
+            )
 from pydantic import BaseModel, Field
 
 from src.config import TOP_N
