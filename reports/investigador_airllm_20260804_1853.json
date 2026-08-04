@@ -1,0 +1,34 @@
+{
+  "backend": "airllm",
+  "modelo": "Qwen/Qwen2.5-72B-Instruct",
+  "compresion": "4bit",
+  "casos_investigados": 4,
+  "casos_expediente": 55,
+  "zona": "cola",
+  "casos": [
+    50,
+    53,
+    54,
+    55
+  ],
+  "veredictos": {
+    "50": "DESCARTADO",
+    "53": "DESCARTADO",
+    "54": "DESCARTADO",
+    "55": "DESCARTADO"
+  },
+  "descartes_correctos": 2,
+  "fraude_destruido": 2,
+  "seg_por_caso": [
+    6297.3,
+    7893.3,
+    6105.5,
+    6194.7
+  ],
+  "salidas": [
+    "CASO 50  \nA pesar de su bajo nivel de riesgo y su importe reducido de 1.00 EUR, el detector considera sospechosa esta transacción debido a la influencia significativa de las variables V14 y V4, que apuntan fuertemente hacia el fraude. Sin embargo, las variables V11 y V1 también contribuyen notablemente hacia una transacción legítima, lo que genera cierta ambigüedad. Dado el bajo importe y el equilibrio entre factores pro y contra, esta transacción parece más bien una anomalía sin intención fraudulenta clara.  \nVEREDICTO: DESCARTADO",
+    "CASO 53  \nA pesar de que el importe de la transacción es de 0.00 EUR, el detector considera sospechoso este caso principalmente debido a las altas puntuaciones de las variables V14 y V4, que contribuyen significativamente hacia el fraude. La variable V14 presenta un valor muy negativo (-4.642) con un aporte positivo (+4.229) hacia el fraude, mientras que V4 tiene un valor positivo elevado (5.394) con un aporte también positivo (+2.250) hacia el fraude. Estas características inusuales en las variables principales, a pesar del importe cero, hacen que el sistema las considere relevantes para una evaluación más detenida.  \nVEREDICTO: DESCARTADO",
+    "CASO 54  \nA pesar de que el importe de 912.00 EUR es significativamente mayor que el promedio del lote (84.25 EUR), lo que podría indicar un comportamiento atípico, las variables V14, V11 y V10 tienen un fuerte aporte hacia una transacción legítima, lo que reduce la probabilidad de fraude. Además, la hora del día (19.7h) no parece influir negativamente en la evaluación. En conjunto, estas características sugieren que la transacción es probablemente legítima.  \nVEREDICTO: DESCARTADO",
+    "CASO 55  \nA pesar de que el importe de 2.22 EUR es bajo y podría parecer inofensivo, el detector considera esta transacción sospechosa principalmente debido a las variables V14 y V4, que muestran valores atípicos y aportan significativamente hacia la clasificación de fraude. Sin embargo, las variables V1 y V7 tienen un efecto opuesto, reduciendo la probabilidad de fraude. Dado que el nivel de riesgo es bajo y el importe es muy reducido, es probable que se trate de un falso positivo.  \nVEREDICTO: DESCARTADO"
+  ]
+}

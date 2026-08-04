@@ -1,53 +1,61 @@
-Plantilla de conversacion en AirLLM y veredictos caso a caso
+Objetivo 4 cerrado, y la prosa resulta estar desacoplada del veredicto
 
-La primera ejecucion con Qwen2.5-72B-Instruct -461 minutos, 3 casos- dejo al
-descubierto tres fallos, dos de ellos silenciosos.
+## Objetivo especifico 4
 
-1. AirLLM no aplicaba la plantilla de conversacion del modelo. Sin las marcas
-   <|im_start|> y <|im_end|>, Qwen2.5-72B-Instruct no interpreta el texto como
-   una peticion sino como un documento que hay que continuar. Las respuestas
-   empezaban rematando la ultima frase de las instrucciones -"Nada mas.", "No
-   escribas nada mas."- y luego se repetian, porque nada marcaba el final.
-   Salian en castellano y con sentido, de ahi que pareciesen validas. Ollama
-   aplica la plantilla por su cuenta, de modo que la comparacion enfrentaba dos
-   regimenes distintos y no dos modelos.
+Qwen2.5-72B-Instruct via AirLLM, sobre los casos 50, 53, 54 y 55 -los dos
+fraudes de la cola mas dos legitimas de control-. Destruye los mismos dos
+fraudes que qwen2.5:14b, 12377 y 1885, a 6622 s por caso frente a 3,7. Un
+factor de 1790. Extrapolado al expediente, 6071 minutos para analizar un turno
+de cuatro horas.
 
-2. Los veredictos se extraian concatenando las salidas y analizando el
-   resultado. Cuando una salida termina con una cabecera 'CASO n' colgante
-   -habitual cuando el modelo se repite-, la expresion regular la empareja con
-   el VEREDICTO de la salida SIGUIENTE y el ultimo caso se queda sin ninguno.
-   Los tres casos llevaban su veredicto y el recuento dijo 2 de 3.
+El uso de GPU observado, entre el 9 y el 25 %, situa el cuello de botella en
+la lectura de las 80 capas desde disco por cada token y no en el computo. No
+se corrige con una tarjeta mayor.
 
-   No se perdio un veredicto cualquiera: se perdio el del caso 55, que es el
-   unico de los tres que corresponde a un fraude real (identificador 1885). La
-   cifra publicada, FRAUDE DESTRUIDO = 0, era en realidad 1. El fallo ocultaba
-   justo el dato que daba sentido al experimento.
+Documentado en docs/OBJETIVO_4_MODELOS_GRANDES.md.
 
-   Ahora el veredicto se extrae de cada salida por separado, que es como se
-   genero, y para medir se concatenan las salidas recortadas en su veredicto.
+## Por que falla, que no era por capacidad
 
-3. Sin eos_token_id el modelo agotaba siempre los max_new_tokens. A 42 segundos
-   por token eso no es solo lento: es lo que producia la repeticion del punto
-   anterior. Se anaden tambien mascara de atencion, decodificacion de los
-   tokens nuevos por posicion en lugar de por longitud de cadena, y un tope de
-   entrada de 8192 tokens con aviso al recortar, en lugar de los 2048 mudos de
-   la version anterior.
+El razonamiento del 72B descartaba ambos fraudes alegando de forma explicita
+que el importe era reducido: 1,00 y 2,22 EUR. En estos datos esa premisa esta
+invertida. El importe mediano de un fraude es 2,11 EUR frente a 19,99 de una
+transaccion legitima, y el 59,3 % de los fraudes no llega a 5 EUR frente al
+25,1 % de las legitimas. Una transaccion fraudulenta tiene 2,4 veces mas
+probabilidad de ser de 5 euros o menos.
 
-Se anade --casos para dirigir la ejecucion a numeros de caso concretos. A 2,5
-horas por caso no se puede recorrer el expediente, y la cola esta compuesta
-casi por completo de transacciones legitimas que todo modelo descarta y que por
-tanto no distinguen nada. Los unicos casos de la cola que son fraude real son
-el 50 (identificador 12377) y el 55 (identificador 1885), exactamente los dos
-que qwen2.5:14b destruye. Dirigir alli la comparacion cuesta lo mismo y si
-responde a la pregunta. El guion avisa de que se trata de una seleccion
-deliberada, porque la cifra resultante deja de ser una tasa sobre la cola.
+Se anade DOMINIO en src/agents/prompts.py y la opcion --dominio al arnes, que
+retira esa premisa sin instalar la contraria: dice que el cargo minimo de
+prueba es habitual y que el importe reducido no basta para descartar, pero no
+dice que indique fraude. Decir lo segundo habria entregado la respuesta en la
+entrada y repetido el defecto de diseno que ya obligo a rehacer el experimento
+del dossier.
 
-Comprobado que el refactor no altera el comportamiento: la ejecucion de
-control con qwen2.5-14b sobre los casos 44-55 reproduce 12 de 12 veredictos,
-10 descartes acertados y los mismos dos fraudes destruidos, 1885 y 12377.
+## El resultado, que no es el que se buscaba
 
-Resultado provisional del objetivo 4, sobre los tres casos que ambos modelos
-han visto: identicos. Los dos descartan 53, 54 y 55, y ambos destruyen por
-tanto el fraude 1885. El coste, en cambio, difiere en un factor de unas 2500
-veces: 9220 segundos por caso frente a 3,7. Extrapolado al expediente completo,
-141 horas para analizar un turno de cuatro.
+Con la correccion, sobre los casos 44-55 con qwen2.5:14b:
+
+    sin --dominio : 12 descartes, 2 fraudes destruidos, 10 aciertos
+    con --dominio : 11 descartes y 1 confirmacion, 2 fraudes destruidos,
+                    9 aciertos
+
+No salva ninguno de los dos fraudes. La unica confirmacion que aparece es el
+caso 44, que es legitimo. La correccion empeora ligeramente el resultado.
+
+Lo interesante esta en el texto. Con la correccion aplicada, el modelo escribe
+sobre el caso 50 que "podria ser un intento inicial de verificacion antes de
+una transaccion mas grande" y a continuacion emite DESCARTADO. Sobre el 55,
+"pese al bajo importe habitualmente asociado a intentos preliminares de uso
+fraudulento", y DESCARTADO. Sobre el 53, "puede ser una tactica comun en
+intentos de fraude para probar la tarjeta", y DESCARTADO.
+
+La prosa absorbio la correccion por completo. El veredicto no se movio.
+
+Es decir: la explicacion no es la razon de la decision, se genera aparte. La
+mencion del importe en la version anterior no era la causa del descarte sino
+una racionalizacion posterior, y por eso corregirla no cambia nada. Encaja con
+la ablacion del dossier, donde la puntuacion daba confianza al agente pero no
+capacidad de discriminar.
+
+La contradiccion es visible dentro de una misma salida y no depende del tamano
+de la muestra. La parte cuantitativa si: es una ejecucion por condicion y hay
+que repetirla con varias semillas y los tres modelos antes de publicar cifras.

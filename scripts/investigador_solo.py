@@ -94,6 +94,14 @@ def parsear_args():
                         "deliberada al informar: la cifra resultante ya no es "
                         "una tasa sobre la cola sino la respuesta a si el "
                         "modelo salva esos casos concretos.")
+    p.add_argument("--dominio", action="store_true",
+                   help="Anade al prompt la correccion sobre el importe: en "
+                        "fraude con tarjeta el cargo minimo de prueba es "
+                        "habitual, de modo que un importe reducido no es "
+                        "prueba de legitimidad. Sin esta correccion, tanto el "
+                        "14B como el 72B descartan los dos fraudes de la cola "
+                        "alegando justo eso. Ver el comentario de DOMINIO en "
+                        "src/agents/prompts.py.")
     p.add_argument("--max-tokens", type=int, default=220,
                    help="Tokens de respuesta por caso.")
     p.add_argument("--disco-minimo-gb", type=int, default=50,
@@ -113,7 +121,7 @@ def parsear_args():
 # ----------------------------------------------------------------------
 # Prompt: identico al de la tarea del Investigador en modo revisa iterativo
 # ----------------------------------------------------------------------
-def construir_prompt(n: int, dossier_caso: str) -> str:
+def construir_prompt(n: int, dossier_caso: str, dominio: bool = False) -> str:
     """Replica el prompt de src/agents/crew.py para el caso n.
 
     Se reproduce aqui en lugar de importarlo porque alli vive dentro de la
@@ -132,7 +140,7 @@ def construir_prompt(n: int, dossier_caso: str) -> str:
     El formato del que depende toda la medicion procede, por tanto, de la
     parte del prompt que menos parece contener instrucciones.
     """
-    from src.agents.prompts import IDIOMA, PROHIBICIONES
+    from src.agents.prompts import DOMINIO, IDIOMA, PROHIBICIONES
 
     veredicto = (
         "Para CADA caso emite ademas un veredicto: CONFIRMADO si las "
@@ -157,7 +165,7 @@ def construir_prompt(n: int, dossier_caso: str) -> str:
         f"importe y las variables de mayor aporte tal y como aparecen arriba.\n"
         f"FORMATO: empieza con la linea 'CASO {n}' y debajo el parrafo en "
         f"prosa. Sin tablas ni vinetas.\n"
-        + PROHIBICIONES + veredicto
+        + PROHIBICIONES + (DOMINIO if dominio else "") + veredicto
         + f"\n\nEsto es lo que se espera de tu respuesta: {salida_esperada}"
     )
 
@@ -344,7 +352,7 @@ def main():
     print("=" * 70)
     print(f"  Backend : {args.backend}")
     print(f"  Modelo  : {args.modelo}")
-    print(f"  Casos   : {args.max_casos}")
+    print(f"  Correccion de dominio: {'SI' if args.dominio else 'no'}")
 
     if args.backend == "airllm":
         libre = shutil.disk_usage(Path.home()).free / GB
@@ -407,7 +415,7 @@ def main():
 
     salidas, tiempos, ver = [], [], {}
     for i in casos_n:
-        prompt = construir_prompt(i, construir_dossier_caso(i))
+        prompt = construir_prompt(i, construir_dossier_caso(i), args.dominio)
         t0 = time.perf_counter()
         if motor:
             texto = motor.generar(prompt, args.max_tokens)
@@ -474,7 +482,7 @@ def main():
         "backend": args.backend, "modelo": args.modelo,
         "compresion": args.compresion if args.backend == "airllm" else None,
         "casos_investigados": n, "casos_expediente": n_total,
-        "zona": args.zona, "casos": casos_n,
+        "zona": args.zona, "casos": casos_n, "dominio": args.dominio,
         "veredictos": {str(k): v for k, v in ver.items()},
         "descartes_correctos": met["n_descarte_correcto"],
         "fraude_destruido": met["n_fraude_descartado"],
