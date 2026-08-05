@@ -1,0 +1,114 @@
+{
+  "generado": "20260805_1443",
+  "modelos": [
+    "gpt-oss-20b-ctx16k"
+  ],
+  "turnos": [
+    0.0,
+    1.0,
+    2.0,
+    3.0
+  ],
+  "max_casos": 12,
+  "umbral": 0.05,
+  "max_tokens": 800,
+  "minutos_reales": 13.5,
+  "filas": [
+    {
+      "modelo": "gpt-oss-20b-ctx16k",
+      "turno": 0.0,
+      "dominio": false,
+      "casos": 12,
+      "confirmados": 6,
+      "descartados": 1,
+      "fraude_destruido": 0,
+      "descartes_correctos": 1,
+      "menciona_patron": 0,
+      "contradicciones": 0
+    },
+    {
+      "modelo": "gpt-oss-20b-ctx16k",
+      "turno": 0.0,
+      "dominio": true,
+      "casos": 12,
+      "confirmados": 9,
+      "descartados": 0,
+      "fraude_destruido": 0,
+      "descartes_correctos": 0,
+      "menciona_patron": 3,
+      "contradicciones": 0
+    },
+    {
+      "modelo": "gpt-oss-20b-ctx16k",
+      "turno": 1.0,
+      "dominio": false,
+      "casos": 12,
+      "confirmados": 3,
+      "descartados": 4,
+      "fraude_destruido": 1,
+      "descartes_correctos": 3,
+      "menciona_patron": 0,
+      "contradicciones": 0
+    },
+    {
+      "modelo": "gpt-oss-20b-ctx16k",
+      "turno": 1.0,
+      "dominio": true,
+      "casos": 12,
+      "confirmados": 8,
+      "descartados": 0,
+      "fraude_destruido": 0,
+      "descartes_correctos": 0,
+      "menciona_patron": 2,
+      "contradicciones": 0
+    },
+    {
+      "modelo": "gpt-oss-20b-ctx16k",
+      "turno": 2.0,
+      "dominio": false,
+      "casos": 12,
+      "confirmados": 8,
+      "descartados": 4,
+      "fraude_destruido": 0,
+      "descartes_correctos": 4,
+      "menciona_patron": 1,
+      "contradicciones": 0
+    },
+    {
+      "modelo": "gpt-oss-20b-ctx16k",
+      "turno": 2.0,
+      "dominio": true,
+      "casos": 12,
+      "confirmados": 8,
+      "descartados": 1,
+      "fraude_destruido": 0,
+      "descartes_correctos": 1,
+      "menciona_patron": 1,
+      "contradicciones": 0
+    },
+    {
+      "modelo": "gpt-oss-20b-ctx16k",
+      "turno": 3.0,
+      "dominio": false,
+      "casos": 12,
+      "confirmados": 8,
+      "descartados": 2,
+      "fraude_destruido": 0,
+      "descartes_correctos": 2,
+      "menciona_patron": 0,
+      "contradicciones": 0
+    },
+    {
+      "modelo": "gpt-oss-20b-ctx16k",
+      "turno": 3.0,
+      "dominio": true,
+      "casos": 12,
+      "confirmados": 11,
+      "descartados": 0,
+      "fraude_destruido": 0,
+      "descartes_correctos": 0,
+      "menciona_patron": 3,
+      "contradicciones": 0
+    }
+  ]
+}

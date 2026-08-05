@@ -1,61 +1,111 @@
-Objetivo 4 cerrado, y la prosa resulta estar desacoplada del veredicto
+Ablacion de dominio, capitulo 6 completo y correccion de dos cifras
 
-## Objetivo especifico 4
+## Ablacion de la correccion de dominio
 
-Qwen2.5-72B-Instruct via AirLLM, sobre los casos 50, 53, 54 y 55 -los dos
-fraudes de la cola mas dos legitimas de control-. Destruye los mismos dos
-fraudes que qwen2.5:14b, 12377 y 1885, a 6622 s por caso frente a 3,7. Un
-factor de 1790. Extrapolado al expediente, 6071 minutos para analizar un turno
-de cuatro horas.
+scripts/ablacion_dominio.py mide si retirar del enunciado la premisa falsa
+sobre el importe cambia el veredicto o solo la prosa. Dieciseis ejecuciones,
+cuatro turnos por dos modelos por dos condiciones, 192 veredictos.
 
-El uso de GPU observado, entre el 9 y el 25 %, situa el cuello de botella en
-la lectura de las 80 capas desde disco por cada token y no en el computo. No
-se corrige con una tarjeta mayor.
+La correccion se incorpora al texto siempre: sin ella el patron del cargo de
+prueba no aparece ni una vez en 96 casos; con ella aparece en 43. Lo que no
+mejora en ningun modelo es la decision. La precision cae a la mitad en ambos
+-de 0,33 a 0,17 en el 14B y de 0,15 a 0,08 en el 8B- y el fraude recuperado
+pasa de seis casos a cinco.
 
-Documentado en docs/OBJETIVO_4_MODELOS_GRANDES.md.
+El modo de fallo difiere segun el modelo, y esa diferencia es el resultado:
 
-## Por que falla, que no era por capacidad
+  qwen2.5:14b  nombra el patron y descarta igual en el 61 % de los casos en
+               que lo menciona. El recall no se mueve. Prosa y veredicto van
+               por separado.
+  llama3.1:8b  solo un 15 % de contradiccion, pero pasa a confirmar 36 de 48
+               casos. Recupera un fraude y deja de filtrar.
 
-El razonamiento del 72B descartaba ambos fraudes alegando de forma explicita
-que el importe era reducido: 1,00 y 2,22 EUR. En estos datos esa premisa esta
-invertida. El importe mediano de un fraude es 2,11 EUR frente a 19,99 de una
-transaccion legitima, y el 59,3 % de los fraudes no llega a 5 EUR frente al
-25,1 % de las legitimas. Una transaccion fraudulenta tiene 2,4 veces mas
-probabilidad de ser de 5 euros o menos.
+De ahi que el capitulo 6 concluya que una explicacion bien redactada no es
+evidencia de que la decision se tomara por esas razones, y que no sirve para
+auditar al sistema que la produce.
 
-Se anade DOMINIO en src/agents/prompts.py y la opcion --dominio al arnes, que
-retira esa premisa sin instalar la contraria: dice que el cargo minimo de
-prueba es habitual y que el importe reducido no basta para descartar, pero no
-dice que indique fraude. Decir lo segundo habria entregado la respuesta en la
-entrada y repetido el defecto de diseno que ya obligo a rehacer el experimento
-del dossier.
+## Capitulo 6 completo
 
-## El resultado, que no es el que se buscaba
+Escrito entero, sin marcas pendientes: consecucion de los cuatro objetivos,
+cinco conclusiones principales, limitaciones y trabajo futuro. La memoria baja
+de 22 marcas [PENDIENTE] a 19, todas ellas en los capitulos 2 y 3.
 
-Con la correccion, sobre los casos 44-55 con qwen2.5:14b:
+## Dos cifras retiradas por no sostenerse
 
-    sin --dominio : 12 descartes, 2 fraudes destruidos, 10 aciertos
-    con --dominio : 11 descartes y 1 confirmacion, 2 fraudes destruidos,
-                    9 aciertos
+PRIMERA. El "n=32, ambos contrastes significativos" del commit a2abb2b sale de
+apilar tres ficheros de experimento en los que 24 de las 48 combinaciones de
+modelo, turno y repeticion estan duplicadas: son re-ejecuciones del mismo turno
+con el mismo numero de repeticion en dias distintos, no replicas nuevas. Con la
+unica tanda completa, de dieciseis ejecuciones por modelo, el fraude destruido
+es 19, 12 y 8 en lugar de 37, 27 y 13, y los contrastes NO alcanzan
+significacion: Fisher p = 0,156 y Mann-Whitney p = 0,050 frente a los 0,024 y
+0,002 publicados. La ordenacion por tamano de modelo se mantiene en direccion
+pero no esta demostrada, y asi queda redactada.
 
-No salva ninguno de los dos fraudes. La unica confirmacion que aparece es el
-caso 44, que es legitimo. La correccion empeora ligeramente el resultado.
+Aun ese 0,050 es optimista: las cuatro repeticiones dentro de cada turno, a
+temperatura 0,1, son casi identicas entre si, de modo que las observaciones
+independientes son cuatro turnos y no dieciseis ejecuciones. Consta como
+limitacion.
 
-Lo interesante esta en el texto. Con la correccion aplicada, el modelo escribe
-sobre el caso 50 que "podria ser un intento inicial de verificacion antes de
-una transaccion mas grande" y a continuacion emite DESCARTADO. Sobre el 55,
-"pese al bajo importe habitualmente asociado a intentos preliminares de uso
-fraudulento", y DESCARTADO. Sobre el 53, "puede ser una tactica comun en
-intentos de fraude para probar la tarjeta", y DESCARTADO.
+SEGUNDA. docs/ESTADO_DEL_ARTE.md afirmaba que los modelos de refuerzo de
+gradiente superan claramente a los de lenguaje en modo cero disparos sobre
+datos tabulares. El trabajo citado para sostenerlo -arXiv:2406.16308- dice lo
+contrario: que GPT-4 rinde a la par de los metodos especializados. El capitulo
+2 se ha reescrito con lo que el trabajo si dice. La diferenciacion de este TFG
+no dependia de esa afirmacion: la literatura pone al modelo de lenguaje a
+COMPETIR con el detector tabular, y aqui opera POR ENCIMA de el.
 
-La prosa absorbio la correccion por completo. El veredicto no se movio.
+## Capitulo 2
 
-Es decir: la explicacion no es la razon de la decision, se genera aparte. La
-mencion del importe en la version anterior no era la causa del descarte sino
-una racionalizacion posterior, y por eso corregirla no cambia nada. Encaja con
-la ablacion del dossier, donde la puntuacion daba confianza al agente pero no
-capacidad de discriminar.
+Leidos completos y ya citables:
 
-La contradiccion es visible dentro de una misma salida y no depende del tamano
-de la muestra. La parte cuantitativa si: es una ejecucion por condicion y hay
-que repetirla con varias semillas y los tres modelos antes de publicar cifras.
+  Kabane (2024), arXiv:2412.07437. Con remuestreo previo a la division obtiene
+  99,969 % de exactitud y 100 % de exhaustividad sobre este mismo conjunto de
+  datos. Sus experimentos sin fuga se quedan en 96,5 % y 91,5 %.
+
+  Magnier (2025), Mathematics 13(16):2563. Retira capas a un perceptron hasta
+  dejarlo en una sola neurona de salida, manteniendo la fuga, y aun asi obtiene
+  94 % de exhaustividad y 97,6 % de precision. Enumera cuatro problemas
+  recurrentes, entre ellos la validacion temporal insuficiente para datos de
+  transacciones.
+
+Ambos respaldan con cifras publicadas el argumento metodologico de este
+trabajo, que hasta ahora se apoyaba solo en razonamiento propio.
+
+docs/ESTADO_DEL_ARTE.md incorpora una tabla de estado de lectura. Lo no leido
+no se cita.
+
+## Modelos de razonamiento: sexto modo de fallo silencioso
+
+gpt-oss-20b consume su presupuesto de generacion razonando antes de responder.
+Con los 220 tokens de los demas modelos devuelve cadena vacia, y el arnes
+registraba doce casos sin veredicto y todas las metricas a cero sin lanzar
+ninguna excepcion. Con 800 tokens responde a veces y se corta a mitad de frase
+otras: de ocho ejecuciones, solo una completo los doce veredictos.
+
+El guion de ablacion agregaba esas ejecuciones parciales junto a las integras y
+las presentaba en la misma tabla resumen, porque solo descartaba una ejecucion
+cuando no lograba extraer NINGUN veredicto. Siete de doce pasaban sin ruido.
+Corregido: ahora se exige extraccion completa, se excluye la ejecucion entera
+si falta un solo veredicto y se informa de cuantas se han descartado.
+
+Las cifras del 20B quedan retiradas por este motivo. La conclusion no es que el
+modelo sea peor, sino que no es comparable bajo un diseno que fija el coste por
+caso. Consta como limitacion y como sexto modo de fallo en 6.2.5.
+
+## Otras correcciones
+
+  - --max-tokens propagado desde el guion de ablacion al arnes, y registrado
+    en el JSON: sin ese dato las cifras de coste de distintas tandas no serian
+    comparables entre si.
+  - Los desplazamientos de turno pasan de [0,4,8,12,16,20] a [0,1,2,3]. El
+    periodo de test dura 7,7 h, de modo que con turnos de 4 h el desplazamiento
+    no puede pasar de 3,7 y la primera version abortaba a mitad.
+  - El arnes localiza su fichero de resultados declarandolo por salida estandar
+    en lugar de comparar el directorio antes y despues. El nombre tenia
+    resolucion de minuto y dos ejecuciones de medio minuto caian en el mismo,
+    de modo que la segunda sobrescribia a la primera y se registraba un error
+    inexistente sobre una ejecucion terminada con normalidad. El nombre lleva
+    ahora los segundos.
+  - construir_turno devuelve codigo 2 cuando el desplazamiento cae fuera del
+    periodo, para que quien lo invoque pueda distinguirlo de un fallo real.

@@ -1,0 +1,62 @@
+{
+  "backend": "ollama",
+  "modelo": "gpt-oss-20b-ctx16k",
+  "compresion": null,
+  "casos_investigados": 12,
+  "casos_expediente": 53,
+  "zona": "cola",
+  "casos": [
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53
+  ],
+  "dominio": false,
+  "veredictos": {
+    "42": "CONFIRMADO",
+    "45": "CONFIRMADO",
+    "46": "DESCARTADO",
+    "47": "CONFIRMADO",
+    "48": "DESCARTADO",
+    "49": "DESCARTADO",
+    "53": "DESCARTADO"
+  },
+  "descartes_correctos": 3,
+  "fraude_destruido": 1,
+  "seg_por_caso": [
+    8.4,
+    9.2,
+    9.2,
+    6.4,
+    4.8,
+    5.5,
+    6.1,
+    7.9,
+    9.2,
+    9.2,
+    9.2,
+    7.5
+  ],
+  "salidas": [
+    "CASO 42  \nEl detector marca la transacción de 0,77 EUR como sospechosa porque su valor está muy por debajo del importe medio del lote (77,36 EUR) y presenta un alto riesgo con una probabilidad de fraude de 0,8969. Los componentes PCA que más influyen son V14 = –7,581, cuyo aporte positivo de +3,756 indica tendencia a fraude; V4 = 3,551 con aporte +1,469 también favorece la sospecha; y V10 = –2,472 con aporte +1,390, reforzando el patrón fraudulento. En contraste, V7 = 2,283 aporta un valor negativo de –1,977 que tiende a legitimidad, pero no es suficiente para contrarrestar los demás indicadores. La combinación de estos factores hace que la transacción sea considerada de alto riesgo y se clasifique como sospechosa.  \nVEREDICTO: CONFIRMADO",
+    "CASO 43  \nEl detector considera sospechosa la transacción porque su probabilidad de fraude es alta (0.8037) y el nivel de riesgo se clasifica como ALTO. El importe de 451.81 EUR supera notablemente el promedio del lote, que es de 77.36 EUR, lo cual ya constituye un indicio de anomalía. Las variables con mayor aporte a la sospecha son V4 = 4.513 (aporte +1.702, hacia FRAUDE) y V14 = -2.245 (aporte +1.514, hacia FRAUDE), mientras que las variables V11 = -0.453 (aporte -1.248, hacia LEGITIMA) y V10 = 0.225 (aporte -0.928, hacia LEGITIMA) solo reducen parcialmente la señal de fraude. La hora del día, 20.6 h, también se encuentra dentro de los rangos donde el",
+    "CASO 44  \nEl detector marca el CASO 44 como sospechoso porque la transacción de 1,00 EUR se sitúa muy por debajo del importe medio del lote (77,36 EUR), lo que ya genera una alerta. Además, las variables con mayor aporte son V14 y V10: V14 = –4,278 aporta +4,307 puntos a la clasificación de fraude, mientras que V10 = –2,644 añade +1,220 puntos en esa dirección. Por otro lado, V7 (2,205) y V4 (0,150) reducen el riesgo con aportes negativos de –1,809 y –1,682 respectivamente, pero no compensan la influencia positiva de las dos primeras",
+    "CASO 45  \nEl detector marca la transacción de 0,77 EUR como sospechosa porque las variables que más influyen en el modelo indican un patrón atípico: V14 aporta +4,001 hacia fraude con un valor negativo de -7,655; V4 añade +1,400 con 3,433; y V10 contribuye +1,378 con -2,449. Aunque la variable V7 tiende a legitimar la operación (‑1,498) su efecto es menor que el combinado de las otras tres. El importe está muy por debajo del promedio del lote (77,36 EUR), lo cual refuerza la anomalía detectada. Por ello el riesgo se clasifica como bajo pero con una probabilidad de fraude de 0,2619.  \n\nVEREDICTO: CONFIRMADO",
+    "CASO 46  \nEl detector marca esta transacción de 1059,28 EUR como sospechosa porque presenta un importe considerablemente superior al promedio del lote (77,36 EUR) y se sitúa en una hora del día que puede ser atípica para el patrón habitual. Los componentes PCA más relevantes son V12 = –3,800, con un aporte positivo de +1,645 hacia fraude, y V4 = 5,994, con un aporte positivo de +1,618 también orientado a fraude; estos valores indican desviaciones significativas respecto al comportamiento típico. Aunque V11 = –0.286 (–1,799) y V5 = –3,237 (–1,240) apuntan hacia una actividad legítima, la combinación de los factores positivos supera el umbral de riesgo bajo, generando una alerta moderada.  \nVEREDICTO: DESCARTADO",
+    "CASO 47  \nEl detector marca sospechoso el pago de 1,00 EUR porque su importe está muy por debajo del promedio del lote (77,36 EUR), lo que ya genera una alerta inicial. Además, las variables V14 y V10 aportan valores positivos (+4,340 y +1,431 respectivamente) que empujan la puntuación hacia FRAUDE, mientras que las demás variables contribuyen a la legitimidad, pero no compensan el efecto de esas dos. La combinación de un monto atípicamente bajo con estos dos indicadores de riesgo hace que el algoritmo considere la transacción como potencialmente fraudulenta.  \nVEREDICTO: CONFIRMADO",
+    "CASO 48  \nEl detector marca la transacción de 0,76 EUR como sospechosa porque el valor de la variable V4 (2,979) aporta un impulso positivo de +1,995 hacia fraude, mientras que las demás variables V11 (-1,986), V14 (0,495) y V10 (1,124) contribuyen a una tendencia legítima con aportes negativos. A pesar del importe bajo comparado con el promedio del lote (77,36 EUR), la combinación de un valor alto en V4 y la hora de 18,6 h genera una puntuación que supera el umbral de alerta. El riesgo se clasifica como BAJO, pero la presencia de ese factor dominante sugiere revisar la operación.  \n\nVEREDICTO: DESCARTADO",
+    "CASO 49  \nEl detector marca el caso 49 como sospechoso porque el importe de la transacción, 377.00 EUR, es considerablemente superior al promedio del lote (77.36 EUR). Además, las variables V4 y V14 aportan valores positivos que favorecen la clasificación de fraude: V4 con 4.332 y V14 con -2.344, sumando un impulso total de más de tres puntos en el score. A pesar de que otras dos variables (V21 y V22) tienden a indicar legitimidad, su efecto no compensa completamente el impacto de las primeras. Por ello, aunque la probabilidad de fraude sea moderada (13 %), el nivel de riesgo se considera bajo.  \nVEREDICTO: DESCARTADO",
+    "CASO 50  \nEl detector marca la transacción como sospechosa a pesar de su bajo importe de 1,00 EUR porque dos componentes PCA (V14 y V4) aportan valores positivos que favorecen el riesgo de fraude, sumando 2,655 y 1,726 respectivamente. En contraste, los componentes V11 y V1 tienen contribuciones negativas que apuntan a legitimidad, pero no compensan la señal fraudulenta. Además, el importe es muy inferior al promedio del lote (77,36 EUR), lo cual suele asociarse con intentos de ocultar actividades ilícitas en pequeñas sumas. La hora de la transacción (17:48) se encuentra dentro de un rango donde históricamente se han observado patrones anómalos. Por estas razones el sistema clasifica la operación como",
+    "CASO 51  \nEl detector marca esta transacción como sospechosa porque su importe de 600,86 EUR supera en gran medida el promedio del lote (77,36 EUR) y presenta una combinación de componentes PCA que favorecen la clasificación fraudulenta. En particular, V20 = –1,103 aporta +1,369 puntos a la probabilidad de fraude, mientras que",
+    "CASO 52  \nEl detector marca la transacción de 1,00 EUR como sospechosa porque el valor del componente V20 (‑0.521) aporta +0,972 puntos a la probabilidad de fraude, mientras que los demás componentes (V11, V4 y V28) reducen esa probabilidad con contribuciones negativas. A pesar de ello, el importe es muy bajo comparado con el promedio del lote (77,36 EUR) y la probabilidad",
+    "CASO 53  \nEl detector marca esta transacción como sospechosa porque el importe de 912,00 EUR es mucho mayor que el promedio del lote (77,36 EUR) y la variable Amount aporta +0.766 hacia fraude. Las demás variables V14, V11 y V10 tienen aportes negativos (-3.030, -1.044 y -0.793 respectivamente) que favorecen la legitimidad, pero no compensan el impacto del importe elevado. A pesar de que la probabilidad total de fraude es baja (0,0734), la combinación de un monto alto con una contribución positiva en la variable Amount genera una alerta. Por ello se considera sospechoso aunque el riesgo sea clasificado como bajo.  \n\nVEREDICTO: DESCARTADO"
+  ]
+}

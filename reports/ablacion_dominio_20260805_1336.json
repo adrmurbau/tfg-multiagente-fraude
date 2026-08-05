@@ -1,0 +1,210 @@
+{
+  "generado": "20260805_1336",
+  "modelos": [
+    "llama3.1-8b-ctx16k",
+    "qwen2.5-14b-ctx16k"
+  ],
+  "turnos": [
+    0.0,
+    1.0,
+    2.0,
+    3.0
+  ],
+  "max_casos": 12,
+  "umbral": 0.05,
+  "minutos_reales": 11.8,
+  "filas": [
+    {
+      "modelo": "llama3.1-8b-ctx16k",
+      "turno": 0.0,
+      "dominio": false,
+      "casos": 12,
+      "confirmados": 1,
+      "descartados": 11,
+      "fraude_destruido": 2,
+      "descartes_correctos": 9,
+      "menciona_patron": 0,
+      "contradicciones": 0
+    },
+    {
+      "modelo": "llama3.1-8b-ctx16k",
+      "turno": 0.0,
+      "dominio": true,
+      "casos": 12,
+      "confirmados": 6,
+      "descartados": 6,
+      "fraude_destruido": 2,
+      "descartes_correctos": 4,
+      "menciona_patron": 3,
+      "contradicciones": 1
+    },
+    {
+      "modelo": "qwen2.5-14b-ctx16k",
+      "turno": 0.0,
+      "dominio": false,
+      "casos": 12,
+      "confirmados": 0,
+      "descartados": 12,
+      "fraude_destruido": 2,
+      "descartes_correctos": 10,
+      "menciona_patron": 0,
+      "contradicciones": 0
+    },
+    {
+      "modelo": "qwen2.5-14b-ctx16k",
+      "turno": 0.0,
+      "dominio": true,
+      "casos": 12,
+      "confirmados": 1,
+      "descartados": 11,
+      "fraude_destruido": 2,
+      "descartes_correctos": 9,
+      "menciona_patron": 6,
+      "contradicciones": 5
+    },
+    {
+      "modelo": "llama3.1-8b-ctx16k",
+      "turno": 1.0,
+      "dominio": false,
+      "casos": 12,
+      "confirmados": 5,
+      "descartados": 7,
+      "fraude_destruido": 1,
+      "descartes_correctos": 6,
+      "menciona_patron": 0,
+      "contradicciones": 0
+    },
+    {
+      "modelo": "llama3.1-8b-ctx16k",
+      "turno": 1.0,
+      "dominio": true,
+      "casos": 12,
+      "confirmados": 10,
+      "descartados": 2,
+      "fraude_destruido": 0,
+      "descartes_correctos": 2,
+      "menciona_patron": 4,
+      "contradicciones": 0
+    },
+    {
+      "modelo": "qwen2.5-14b-ctx16k",
+      "turno": 1.0,
+      "dominio": false,
+      "casos": 12,
+      "confirmados": 1,
+      "descartados": 11,
+      "fraude_destruido": 1,
+      "descartes_correctos": 10,
+      "menciona_patron": 0,
+      "contradicciones": 0
+    },
+    {
+      "modelo": "qwen2.5-14b-ctx16k",
+      "turno": 1.0,
+      "dominio": true,
+      "casos": 12,
+      "confirmados": 3,
+      "descartados": 8,
+      "fraude_destruido": 1,
+      "descartes_correctos": 7,
+      "menciona_patron": 4,
+      "contradicciones": 1
+    },
+    {
+      "modelo": "llama3.1-8b-ctx16k",
+      "turno": 2.0,
+      "dominio": false,
+      "casos": 12,
+      "confirmados": 3,
+      "descartados": 9,
+      "fraude_destruido": 0,
+      "descartes_correctos": 9,
+      "menciona_patron": 0,
+      "contradicciones": 0
+    },
+    {
+      "modelo": "llama3.1-8b-ctx16k",
+      "turno": 2.0,
+      "dominio": true,
+      "casos": 12,
+      "confirmados": 10,
+      "descartados": 2,
+      "fraude_destruido": 0,
+      "descartes_correctos": 2,
+      "menciona_patron": 6,
+      "contradicciones": 1
+    },
+    {
+      "modelo": "qwen2.5-14b-ctx16k",
+      "turno": 2.0,
+      "dominio": false,
+      "casos": 12,
+      "confirmados": 2,
+      "descartados": 10,
+      "fraude_destruido": 0,
+      "descartes_correctos": 10,
+      "menciona_patron": 0,
+      "contradicciones": 0
+    },
+    {
+      "modelo": "qwen2.5-14b-ctx16k",
+      "turno": 2.0,
+      "dominio": true,
+      "casos": 12,
+      "confirmados": 3,
+      "descartados": 8,
+      "fraude_destruido": 0,
+      "descartes_correctos": 8,
+      "menciona_patron": 6,
+      "contradicciones": 4
+    },
+    {
+      "modelo": "llama3.1-8b-ctx16k",
+      "turno": 3.0,
+      "dominio": false,
+      "casos": 12,
+      "confirmados": 4,
+      "descartados": 8,
+      "fraude_destruido": 0,
+      "descartes_correctos": 8,
+      "menciona_patron": 0,
+      "contradicciones": 0
+    },
+    {
+      "modelo": "llama3.1-8b-ctx16k",
+      "turno": 3.0,
+      "dominio": true,
+      "casos": 12,
+      "confirmados": 10,
+      "descartados": 2,
+      "fraude_destruido": 0,
+      "descartes_correctos": 2,
+      "menciona_patron": 7,
+      "contradicciones": 1
+    },
+    {
+      "modelo": "qwen2.5-14b-ctx16k",
+      "turno": 3.0,
+      "dominio": false,
+      "casos": 12,
+      "confirmados": 3,
+      "descartados": 9,
+      "fraude_destruido": 0,
+      "descartes_correctos": 9,
+      "menciona_patron": 0,
+      "contradicciones": 0
+    },
+    {
+      "modelo": "qwen2.5-14b-ctx16k",
+      "turno": 3.0,
+      "dominio": true,
+      "casos": 12,
+      "confirmados": 5,
+      "descartados": 7,
+      "fraude_destruido": 0,
+      "descartes_correctos": 7,
+      "menciona_patron": 7,
+      "contradicciones": 4
+    }
+  ]
+}

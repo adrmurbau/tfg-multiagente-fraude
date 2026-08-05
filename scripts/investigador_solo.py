@@ -187,7 +187,25 @@ def generar_ollama(modelo: str, prompt: str, max_tokens: int) -> str:
         timeout=1800,
     )
     r.raise_for_status()
-    return r.json().get("response", "")
+    d = r.json()
+    texto = d.get("response", "") or ""
+    if texto.strip():
+        return texto
+
+    # Los modelos de razonamiento -gpt-oss, entre otros- emiten primero una
+    # cadena de pensamiento que Ollama devuelve en un campo aparte. Si el
+    # presupuesto de tokens se agota razonando, 'response' llega vacia y el
+    # guion registraba doce casos sin veredicto y metricas a cero sin que
+    # nada fallase. Se avisa de forma explicita en lugar de devolver "".
+    pensado = (d.get("thinking") or "").strip()
+    if pensado:
+        print(f"    [AVISO] respuesta vacia: el modelo consumio los "
+              f"{max_tokens} tokens razonando ({len(pensado)} caracteres de "
+              f"pensamiento). Sube --max-tokens.")
+    else:
+        print(f"    [AVISO] el modelo devolvio una respuesta vacia. "
+              f"Motivo declarado: {d.get('done_reason', 'desconocido')}")
+    return ""
 
 
 class MotorAirLLM:
@@ -366,8 +384,12 @@ def main():
     from src.agents.tools import construir_dossier_caso, inicializar_contexto, mapa_casos
 
     df = cargar_dataset()
-    turno = construir_turno(df, horas=args.turno_horas,
-                            desplazamiento_h=args.desplazamiento)
+    try:
+        turno = construir_turno(df, horas=args.turno_horas,
+                                desplazamiento_h=args.desplazamiento)
+    except ValueError as e:
+        print(f"\n  {e}\n")
+        sys.exit(2)
     detector = DetectorFraude()
     inicializar_contexto(turno, detector, capacidad=args.capacidad,
                          umbral=args.umbral)
@@ -476,7 +498,7 @@ def main():
         print(f"\n  Extrapolacion a un expediente de {n_total} casos: "
               f"{sum(tiempos)/len(tiempos)*n_total/60:.0f} min")
 
-    sello = datetime.now().strftime("%Y%m%d_%H%M")
+    sello = datetime.now().strftime("%Y%m%d_%H%M%S")
     destino = REPORTS_DIR / f"investigador_{args.backend}_{sello}.json"
     destino.write_text(json.dumps({
         "backend": args.backend, "modelo": args.modelo,

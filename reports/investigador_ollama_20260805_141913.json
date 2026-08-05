@@ -1,0 +1,31 @@
+{
+  "backend": "ollama",
+  "modelo": "gpt-oss-20b-ctx16k",
+  "compresion": null,
+  "casos_investigados": 3,
+  "casos_expediente": 55,
+  "zona": "cola",
+  "casos": [
+    53,
+    54,
+    55
+  ],
+  "dominio": false,
+  "veredictos": {
+    "53": "CONFIRMADO",
+    "54": "CONFIRMADO",
+    "55": "DESCARTADO"
+  },
+  "descartes_correctos": 0,
+  "fraude_destruido": 1,
+  "seg_por_caso": [
+    17.7,
+    5.3,
+    8.0
+  ],
+  "salidas": [
+    "CASO 53  \nEl detector marca el caso como sospechoso a pesar de que la probabilidad de fraude es solo del 10,08 % y el riesgo se clasifica como bajo. El importe transaccionado es de 0,00 EUR, muy por debajo del promedio del lote (84,25 EUR), lo cual genera una anomalía en el perfil financiero. Los componentes V14 (-4,642) y V4 (5,394) aportan valores positivos que favorecen la clasificación de fraude (+4,229 y +2,250 respectivamente). En contraste, los componentes V18 (2,318) y V10 (-0,166) tienen contribuciones negativas que apuntan a una transacción legítima. La combinación de un importe atípico con dos variables que impulsan la sospecha lleva al detector a marcar el caso como potencial fraude.  \nVEREDICTO: CONFIRMADO",
+    "CASO 54  \nEl detector marca sospechoso el pago de 912 EUR realizado a las 19:7h porque su importe es mucho mayor que el promedio del lote (84,25 EUR) y la variable “Amount” aporta positivamente al riesgo de fraude (+0,766). A pesar de que V14, V11 y V10 tienen contribuciones negativas hacia la legitimidad (-3,030; -1,044; -0,793 respectivamente), su efecto no compensa el impacto del importe elevado. Por tanto, la combinación de un monto anormalmente alto con una señal positiva en la variable “Amount” hace que la transacción sea considerada sospechosa.  \nVEREDICTO: CONFIRMADO",
+    "CASO 55  \nEl detector marca el caso 55 como sospechoso porque, a pesar de que la transacción solo suma 2,22 EUR—mucho menor que el importe medio del lote de 84,25 EUR—las variables V14 y V4 aportan valores positivos significativos (+3,004 y +2,180) que impulsan la probabilidad hacia fraude. En contraste, las variables V1 y V7 reducen ligeramente esa inclinación con contribuciones negativas (-2,603 y -1,660), pero no son suficientes para anular el efecto de V14 y V4. La hora del día (16,6 h) tampoco se alinea con patrones típicos de transacciones legítimas en este conjunto de datos. Por ello la probabilidad calculada es 0,0673, lo que sitúa el riesgo en nivel bajo pero aún sospechoso.  \nVEREDICTO: DESCARTADO"
+  ]
+}
