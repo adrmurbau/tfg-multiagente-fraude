@@ -1,111 +1,85 @@
-Ablacion de dominio, capitulo 6 completo y correccion de dos cifras
+Memoria: nueve capitulos cerrados, cuatro afirmaciones sin fuente retiradas
 
-## Ablacion de la correccion de dominio
+18.764 palabras. De 21 marcas [PENDIENTE] quedan 5, todas en el capitulo 2 y
+todas por lectura de trabajos a los que no hay acceso desde aqui.
 
-scripts/ablacion_dominio.py mide si retirar del enunciado la premisa falsa
-sobre el importe cambia el veredicto o solo la prosa. Dieciseis ejecuciones,
-cuatro turnos por dos modelos por dos condiciones, 192 veredictos.
+## Escrito
 
-La correccion se incorpora al texto siempre: sin ella el patron del cargo de
-prueba no aparece ni una vez en 96 casos; con ella aparece en 43. Lo que no
-mejora en ningun modelo es la decision. La precision cae a la mitad en ambos
--de 0,33 a 0,17 en el 14B y de 0,15 a 0,08 en el 8B- y el fraude recuperado
-pasa de seis casos a cinco.
+  - Capitulo 6 completo: consecucion de los cuatro objetivos, cinco
+    conclusiones, limitaciones y trabajo futuro.
+  - Capitulo 5: seccion del objetivo especifico 4, seccion 5.12 sobre la
+    ablacion de dominio, y reescritura de 5.4 y 5.5.
+  - Capitulo 2: secciones 2.1 a 2.5 redactadas a partir de cinco trabajos
+    leidos.
+  - Capitulo 3: los dos diagramas de Gantt, generados con matplotlib desde
+    scripts y insertados como figuras. generate.js soporta ahora imagenes.
+  - Resumen, abstract, fases de ejecucion, bibliografia, apendice de
+    reproducibilidad y glosario de dieciseis terminos.
 
-El modo de fallo difiere segun el modelo, y esa diferencia es el resultado:
+## Cuatro afirmaciones retiradas por no sostenerse
 
-  qwen2.5:14b  nombra el patron y descarta igual en el 61 % de los casos en
-               que lo menciona. El recall no se mueve. Prosa y veredicto van
-               por separado.
-  llama3.1:8b  solo un 15 % de contradiccion, pero pasa a confirmar 36 de 48
-               casos. Recupera un fraude y deja de filtrar.
+PRIMERA. El "n=32, ambos contrastes significativos" salia de apilar tres
+ficheros con 24 de 48 combinaciones duplicadas. Con la unica tanda completa,
+n=16 por modelo, el fraude destruido es 19, 12 y 8 en lugar de 37, 27 y 13, y
+ningun contraste alcanza significacion: Fisher p = 0,156 y Mann-Whitney
+p = 0,050 entre los extremos, frente a los 0,024 y 0,002 publicados. Estaba
+escrito como resultado principal en el capitulo 5.
 
-De ahi que el capitulo 6 concluya que una explicacion bien redactada no es
-evidencia de que la decision se tomara por esas razones, y que no sirve para
-auditar al sistema que la produce.
+SEGUNDA. La seccion 5.5 reportaba "6 de 18 frente a 0 de 18" con Fisher
+p = 0,0191 y Wilcoxon p = 0,0235. No se reproduce. La seccion se reescribe
+como reproducibilidad entre ejecuciones, con datos verificados: el modelo de
+14B da rango 0,000 en las dieciseis ejecuciones, el de 8B varia en tres de
+cuatro turnos y el de 20B en dos. La reproducibilidad no crece con el tamano.
 
-## Capitulo 6 completo
+Los recalls de 0,60, 0,40 y 0,80 que ilustraban la falta de reproducibilidad
+son reales y estan en fichero, pero proceden de lotes sinteticos con cinco
+fraudes, donde un solo caso mueve el recall 0,20. Sobre turnos reales la
+variacion del mismo modelo es de 0,019 a 0,039.
 
-Escrito entero, sin marcas pendientes: consecucion de los cuatro objetivos,
-cinco conclusiones principales, limitaciones y trabajo futuro. La memoria baja
-de 22 marcas [PENDIENTE] a 19, todas ellas en los capitulos 2 y 3.
+TERCERA. "Los modelos de boosting superan claramente a los de lenguaje en modo
+cero disparos sobre datos tabulares". El trabajo citado para sostenerlo dice lo
+contrario: que GPT-4 rinde a la par de los metodos especializados.
 
-## Dos cifras retiradas por no sostenerse
+CUARTA. "La literatura identifica en torno a 7B un umbral critico para la
+invocacion fiable de herramientas". Se han comprobado los tres trabajos
+citados y ninguno de sus resumenes lo afirma. El capitulo 2 se ha redactado sin
+esa cifra.
 
-PRIMERA. El "n=32, ambos contrastes significativos" del commit a2abb2b sale de
-apilar tres ficheros de experimento en los que 24 de las 48 combinaciones de
-modelo, turno y repeticion estan duplicadas: son re-ejecuciones del mismo turno
-con el mismo numero de repeticion en dias distintos, no replicas nuevas. Con la
-unica tanda completa, de dieciseis ejecuciones por modelo, el fraude destruido
-es 19, 12 y 8 en lugar de 37, 27 y 13, y los contrastes NO alcanzan
-significacion: Fisher p = 0,156 y Mann-Whitney p = 0,050 frente a los 0,024 y
-0,002 publicados. La ordenacion por tamano de modelo se mantiene en direccion
-pero no esta demostrada, y asi queda redactada.
+QUINTA, menor. "La literatura establece que al modelo de lenguaje solo debe
+pedirsele que verbalice la salida de un metodo de explicacion". El survey de
+XAI se ha revisado con esa pregunta y no lo enuncia como recomendacion. Los
+trabajos que recoge se limitan de hecho a ese papel, pero eso es la practica
+observada y no una advertencia formulada.
 
-Aun ese 0,050 es optimista: las cuatro repeticiones dentro de cada turno, a
-temperatura 0,1, son casi identicas entre si, de modo que las observaciones
-independientes son cuatro turnos y no dieciseis ejecuciones. Consta como
-limitacion.
+## Trabajos leidos, ya citables
 
-SEGUNDA. docs/ESTADO_DEL_ARTE.md afirmaba que los modelos de refuerzo de
-gradiente superan claramente a los de lenguaje en modo cero disparos sobre
-datos tabulares. El trabajo citado para sostenerlo -arXiv:2406.16308- dice lo
-contrario: que GPT-4 rinde a la par de los metodos especializados. El capitulo
-2 se ha reescrito con lo que el trabajo si dice. La diferenciacion de este TFG
-no dependia de esa afirmacion: la literatura pone al modelo de lenguaje a
-COMPETIR con el detector tabular, y aqui opera POR ENCIMA de el.
+  Kabane (2024), arXiv:2412.07437. Con remuestreo previo a la division:
+  99,969 % de exactitud y 100 % de exhaustividad. Sin fuga: 96,5 % y 91,5 %.
 
-## Capitulo 2
+  Magnier (2025), Mathematics 13(16):2563. Un perceptron reducido a una sola
+  neurona de salida, manteniendo la fuga, alcanza 94 % de exhaustividad y
+  97,6 % de precision. Enumera cuatro problemas recurrentes, entre ellos la
+  validacion temporal insuficiente.
 
-Leidos completos y ya citables:
+  Baisholanova y otros (2025), Computers 14(4):120. FraudX AI alcanza 0,97 de
+  AUC-PR SIN remuestreo sintetico, usando pesos de clase igual que este
+  trabajo. Obliga a matizar: el extremo alto de la horquilla no es todo fuga, y
+  el detector de este trabajo no es el estado del arte.
 
-  Kabane (2024), arXiv:2412.07437. Con remuestreo previo a la division obtiene
-  99,969 % de exactitud y 100 % de exhaustividad sobre este mismo conjunto de
-  datos. Sus experimentos sin fuga se quedan en 96,5 % y 91,5 %.
+  Bhattacharya y otros (2025), arXiv:2507.22758. MASCA si se evalua contra
+  lineas base, pero todas ellas son configuraciones del propio modelo de
+  lenguaje: no hay comparacion contra un modelo estadistico clasico. Ahi esta
+  la diferencia con este trabajo, cuya linea base es el detector solo. Ademas
+  su cadena de pensamiento empeora el resultado, 36 % frente a 45,5 %.
 
-  Magnier (2025), Mathematics 13(16):2563. Retira capas a un perceptron hasta
-  dejarlo en una sola neurona de salida, manteniendo la fuga, y aun asi obtiene
-  94 % de exhaustividad y 97,6 % de precision. Enumera cuatro problemas
-  recurrentes, entre ellos la validacion temporal insuficiente para datos de
-  transacciones.
+  Bilal, Ebert y Lin (2025), arXiv:2504.00125. Aporta la distincion entre
+  FIDELIDAD y PLAUSIBILIDAD, y la observacion de que una explicacion puede ser
+  plausible sin ser fiel. Es exactamente el fenomeno que mide la seccion 5.12,
+  y permite enunciarlo en el vocabulario del campo.
 
-Ambos respaldan con cifras publicadas el argumento metodologico de este
-trabajo, que hasta ahora se apoyaba solo en razonamiento propio.
+## Nota sobre la comparacion con modelos por interfaz remota
 
-docs/ESTADO_DEL_ARTE.md incorpora una tabla de estado de lectura. Lo no leido
-no se cita.
-
-## Modelos de razonamiento: sexto modo de fallo silencioso
-
-gpt-oss-20b consume su presupuesto de generacion razonando antes de responder.
-Con los 220 tokens de los demas modelos devuelve cadena vacia, y el arnes
-registraba doce casos sin veredicto y todas las metricas a cero sin lanzar
-ninguna excepcion. Con 800 tokens responde a veces y se corta a mitad de frase
-otras: de ocho ejecuciones, solo una completo los doce veredictos.
-
-El guion de ablacion agregaba esas ejecuciones parciales junto a las integras y
-las presentaba en la misma tabla resumen, porque solo descartaba una ejecucion
-cuando no lograba extraer NINGUN veredicto. Siete de doce pasaban sin ruido.
-Corregido: ahora se exige extraccion completa, se excluye la ejecucion entera
-si falta un solo veredicto y se informa de cuantas se han descartado.
-
-Las cifras del 20B quedan retiradas por este motivo. La conclusion no es que el
-modelo sea peor, sino que no es comparable bajo un diseno que fija el coste por
-caso. Consta como limitacion y como sexto modo de fallo en 6.2.5.
-
-## Otras correcciones
-
-  - --max-tokens propagado desde el guion de ablacion al arnes, y registrado
-    en el JSON: sin ese dato las cifras de coste de distintas tandas no serian
-    comparables entre si.
-  - Los desplazamientos de turno pasan de [0,4,8,12,16,20] a [0,1,2,3]. El
-    periodo de test dura 7,7 h, de modo que con turnos de 4 h el desplazamiento
-    no puede pasar de 3,7 y la primera version abortaba a mitad.
-  - El arnes localiza su fichero de resultados declarandolo por salida estandar
-    en lugar de comparar el directorio antes y despues. El nombre tenia
-    resolucion de minuto y dos ejecuciones de medio minuto caian en el mismo,
-    de modo que la segunda sobrescribia a la primera y se registraba un error
-    inexistente sobre una ejecucion terminada con normalidad. El nombre lleva
-    ahora los segundos.
-  - construir_turno devuelve codigo 2 cuando el desplazamiento cae fuera del
-    periodo, para que quien lo invoque pueda distinguirlo de un fallo real.
+Se anade a 5.12 una seccion que declara por que NO se ha realizado: la
+ejecucion local no es una limitacion sufrida sino la premisa del trabajo, y una
+cifra medida contra un modelo remoto no seria utilizable en el escenario que se
+modela. El objetivo 4 se resolvio por descomposicion en capas.
