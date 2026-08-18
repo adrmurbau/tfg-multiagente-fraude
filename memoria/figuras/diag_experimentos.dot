@@ -1,0 +1,50 @@
+digraph {
+  rankdir=TB;
+  bgcolor="transparent";
+  node [fontname="Helvetica", fontsize=10, shape=box, style="rounded,filled",
+        penwidth=1.4, margin="0.16,0.10"];
+  edge [fontname="Helvetica", fontsize=9, color="#555555", penwidth=1.1,
+        arrowsize=0.8];
+
+  ds [label="Conjunto ULB\n284.807 transacciones", color="#5B6670", fillcolor="#F0F1F2"];
+
+  subgraph cluster_part {
+    label="Particiones"; fontname="Helvetica"; fontsize=10; fontcolor="#5B6670";
+    color="#5B6670"; style=dashed;
+    alea [label="Aleatoria\nestratificada", color="#2E5A88", fillcolor="#E8EFF6"];
+    temp [label="Temporal\npasado → futuro", color="#2E5A88", fillcolor="#E8EFF6"];
+  }
+
+  subgraph cluster_c1 {
+    label="Experimentos sobre la capa 1"; fontname="Helvetica"; fontsize=10;
+    fontcolor="#2E5A88"; color="#2E5A88"; style=dashed;
+    e1 [label="Comparación de detectores\nXGBoost · RF · Isolation Forest", color="#2E5A88", fillcolor="#E8EFF6"];
+    e2 [label="Ablación del desbalanceo\n4 estrategias", color="#2E5A88", fillcolor="#E8EFF6"];
+    e3 [label="Ablación de variables\n4 grupos", color="#2E5A88", fillcolor="#E8EFF6"];
+  }
+
+  turnos [label="4 turnos de 4 h\npor desplazamiento del inicio", color="#5B6670", fillcolor="#F0F1F2"];
+
+  subgraph cluster_c2 {
+    label="Experimentos sobre la capa 2"; fontname="Helvetica"; fontsize=10;
+    fontcolor="#A8322D"; color="#A8322D"; style=dashed;
+    e4 [label="Comparativa de modelos\n3 modelos × 16 ejecuciones", color="#A8322D", fillcolor="#FBEDEC"];
+    e5 [label="Ablación del expediente\n3 niveles × 48 ejecuciones", color="#A8322D", fillcolor="#FBEDEC"];
+    e6 [label="Corrección de dominio\n2 condiciones × 192 veredictos", color="#A8322D", fillcolor="#FBEDEC"];
+    e7 [label="Modelo de mayor capacidad\n72B por descomposición en capas", color="#A8322D", fillcolor="#FBEDEC"];
+    e8 [label="Operación en continuo\nventanas de 5 a 240 min", color="#A8322D", fillcolor="#FBEDEC"];
+  }
+
+  base [label="LÍNEA BASE\nel detector sin capa 2", shape=box, color="#3D7A4E",
+        fillcolor="#EBF3ED", penwidth=2];
+
+  ds -> alea; ds -> temp;
+  alea -> e1; temp -> e1; alea -> e2; temp -> e3;
+  temp -> turnos;
+  turnos -> e4; turnos -> e5; turnos -> e6; turnos -> e7; turnos -> e8;
+  e1 -> base [style=invis];
+  base -> e4 [label="  se compara contra", color="#3D7A4E", fontcolor="#3D7A4E", penwidth=1.6];
+  base -> e5 [color="#3D7A4E", penwidth=1.6];
+  base -> e6 [color="#3D7A4E", penwidth=1.6];
+
+}

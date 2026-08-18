@@ -1,0 +1,44 @@
+digraph {
+  rankdir=TB;
+  bgcolor="transparent";
+  node [fontname="Helvetica", fontsize=10, shape=box, style="rounded,filled",
+        penwidth=1.4, margin="0.16,0.10"];
+  edge [fontname="Helvetica", fontsize=9, color="#555555", penwidth=1.1,
+        arrowsize=0.8];
+
+  subgraph cluster_datos {
+    label="Datos"; fontname="Helvetica"; fontsize=10; fontcolor="#5B6670";
+    color="#5B6670"; style=dashed; penwidth=1;
+    turno [label="Turno de 4 h\n32.791 transacciones", color="#5B6670", fillcolor="#F0F1F2"];
+  }
+
+  subgraph cluster_c1 {
+    label="Capa 1 — Detector  (determinista)"; fontname="Helvetica";
+    fontsize=10; fontcolor="#2E5A88"; color="#2E5A88"; style=dashed; penwidth=1.2;
+    punt [label="XGBoost\npuntúa cada transacción", color="#2E5A88", fillcolor="#E8EFF6"];
+    shap [label="Contribuciones\npor variable (SHAP)", color="#2E5A88", fillcolor="#E8EFF6"];
+    sel  [label="Selección por umbral\ny capacidad de revisión", color="#2E5A88", fillcolor="#E8EFF6"];
+  }
+
+  exp [label="EXPEDIENTE\n55 casos elevados", shape=note, color="#5B6670", fillcolor="#F0F1F2"];
+
+  subgraph cluster_c2 {
+    label="Capa 2 — Departamento  (estocástica)"; fontname="Helvetica";
+    fontsize=10; fontcolor="#A8322D"; color="#A8322D"; style=dashed; penwidth=1.2;
+    mod [label="Modelador\npresenta los casos", color="#A8322D", fillcolor="#FBEDEC"];
+    inv [label="Investigador\nexplica y emite veredicto", color="#A8322D", fillcolor="#FBEDEC"];
+    rep [label="Reportero\nredacta el informe", color="#A8322D", fillcolor="#FBEDEC"];
+  }
+
+  tabla [label="Tabla de casos\nensamblada sin modelo", color="#2E5A88", fillcolor="#E8EFF6"];
+  inf   [label="INFORME", shape=note, color="#5B6670", fillcolor="#F0F1F2"];
+  aud   [label="Auditor\ncobertura, invenciones, idioma", color="#3D7A4E", fillcolor="#EBF3ED"];
+  fin   [label="FIABLE  /  NO FIABLE", shape=box, color="#3D7A4E", fillcolor="#EBF3ED"];
+
+  turno -> punt -> shap -> sel -> exp;
+  exp -> mod -> inv -> rep;
+  inv -> tabla [label="veredictos", style=dashed];
+  tabla -> rep [style=dashed];
+  rep -> inf -> aud -> fin;
+
+}

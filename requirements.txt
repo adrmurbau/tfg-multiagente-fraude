@@ -1,9 +1,5 @@
 # TFG - Sistema multi-agente de deteccion de fraude bancario
 # Python 3.12 (NO usar 3.13: CrewAI tiene dependencias que aun rompen)
-#
-# Fase 1 = nucleo minimo. Las dependencias de fases posteriores
-# (shap, matplotlib, imbalanced-learn) se anaden cuando toque, para
-# no arriesgar el resolver de pip en el primer arranque.
 
 # --- Capa 2: agentes LLM ---
 crewai>=0.86
@@ -15,5 +11,33 @@ pandas>=2.2
 numpy>=1.26,<3
 joblib>=1.4
 
-# --- Contrastes estadisticos del experimento (Fase 5) ---
+# --- Contrastes estadisticos de los experimentos ---
 scipy>=1.11
+
+# --- Remuestreo, solo para la ablacion del desbalanceo ---
+# El sistema NO usa SMOTE: pondera el gradiente. Esta dependencia existe
+# unicamente para poder medir que ocurre al aplicarlo, incluido el caso
+# incorrecto de aplicarlo antes de dividir el conjunto.
+imbalanced-learn>=0.12
+
+# --- Figuras de la memoria (diagramas de Gantt del capitulo 3) ---
+matplotlib>=3.8
+
+# ----------------------------------------------------------------------
+# ENTORNO APARTE PARA MODELOS QUE NO CABEN EN VRAM
+#
+# La comparacion del objetivo 4 usa descomposicion por capas y exige un
+# PyTorch compilado para la arquitectura de la GPU. NO se instala aqui: su
+# version de torch sustituiria a la que arrastra CrewAI y dejaria inservible
+# el entorno con el que se han obtenido todos los demas resultados.
+#
+#     python -m venv .venv-airllm
+#     .\.venv-airllm\Scripts\Activate.ps1
+#     pip install torch --index-url https://download.pytorch.org/whl/cu128
+#     pip install airllm bitsandbytes transformers accelerate
+#     pip install pandas numpy xgboost scikit-learn pydantic joblib requests
+#
+# La rueda de CUDA depende de la tarjeta: cu128 corresponde a las Blackwell
+# (serie RTX 50). scripts/investigador_solo.py comprueba que la GPU funciona
+# de verdad, ejecutando una operacion, antes de descargar el modelo.
+# ----------------------------------------------------------------------

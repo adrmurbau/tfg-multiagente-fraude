@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Departamento antifraude — demostrador</title>
+<link rel="stylesheet" href="/estilo.css">
+</head>
+<body>
+
+<header>
+  <h1>Departamento antifraude</h1>
+  <p class="sub">Detector tabular con una capa de agentes encima.
+     Todo se ejecuta en local.</p>
+  <div id="estado" class="estado">Comprobando el entorno…</div>
+</header>
+
+<div id="turno-activo" class="turno-activo oculto"></div>
+
+<nav class="pasos">
+  <button class="paso activo" data-panel="p-turno"><span>1</span> Turno</button>
+  <button class="paso" data-panel="p-caso"><span>2</span> Caso</button>
+  <button class="paso" data-panel="p-investigar"><span>3</span> Investigación</button>
+  <button class="paso" data-panel="p-informe"><span>4</span> Informe</button>
+</nav>
+
+<!-- ------------------------------------------------------ 1. TURNO -->
+<section id="p-turno" class="panel visible">
+  <h2>1. Construir un turno y detectar</h2>
+  <p class="ayuda">La capa 1 puntúa todas las transacciones del periodo y eleva
+     a revisión las que superan el umbral, hasta agotar la capacidad del equipo.</p>
+
+  <div class="controles">
+    <label>Duración (h)<input type="number" id="horas" value="4" step="0.5" min="0.5"></label>
+    <label>Desplazamiento (h)<input type="number" id="desp" value="0" step="1" min="0" max="3"></label>
+    <label>Umbral<input type="number" id="umbral" value="0.05" step="0.01" min="0.01" max="0.99"></label>
+    <label>Capacidad (casos)<input type="number" id="capacidad" value="60" step="5" min="5"></label>
+    <button id="btn-turno" class="primario">Detectar</button>
+  </div>
+
+  <div id="resumen-turno" class="tarjetas"></div>
+  <div id="tabla-casos"></div>
+</section>
+
+<!-- ------------------------------------------------------- 2. CASO -->
+<section id="p-caso" class="panel">
+  <h2>2. El caso, tal como lo ve el modelo</h2>
+  <p class="ayuda">A la izquierda, las cifras que calcula el detector. A la
+     derecha, el texto exacto que se incrusta en el enunciado. El desplegable
+     reproduce la ablación de la sección 5.7: retira información y observa qué
+     deja de ver el modelo.</p>
+
+  <div class="controles">
+    <label>Caso <input type="number" id="n-caso" value="1" min="1"></label>
+    <label>Nivel de expediente
+      <select id="nivel-dossier">
+        <option value="completo">completo — probabilidad y nivel de riesgo</option>
+        <option value="sin_nivel">sin nivel — solo probabilidad</option>
+        <option value="ciego">ciego — sin puntuación alguna</option>
+      </select>
+    </label>
+    <button id="btn-caso" class="primario">Ver caso</button>
+  </div>
+
+  <div class="dos-columnas">
+    <div><h3>Lo que calcula el detector</h3><div id="detalle-caso"></div></div>
+    <div><h3>Lo que recibe el modelo</h3><pre id="dossier" class="mono"></pre></div>
+  </div>
+</section>
+
+<!-- ------------------------------------------------- 3. INVESTIGAR -->
+<section id="p-investigar" class="panel">
+  <h2>3. Investigación de un caso</h2>
+  <p class="ayuda">El Investigador produce dos salidas: un párrafo explicativo
+     y un veredicto. Se muestran por separado a propósito, porque el resultado
+     central de este trabajo es que no siempre se corresponden.</p>
+
+  <div class="controles">
+    <label>Caso <input type="number" id="n-inv" value="1" min="1"></label>
+    <label>Modelo <select id="modelo-inv"></select></label>
+    <label class="check"><input type="checkbox" id="dominio">
+      Corrección de dominio</label>
+    <label>Tokens <input type="number" id="max-tokens" value="220" step="20" min="60"></label>
+    <button id="btn-inv" class="primario">Investigar</button>
+  </div>
+
+  <div id="aviso-inv"></div>
+  <div class="dos-columnas">
+    <div><h3>Párrafo explicativo</h3><div id="prosa" class="cuadro"></div></div>
+    <div><h3>Veredicto</h3><div id="veredicto" class="cuadro"></div></div>
+  </div>
+  <details><summary>Ver el enunciado completo enviado al modelo</summary>
+    <pre id="prompt-inv" class="mono"></pre></details>
+</section>
+
+<!-- ---------------------------------------------------- 4. INFORME -->
+<section id="p-informe" class="panel">
+  <h2>4. Informe del departamento</h2>
+  <p class="ayuda">Ejecuta los seis agentes sobre el expediente completo y
+     audita el resultado. Tarda varios minutos: el coste está en la capa 2,
+     no en la detección.</p>
+
+  <div class="controles">
+    <label>Modelo <select id="modelo-inf"></select></label>
+    <label>Modo
+      <select id="modo">
+        <option value="interpreta">interpreta — explica sin decidir</option>
+        <option value="revisa" selected>revisa — puede descartar casos</option>
+      </select>
+    </label>
+    <button id="btn-informe" class="primario">Ejecutar departamento</button>
+  </div>
+
+  <div id="auditoria"></div>
+  <div id="salida-informe"></div>
+</section>
+
+<script src="/app.js"></script>
+</body>
+</html>

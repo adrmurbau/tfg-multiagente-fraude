@@ -1,0 +1,34 @@
+digraph {
+  rankdir=TB;
+  bgcolor="transparent";
+  node [fontname="Helvetica", fontsize=10, shape=box, style="rounded,filled",
+        penwidth=1.4, margin="0.16,0.10"];
+  edge [fontname="Helvetica", fontsize=9, color="#555555", penwidth=1.1,
+        arrowsize=0.8];
+
+  tx   [label="Transacción\nV1–V28, importe, hora", color="#5B6670", fillcolor="#F0F1F2"];
+  prob [label="Probabilidad de fraude", color="#2E5A88", fillcolor="#E8EFF6"];
+  contr[label="Contribuciones por variable", color="#2E5A88", fillcolor="#E8EFF6"];
+  niv  [label="Nivel de riesgo\n(etiqueta derivada del umbral)", color="#2E5A88", fillcolor="#E8EFF6"];
+  dos  [label="DOSSIER DEL CASO", shape=note, color="#5B6670", fillcolor="#F0F1F2"];
+
+  llm  [label="Investigador\n(modelo de lenguaje)", color="#A8322D", fillcolor="#FBEDEC", penwidth=2];
+  pros [label="Párrafo explicativo", color="#A8322D", fillcolor="#FBEDEC"];
+  ver  [label="VEREDICTO\nconfirmado / descartado", color="#A8322D", fillcolor="#FBEDEC"];
+
+  met  [label="Métricas del sistema", color="#3D7A4E", fillcolor="#EBF3ED"];
+  txt  [label="Texto del informe", color="#5B6670", fillcolor="#F0F1F2"];
+
+  tx -> prob; tx -> contr; prob -> niv;
+  prob -> dos; contr -> dos; niv -> dos [label="  se retira en\n  la ablación", fontcolor="#5B6670", style=dashed];
+  dos -> llm;
+  llm -> pros; llm -> ver;
+  pros -> txt;
+  ver -> met;
+
+  { rank=same; pros; ver; }
+  pros -> ver [label="  no se corresponden\n  (sección 5.12)", color="#A8322D",
+               style=dotted, penwidth=1.6, fontcolor="#A8322D", dir=both,
+               arrowhead=none, arrowtail=none];
+
+}

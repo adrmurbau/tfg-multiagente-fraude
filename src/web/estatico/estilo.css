@@ -1,0 +1,195 @@
+/* Demostrador del departamento antifraude.
+   El color no es decorativo: se mantiene el mismo convenio que los diagramas
+   de la memoria, azul para lo determinista y rojo para lo estocastico. */
+
+:root {
+  --azul: #2E5A88;  --azul-claro: #E8EFF6;
+  --rojo: #A8322D;  --rojo-claro: #FBEDEC;
+  --verde: #3D7A4E; --verde-claro: #EBF3ED;
+  --ambar: #B8860B; --ambar-claro: #FBF4E3;
+  --gris: #5B6670;  --borde: #DFE3E6;  --fondo: #F7F8F9;
+  --texto: #1F2429;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0; padding: 0 0 60px;
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--texto); background: var(--fondo); line-height: 1.55;
+}
+
+header {
+  background: #fff; border-bottom: 1px solid var(--borde);
+  padding: 22px 32px 18px;
+}
+header h1 { margin: 0; font-size: 22px; font-weight: 600; }
+.sub { margin: 4px 0 12px; color: var(--gris); font-size: 14px; }
+
+.estado {
+  display: inline-block; font-size: 13px; padding: 6px 12px;
+  border-radius: 4px; background: var(--fondo); border: 1px solid var(--borde);
+}
+.estado .ok  { color: var(--verde); font-weight: 600; }
+.estado .mal { color: var(--rojo);  font-weight: 600; }
+.estado span + span { margin-left: 16px; }
+
+/* --- Navegacion por pasos --- */
+.pasos { display: flex; gap: 2px; padding: 0 32px; background: #fff;
+         border-bottom: 1px solid var(--borde); }
+.paso {
+  border: none; background: none; cursor: pointer; padding: 12px 18px;
+  font-size: 14px; color: var(--gris); border-bottom: 3px solid transparent;
+  font-family: inherit;
+}
+.paso span {
+  display: inline-block; width: 20px; height: 20px; line-height: 20px;
+  border-radius: 50%; background: var(--borde); color: #fff;
+  text-align: center; font-size: 12px; margin-right: 7px;
+}
+.paso:hover { color: var(--texto); }
+.paso.activo { color: var(--azul); border-bottom-color: var(--azul);
+               font-weight: 600; }
+.paso.activo span { background: var(--azul); }
+
+/* --- Paneles --- */
+.panel { display: none; padding: 26px 32px; max-width: 1180px; }
+.panel.visible { display: block; }
+.panel h2 { margin: 0 0 6px; font-size: 18px; font-weight: 600; }
+.panel h3 { font-size: 14px; font-weight: 600; margin: 0 0 8px;
+            color: var(--gris); text-transform: uppercase;
+            letter-spacing: .04em; }
+.ayuda { margin: 0 0 20px; color: var(--gris); font-size: 14px;
+         max-width: 760px; }
+
+/* --- Controles --- */
+.controles {
+  display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
+  background: #fff; border: 1px solid var(--borde); border-radius: 6px;
+  padding: 16px; margin-bottom: 22px;
+}
+.controles label { display: flex; flex-direction: column; font-size: 12px;
+                   color: var(--gris); gap: 5px; }
+.controles label.check { flex-direction: row; align-items: center;
+                         font-size: 13px; color: var(--texto); }
+.controles input, .controles select {
+  font-family: inherit; font-size: 14px; padding: 6px 9px;
+  border: 1px solid var(--borde); border-radius: 4px; background: #fff;
+  color: var(--texto);
+}
+.controles input[type=number] { width: 90px; }
+.controles input[type=checkbox] { width: auto; margin-right: 6px; }
+
+.primario {
+  background: var(--azul); color: #fff; border: none; border-radius: 4px;
+  padding: 9px 20px; font-size: 14px; cursor: pointer; font-family: inherit;
+  font-weight: 500;
+}
+.primario:hover { background: #24486D; }
+.primario:disabled { background: var(--gris); cursor: progress; opacity: .7; }
+
+/* --- Tarjetas de resumen --- */
+.tarjetas { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; }
+.tarjeta {
+  background: #fff; border: 1px solid var(--borde); border-radius: 6px;
+  padding: 14px 18px; min-width: 130px;
+}
+.tarjeta .valor { font-size: 24px; font-weight: 600; }
+.tarjeta .etiqueta { font-size: 12px; color: var(--gris); margin-top: 2px; }
+.tarjeta.destacada { border-color: var(--azul); background: var(--azul-claro); }
+.tarjeta.destacada .valor { color: var(--azul); }
+
+/* --- Tablas --- */
+table { border-collapse: collapse; width: 100%; background: #fff;
+        border: 1px solid var(--borde); border-radius: 6px; font-size: 13px; }
+th { background: var(--fondo); text-align: left; padding: 9px 12px;
+     font-weight: 600; color: var(--gris); font-size: 12px;
+     text-transform: uppercase; letter-spacing: .03em;
+     border-bottom: 1px solid var(--borde); }
+td { padding: 8px 12px; border-bottom: 1px solid #F0F2F3; }
+tr:last-child td { border-bottom: none; }
+tr.fraude { background: var(--rojo-claro); }
+tr:hover { background: var(--azul-claro); cursor: pointer; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+.pastilla { display: inline-block; padding: 2px 9px; border-radius: 10px;
+            font-size: 11px; font-weight: 600; }
+.pastilla.alto  { background: var(--rojo-claro);  color: var(--rojo); }
+.pastilla.medio { background: var(--ambar-claro); color: var(--ambar); }
+.pastilla.bajo  { background: var(--verde-claro); color: var(--verde); }
+
+/* --- Dos columnas --- */
+.dos-columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+@media (max-width: 900px) { .dos-columnas { grid-template-columns: 1fr; } }
+
+.mono {
+  font-family: "SF Mono", Consolas, "Liberation Mono", monospace;
+  font-size: 12.5px; line-height: 1.5; background: #fff;
+  border: 1px solid var(--borde); border-radius: 6px; padding: 14px;
+  white-space: pre-wrap; overflow-x: auto; margin: 0;
+}
+.cuadro { background: #fff; border: 1px solid var(--borde);
+          border-radius: 6px; padding: 16px; font-size: 14px; }
+
+/* --- Barras de contribucion --- */
+.contrib { display: flex; align-items: center; gap: 10px; margin: 5px 0;
+           font-size: 13px; }
+.contrib .var { width: 52px; font-family: monospace; color: var(--gris); }
+.contrib .barra { flex: 1; height: 16px; background: var(--fondo);
+                  border-radius: 3px; position: relative; }
+.contrib .relleno { position: absolute; top: 0; height: 100%; border-radius: 3px; }
+.contrib .relleno.pos { background: var(--rojo); }
+.contrib .relleno.neg { background: var(--azul); }
+.contrib .cifra { width: 62px; text-align: right;
+                  font-variant-numeric: tabular-nums; }
+
+/* --- Veredicto --- */
+.veredicto-grande { font-size: 26px; font-weight: 700; letter-spacing: .02em; }
+.veredicto-grande.confirmado { color: var(--verde); }
+.veredicto-grande.descartado { color: var(--rojo); }
+.veredicto-grande.ninguno    { color: var(--gris); }
+
+.nota { font-size: 13px; color: var(--gris); margin-top: 10px; }
+.alerta { background: var(--rojo-claro); border: 1px solid var(--rojo);
+          color: var(--rojo); border-radius: 6px; padding: 12px 16px;
+          font-size: 13.5px; margin-bottom: 18px; }
+.bien { background: var(--verde-claro); border: 1px solid var(--verde);
+        color: var(--verde); border-radius: 6px; padding: 12px 16px;
+        font-size: 13.5px; margin-bottom: 18px; }
+.aviso { background: var(--ambar-claro); border: 1px solid var(--ambar);
+         color: #7A5B08; border-radius: 6px; padding: 12px 16px;
+         font-size: 13.5px; margin-bottom: 18px; }
+
+details { margin-top: 20px; }
+summary { cursor: pointer; font-size: 13px; color: var(--azul);
+          padding: 6px 0; }
+
+
+/* --- Barra de turno activo -------------------------------------------
+   Sin ella, las pantallas 2 y 3 piden un numero de caso sin decir de que
+   expediente. Durante las pruebas, un turno que fallo dejo cargado el
+   anterior y la interfaz respondia "el caso 55 no existe" sin explicar que
+   el expediente vigente solo tenia 32. */
+.turno-activo {
+  background: var(--azul-claro); border-bottom: 1px solid #C9D9E8;
+  padding: 9px 32px; font-size: 13px; color: var(--azul);
+  display: flex; gap: 22px; align-items: center; flex-wrap: wrap;
+}
+.turno-activo.oculto { display: none; }
+.turno-activo b { font-variant-numeric: tabular-nums; }
+.turno-activo .aviso-sin-turno { color: var(--rojo); }
+
+/* --- Detalle de la auditoria ------------------------------------------ */
+.auditoria-detalle { font-size: 13px; margin-top: 10px; }
+.auditoria-detalle li { margin: 3px 0; }
+.veredicto-aud { font-size: 15px; font-weight: 700; letter-spacing: .02em; }
+
+/* La tabla del expediente puede tener sesenta filas: se limita su altura
+   para que el resto de la pagina siga siendo alcanzable. */
+.tabla-scroll { max-height: 460px; overflow-y: auto;
+                border: 1px solid var(--borde); border-radius: 6px; }
+.tabla-scroll table { border: none; border-radius: 0; }
+.tabla-scroll thead th { position: sticky; top: 0; z-index: 1; }
+
+.tarjeta.grave { border-color: var(--rojo); background: var(--rojo-claro); }
+.tarjeta.grave .valor { color: var(--rojo); }
