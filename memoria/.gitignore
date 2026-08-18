@@ -2,10 +2,20 @@ node_modules/
 package-lock.json
 package.json
 
-# Ficheros temporales de la previsualización (conversión a PDF e imágenes)
+# Ficheros temporales de la previsualizacion (conversion a PDF e imagenes)
 *.pdf
 *.jpg
 *.png
+
+# Las figuras SI se versionan. Sin ellas la memoria no se puede regenerar desde
+# un clon limpio: generate.js las incrusta en el .docx y si faltan escribe una
+# marca de pendiente en su lugar. La regla *.png de arriba existe para las
+# imagenes que produce la conversion a PDF al previsualizar, y estuvo a punto
+# de dejar los dos diagramas de Gantt fuera del repositorio sin avisar.
+!figuras/
+!figuras/*.png
+!capturas/
+!capturas/*.png
 
 # Temporales de LibreOffice, que aparecen al convertir el .docx para revisarlo
 .~lock.*#
