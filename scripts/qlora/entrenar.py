@@ -138,6 +138,10 @@ def main():
         prompt_ids = tk.apply_chat_template(
             [{"role": "user", "content": ej["prompt"]}],
             tokenize=True, add_generation_prompt=True)
+        # Segun la version de transformers, apply_chat_template devuelve una
+        # lista de ids o un BatchEncoding; se normaliza a lista en ambos casos.
+        if not isinstance(prompt_ids, list):
+            prompt_ids = prompt_ids["input_ids"]
         resp_ids = tk(ej["respuesta"] + tk.eos_token,
                       add_special_tokens=False)["input_ids"]
         ids = (prompt_ids + resp_ids)[:args.max_len]
