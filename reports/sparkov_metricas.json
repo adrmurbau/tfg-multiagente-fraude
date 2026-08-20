@@ -1,0 +1,204 @@
+{
+  "metricas": {
+    "modelo": "XGBoost-Sparkov",
+    "auc_pr": 0.07748458771014856,
+    "roc_auc": 0.7226722990280686,
+    "precision": 0.009154404781039497,
+    "recall": 0.9485238455715367,
+    "f1": 0.01813379644704946,
+    "tp": 1253,
+    "fp": 135621,
+    "fn": 68,
+    "tn": 55939,
+    "prevalencia": 0.006848782409879667,
+    "precision@50": 0.42,
+    "aciertos@50": 21,
+    "precision@100": 0.4,
+    "aciertos@100": 40,
+    "precision@200": 0.345,
+    "aciertos@200": 69,
+    "split": "temporal"
+  },
+  "ejemplos_contribuciones": [
+    {
+      "comercio": "Kozey-Kuhlman",
+      "categoria": "personal_care",
+      "importe": 744.54,
+      "hora": 22.816666666666663,
+      "edad": 75.60027378507871,
+      "distancia_km": 109.67337400303636,
+      "poblacion_ciudad": 9410,
+      "probabilidad": 0.9999992847442627,
+      "contribuciones": [
+        [
+          "categoria_personal_care",
+          5.108757972717285
+        ],
+        [
+          "hora",
+          3.6054913997650146
+        ],
+        [
+          "importe",
+          3.284625291824341
+        ],
+        [
+          "edad",
+          1.2468292713165283
+        ],
+        [
+          "categoria_home",
+          0.36498382687568665
+        ],
+        [
+          "dia_semana",
+          0.282341867685318
+        ]
+      ]
+    },
+    {
+      "comercio": "Weimann-Lockman",
+      "categoria": "kids_pets",
+      "importe": 910.51,
+      "hora": 23.03333333333333,
+      "edad": 64.11772758384669,
+      "distancia_km": 30.26553051951678,
+      "poblacion_ciudad": 18248,
+      "probabilidad": 0.9999992847442627,
+      "contribuciones": [
+        [
+          "categoria_kids_pets",
+          5.039330959320068
+        ],
+        [
+          "importe",
+          3.7351348400115967
+        ],
+        [
+          "hora",
+          3.2361831665039062
+        ],
+        [
+          "edad",
+          1.0691102743148804
+        ],
+        [
+          "categoria_home",
+          0.269269198179245
+        ],
+        [
+          "sesgo_base",
+          0.23933279514312744
+        ]
+      ]
+    },
+    {
+      "comercio": "Medhurst, Cartwright and Ebert",
+      "categoria": "personal_care",
+      "importe": 902.19,
+      "hora": 22.0,
+      "edad": 84.9719370294319,
+      "distancia_km": 120.70763135338116,
+      "poblacion_ciudad": 940359,
+      "probabilidad": 0.9999992847442627,
+      "contribuciones": [
+        [
+          "categoria_personal_care",
+          5.111295700073242
+        ],
+        [
+          "importe",
+          3.9925169944763184
+        ],
+        [
+          "hora",
+          3.218413829803467
+        ],
+        [
+          "edad",
+          1.2978979349136353
+        ],
+        [
+          "distancia_km",
+          -0.3399851620197296
+        ],
+        [
+          "dia_semana",
+          0.3347603976726532
+        ]
+      ]
+    },
+    {
+      "comercio": "Zemlak, Tillman and Cremin",
+      "categoria": "personal_care",
+      "importe": 732.52,
+      "hora": 22.35,
+      "edad": 83.78918548939083,
+      "distancia_km": 110.99877634872416,
+      "poblacion_ciudad": 24983,
+      "probabilidad": 0.9999991655349731,
+      "contribuciones": [
+        [
+          "categoria_personal_care",
+          5.0969648361206055
+        ],
+        [
+          "hora",
+          3.6898036003112793
+        ],
+        [
+          "importe",
+          3.3561630249023438
+        ],
+        [
+          "edad",
+          1.2069485187530518
+        ],
+        [
+          "categoria_home",
+          0.3562663197517395
+        ],
+        [
+          "categoria_health_fitness",
+          0.27205318212509155
+        ]
+      ]
+    },
+    {
+      "comercio": "Mosciski Group",
+      "categoria": "travel",
+      "importe": 866.48,
+      "hora": 22.266666666666666,
+      "edad": 70.85831622176592,
+      "distancia_km": 52.36887045450637,
+      "poblacion_ciudad": 5720,
+      "probabilidad": 0.9999991655349731,
+      "contribuciones": [
+        [
+          "categoria_travel",
+          4.461300373077393
+        ],
+        [
+          "importe",
+          3.991821527481079
+        ],
+        [
+          "hora",
+          3.7273123264312744
+        ],
+        [
+          "edad",
+          1.432421088218689
+        ],
+        [
+          "poblacion_ciudad",
+          -0.3470883071422577
+        ],
+        [
+          "categoria_home",
+          0.2719568908214569
+        ]
+      ]
+    }
+  ]
+}
