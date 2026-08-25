@@ -81,7 +81,13 @@ def cargar_generador(base, con_adaptador):
         entrada = tk.apply_chat_template(
             [{"role": "user", "content": prompt}],
             tokenize=True, add_generation_prompt=True, return_tensors="pt",
-        ).to(m.device)
+        )
+        # Segun la version de transformers, esto devuelve un tensor plano o
+        # un BatchEncoding; se normaliza a tensor antes de pasarlo a generate,
+        # que espera input_ids como primer argumento posicional, no un dict.
+        if not torch.is_tensor(entrada):
+            entrada = entrada["input_ids"]
+        entrada = entrada.to(m.device)
         with torch.no_grad():
             salida = m.generate(
                 entrada, max_new_tokens=max_tokens, do_sample=False,
