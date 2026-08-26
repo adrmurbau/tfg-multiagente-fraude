@@ -1,0 +1,29 @@
+digraph {
+  rankdir=LR;
+  bgcolor="transparent";
+  node [fontname="Helvetica", fontsize=10, shape=box, style="rounded,filled",
+        penwidth=1.4, margin="0.16,0.10"];
+  edge [fontname="Helvetica", fontsize=9, color="#555555", penwidth=1.1,
+        arrowsize=0.8];
+
+  raiz [label="tfg-multiagente-fraude/", shape=folder, color="#5B6670", fillcolor="#F0F1F2"];
+
+  src    [label="src/\ncodigo del sistema", shape=folder, color="#2E5A88", fillcolor="#E8EFF6"];
+  det    [label="detector/\nCapa 1: train, predict, metrics", shape=folder, color="#2E5A88", fillcolor="#E8EFF6"];
+  ag     [label="agents/\nCapa 2: crew, tools, prompts", shape=folder, color="#A8322D", fillcolor="#FBEDEC"];
+  web    [label="web/\ndemostrador FastAPI", shape=folder, color="#2E5A88", fillcolor="#E8EFF6"];
+
+  scripts [label="scripts/\nexperimentos y ablaciones", shape=folder, color="#3D7A4E", fillcolor="#EBF3ED"];
+  qlora   [label="qlora/, sparkov/\nextensiones", shape=folder, color="#3D7A4E", fillcolor="#EBF3ED"];
+
+  datos  [label="data/, models/\nno versionados\n(licencia y tamano)", shape=folder, color="#5B6670", fillcolor="#F0F1F2"];
+  rep    [label="reports/\nresultados de cada ejecucion\n(SI versionados)", shape=folder, color="#5B6670", fillcolor="#F0F1F2"];
+
+  mem    [label="memoria/\ncontent.js + generate.js\n-> memoria_TFG.docx", shape=folder, color="#5B6670", fillcolor="#F0F1F2"];
+  docs   [label="docs/\nguiones y decisiones", shape=folder, color="#5B6670", fillcolor="#F0F1F2"];
+
+  raiz -> src; raiz -> scripts; raiz -> datos; raiz -> rep; raiz -> mem; raiz -> docs;
+  src -> det; src -> ag; src -> web;
+  scripts -> qlora;
+
+}

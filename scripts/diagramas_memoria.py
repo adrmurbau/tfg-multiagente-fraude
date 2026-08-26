@@ -171,7 +171,38 @@ def diag_experimentos():
 ''', rankdir="TB")
 
 
-DIAGRAMAS = [diag_arquitectura, diag_caso, diag_experimentos]
+def diag_estructura():
+    """Esquema de directorios del repositorio, para el apendice A.
+
+    No es un `tree` literal -con node_modules, entornos virtuales y decenas
+    de informes en reports/ el arbol real es ilegible-, sino la separacion
+    que importa: donde vive el codigo determinista, donde el estocastico,
+    donde los datos y donde la memoria.
+    """
+    render("diag_estructura", f'''
+  raiz [label="tfg-multiagente-fraude/", shape=folder, color="{GRIS}", fillcolor="{GRIS_F}"];
+
+  src    [label="src/\\ncodigo del sistema", shape=folder, color="{AZUL}", fillcolor="{AZUL_F}"];
+  det    [label="detector/\\nCapa 1: train, predict, metrics", shape=folder, color="{AZUL}", fillcolor="{AZUL_F}"];
+  ag     [label="agents/\\nCapa 2: crew, tools, prompts", shape=folder, color="{ROJO}", fillcolor="{ROJO_F}"];
+  web    [label="web/\\ndemostrador FastAPI", shape=folder, color="{AZUL}", fillcolor="{AZUL_F}"];
+
+  scripts [label="scripts/\\nexperimentos y ablaciones", shape=folder, color="{VERDE}", fillcolor="{VERDE_F}"];
+  qlora   [label="qlora/, sparkov/\\nextensiones", shape=folder, color="{VERDE}", fillcolor="{VERDE_F}"];
+
+  datos  [label="data/, models/\\nno versionados\\n(licencia y tamano)", shape=folder, color="{GRIS}", fillcolor="{GRIS_F}"];
+  rep    [label="reports/\\nresultados de cada ejecucion\\n(SI versionados)", shape=folder, color="{GRIS}", fillcolor="{GRIS_F}"];
+
+  mem    [label="memoria/\\ncontent.js + generate.js\\n-> memoria_TFG.docx", shape=folder, color="{GRIS}", fillcolor="{GRIS_F}"];
+  docs   [label="docs/\\nguiones y decisiones", shape=folder, color="{GRIS}", fillcolor="{GRIS_F}"];
+
+  raiz -> src; raiz -> scripts; raiz -> datos; raiz -> rep; raiz -> mem; raiz -> docs;
+  src -> det; src -> ag; src -> web;
+  scripts -> qlora;
+''', rankdir="LR")
+
+
+DIAGRAMAS = [diag_arquitectura, diag_caso, diag_experimentos, diag_estructura]
 
 
 def main():
