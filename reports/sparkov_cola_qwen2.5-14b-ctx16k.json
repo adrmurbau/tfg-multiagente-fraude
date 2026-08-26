@@ -1,0 +1,146 @@
+[
+  {
+    "n": 1,
+    "es_fraude": true,
+    "comercio": "Lind, Huel and McClure",
+    "categoria": "gas_transport",
+    "importe": 93.28,
+    "probabilidad": 0.0018493948737159371,
+    "completo": {
+      "respuesta": "CASO 1\nEl detector marca esta transacción como sospechosa principalmente debido a la combinación de un importe relativamente bajo de 93.28 USD para una transacción en servicios de transporte de gas, una hora poco común para este tipo de transacción (2.7 horas de la mañana), y la edad del titular de 40 años, que no parece en sí misma una variable sospechosa pero contribuye de manera negativa. Además, la población de la ciudad del titular es alta (1,382,480 habitantes), lo que podría sugerir una actividad inusual en un área densamente poblada. A pesar de estos factores, el sesgo base y la hora del día contribuyen de manera positiva, lo que podría indicar cierta normalidad, pero no es suficiente para contrarrestar las otras señales negativas.\n\nVEREDICTO: DESCARTADO",
+      "veredicto": "DESCARTADO"
+    },
+    "reducido": {
+      "respuesta": "CASO 1\nEl detector de fraude señala que la transacción de 93.28 USD realizada a las 2.7 horas de la mañana es sospechosa debido a que el importe es significativamente bajo para el riesgo que representa, según las contribuciones de las variables. Aunque la hora del día tiene un efecto positivo, ya que las compras nocturnas suelen ser menos comunes y por tanto más sospechosas, el importe y otras variables negativas (var_1 y var_2) pesan más en la decisión, sugiriendo que hay patrones atípicos que no son comunes en transacciones legítimas. VEREDICTO: DESCARTADO",
+      "veredicto": "DESCARTADO"
+    }
+  },
+  {
+    "n": 2,
+    "es_fraude": true,
+    "comercio": "Lakin, Ferry and Beatty",
+    "categoria": "food_dining",
+    "importe": 101.07,
+    "probabilidad": 0.0031167708802968264,
+    "completo": {
+      "respuesta": "CASO 2 El detector de fraude señala esta transacción como sospechosa debido a varios factores: el importe de 101.07 USD es relativamente alto para la categoría de comida y bebida, y la hora del día (12.4 h) y la distancia del domicilio al comercio (109.0 km) son inusuales para un consumidor de 67 años en una ciudad de tamaño mediano. Estos factores, junto con la categoría de comercio, contribuyen a una probabilidad de fraude baja pero significativa.\n\nVEREDICTO: DESCARTADO",
+      "veredicto": "DESCARTADO"
+    },
+    "reducido": {
+      "respuesta": "CASO 2\nEl detector de fraude señala esta transacción como sospechosa debido a un conjunto de factores que incluyen un importe bajo de 101.07 USD, una hora del día poco común para transacciones (12.4 h), y valores atípicos en las variables var_1, var_2 y var_3. Estos factores, en conjunto con un sesgo base ligeramente positivo, sugieren un patrón poco común que podría indicar actividad fraudulenta. VEREDICTO: DESCARTADO",
+      "veredicto": "DESCARTADO"
+    }
+  },
+  {
+    "n": 3,
+    "es_fraude": true,
+    "comercio": "Hoppe, Harris and Bednar",
+    "categoria": "entertainment",
+    "importe": 103.25,
+    "probabilidad": 0.008268852718174458,
+    "completo": {
+      "respuesta": "CASO 3\n\nEl detector de fraude señala esta transacción como sospechosa debido a varios factores: el importe de 103.25 USD es relativamente bajo para un posible fraude, pero la combinación de una hora temprana de la madrugada (3.9 h) y una categoría de comercio de entretenimiento que no suele estar activa a esas horas, junto con la edad avanzada del titular (48 años) y la distancia considerable entre el domicilio y el comercio (108.4 km), sugiere un comportamiento inusual. Además, la población de la ciudad del titular es moderada, lo que no necesariamente indica un entorno propicio para el fraude, pero el conjunto de factores contribuye a una probabilidad de fraude del 0.83%, que aunque baja, es notable.\n\nVEREDICTO: DESCARTADO",
+      "veredicto": "DESCARTADO"
+    },
+    "reducido": {
+      "respuesta": "CASO 3\nEl detector de fraude señala esta transacción como sospechosa debido a un importe bajo de 103.25 USD, que tiene un impacto negativo en la puntuación de riesgo, y a una hora poco común de transacción, 3.9 horas (cerca de las 3:54 AM), que tiene un efecto positivo pero no lo suficiente para contrarrestar otros factores negativos. Además, las variables var_1, var_2 y var_3 también contribuyen negativamente a la puntuación, lo que sugiere patrones atípicos en la actividad del titular. A pesar de que la hora de la transacción es ligeramente favorable, el conjunto de factores negativos supera el sesgo base positivo, lo que lleva al detector a marcar esta transacción como potencialmente fraudulenta.\n\nVEREDICTO: DESCARTADO",
+      "veredicto": "DESCARTADO"
+    }
+  },
+  {
+    "n": 4,
+    "es_fraude": true,
+    "comercio": "Berge-Ullrich",
+    "categoria": "home",
+    "importe": 26.09,
+    "probabilidad": 0.009310474619269371,
+    "completo": {
+      "respuesta": "CASO 4\nEl detector de fraude señala esta transacción como sospechosa debido a un conjunto de factores que no encajan con patrones típicos de compra. El importe de la transacción es relativamente bajo, pero la distancia considerable entre la ubicación del titular y el comercio, sumado a la hora poco común del día para realizar compras, contribuyen a aumentar la probabilidad de fraude. Además, la edad del titular y la categoría del comercio también pesan negativamente, mientras que la pequeña población de la ciudad donde reside el titular tiene un efecto positivo, aunque no es suficiente para contrarrestar los otros factores negativos. VEREDICTO: DESCARTADO",
+      "veredicto": "DESCARTADO"
+    },
+    "reducido": {
+      "respuesta": "CASO 4\nEl detector de fraude señala esta transacción como sospechosa debido a un conjunto de factores que incluyen un importe bajo de 26.09 USD, que tiene un impacto negativo en la puntuación del modelo, y la hora del día, específicamente las 15.9 horas, que también contribuye negativamente. Además, las variables var_1 y var_2, que no han sido identificadas pero que tienen un efecto negativo en la puntuación, suman a la sospecha. A pesar de estos factores, la variable var_3 y el sesgo base proporcionan un contrapeso que reduce la probabilidad de fraude, pero no la eliminan completamente. VEREDICTO: DESCARTADO",
+      "veredicto": "DESCARTADO"
+    }
+  },
+  {
+    "n": 5,
+    "es_fraude": true,
+    "comercio": "McGlynn-Jaskolski",
+    "categoria": "misc_pos",
+    "importe": 156.52,
+    "probabilidad": 0.011013804003596306,
+    "completo": {
+      "respuesta": "CASO 5\n\nEl detector de fraude señala una transacción sospechosa en McGlynn-Jaskolski, un comercio de categoría misc_pos, debido a un importe elevado de 156.52 USD y a la distancia considerable entre el domicilio del titular y el comercio, que asciende a 76.4 km. Aunque la hora del día y la edad del titular contribuyen de forma positiva al score, el importe y la categoría del comercio pesan negativamente, lo que eleva la probabilidad de fraude a 0.0110. \n\nVEREDICTO: DESCARTADO",
+      "veredicto": "DESCARTADO"
+    },
+    "reducido": {
+      "respuesta": "CASO 5\nEl detector de fraude señala esta transacción como sospechosa debido a un importe relativamente alto de 156.52 USD que ocurre muy temprano en la mañana, a las 1.9 horas, lo que podría ser atípico para muchos consumidores. Además, aunque el importe y una variable no identificada (var_1) contribuyen negativamente a la probabilidad de fraude, otras variables como la hora del día y otras dos variables no identificadas (var_2 y var_3) aportan de manera positiva, incrementando la sospecha. El sesgo base también contribuye de manera leve al incremento de la probabilidad de fraude. VEREDICTO: DESCARTADO",
+      "veredicto": "DESCARTADO"
+    }
+  },
+  {
+    "n": 6,
+    "es_fraude": true,
+    "comercio": "Graham and Sons",
+    "categoria": "health_fitness",
+    "importe": 9.67,
+    "probabilidad": 0.02049814537167549,
+    "completo": {
+      "respuesta": "CASO 6\nEl detector de fraude señala esta transacción como sospechosa debido a varios factores: el importe bajo de 9.67 USD, la hora poco común de las 22:12, y la distancia considerable de 110.5 km entre la ubicación del titular y el comercio. Aunque la categoría de comercio \"health_fitness\" es común, su contribución negativa sugiere que no es típica para este tipo de establecimiento. La alta población de la ciudad del titular también contribuye negativamente, lo que podría indicar un entorno urbano no habitual para este tipo de transacción. VEREDICTO: DESCARTADO",
+      "veredicto": "DESCARTADO"
+    },
+    "reducido": {
+      "respuesta": "CASO 6\nEl detector de fraude señala este caso como sospechoso debido a un conjunto de factores que incluyen un importe de transacción relativamente bajo de 9.67 USD y una hora poco común para transacciones, siendo las 22:22 horas. Además, las contribuciones de las variables var_1 y var_2, que son negativas y significativas, sugieren patrones atípicos que el modelo ha aprendido a asociar con posibles fraudes. A pesar de que el importe es bajo y la hora no es típica para transacciones fraudulentas, la combinación de estos factores junto con las variables var_1 y var_2, pesan en contra de la transacción, elevando la probabilidad de fraude a 0.0205. VEREDICTO: DESCARTADO",
+      "veredicto": "DESCARTADO"
+    }
+  },
+  {
+    "n": 7,
+    "es_fraude": false,
+    "comercio": "Pouros, Walker and Spencer",
+    "categoria": "kids_pets",
+    "importe": 955.36,
+    "probabilidad": 0.9999986886978149,
+    "completo": {
+      "respuesta": "CASO 7\n\nEl detector marca esta transacción como sospechosa debido a varios factores: el importe de 955.36 USD es significativamente alto para la categoría de comercio \"kids_pets\", la hora de la transacción, a las 22:48, es poco común para este tipo de compras, y el titular, con 60 años, realiza la transacción a una distancia considerable de 52.3 km desde su domicilio en una ciudad de tamaño mediano. Estos factores, junto con la contribución positiva del sesgo base, elevan la probabilidad de fraude a 1.0000.\n\nVEREDICTO: CONFIRMADO",
+      "veredicto": "CONFIRMADO"
+    },
+    "reducido": {
+      "respuesta": "CASO 7\nEl detector marca esta transacción como sospechosa debido a un conjunto de factores que indican un comportamiento atípico. El importe de 955.36 USD, la hora del día (22.8 h), y dos variables no identificadas (var_1 y var_2) contribuyen significativamente a aumentar la probabilidad de fraude, con valores Shapley positivos y elevados. Aunque no se identifican más detalles específicos, la combinación de estos factores sugiere un patrón poco común que desencadena la alerta del sistema.\n\nVEREDICTO: CONFIRMADO",
+      "veredicto": "CONFIRMADO"
+    }
+  },
+  {
+    "n": 8,
+    "es_fraude": false,
+    "comercio": "Hagenes, Hermann and Stroman",
+    "categoria": "travel",
+    "importe": 2135.09,
+    "probabilidad": 0.9999990463256836,
+    "completo": {
+      "respuesta": "CASO 8\n\nEl detector marca esta transacción como sospechosa debido a varios factores: el importe elevado de 2135.09 USD, la hora poco común de las 23:00, la distancia considerable de 84.4 km entre el domicilio del titular y el comercio, y la edad avanzada del titular de 81 años. Además, la categoría del comercio, que es de viajes, contribuye significativamente a la puntuación de riesgo, lo que sugiere que podría tratarse de una actividad inusual para un titular de esta edad y ubicación.\n\nVEREDICTO: CONFIRMADO",
+      "veredicto": "CONFIRMADO"
+    },
+    "reducido": {
+      "respuesta": "CASO 8\nEl detector marca esta transacción como sospechosa debido a un conjunto de factores que indican un comportamiento inusual. El alto importe de 2135.09 USD y la hora poco común de las 23:00 h contribuyen significativamente a la probabilidad de fraude, junto con las variables var_1 y var_2 que también muestran valores elevados. Aunque var_3 tiene un aporte menor y var_4 es ligeramente negativo, la combinación de estos factores lleva al detector a asignar una probabilidad de fraude del 100%.\n\nVEREDICTO: CONFIRMADO",
+      "veredicto": "CONFIRMADO"
+    }
+  },
+  {
+    "n": 9,
+    "es_fraude": false,
+    "comercio": "Erdman-Ebert",
+    "categoria": "personal_care",
+    "importe": 984.83,
+    "probabilidad": 0.9999995231628418,
+    "completo": {
+      "respuesta": "CASO 9\nEl detector marca esta transacción como sospechosa debido a varios factores: el importe elevado de 984.83 USD, la hora poco común de las 23:30, y la categoría del comercio que es de cuidado personal, lo cual, junto con la edad avanzada del titular (68 años) y la distancia considerable al comercio (16.7 km), sugiere un comportamiento inusual. Aunque no hay evidencias concluyentes de fraude, la combinación de estos factores eleva significativamente la probabilidad de fraude según el modelo.\n\nVEREDICTO: CONFIRMADO",
+      "veredicto": "CONFIRMADO"
+    },
+    "reducido": {
+      "respuesta": "CASO 9\nEl detector marca esta transacción como sospechosa debido a un conjunto de factores que indican un comportamiento atípico. El importe de 984.83 USD es significativamente alto y se realiza a altas horas de la noche (23:30 h), lo que ya es inusual. Además, las variables var_1 y var_2, que no se especifican pero tienen un peso importante en la detección, contribuyen de manera considerable a la probabilidad de fraude. En conjunto, estos elementos apuntan a una transacción potencialmente fraudulenta.\n\nVEREDICTO: CONFIRMADO",
+      "veredicto": "CONFIRMADO"
+    }
+  }
+]
