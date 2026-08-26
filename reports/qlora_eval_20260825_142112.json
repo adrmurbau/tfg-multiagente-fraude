@@ -1,0 +1,148 @@
+{
+  "base": "Qwen/Qwen2.5-14B-Instruct",
+  "casos": [
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55
+  ],
+  "reales": {
+    "44": false,
+    "45": false,
+    "46": false,
+    "47": false,
+    "48": false,
+    "49": false,
+    "50": true,
+    "51": false,
+    "52": false,
+    "53": false,
+    "54": false,
+    "55": true
+  },
+  "max_tokens": 220,
+  "resultados": {
+    "base": {
+      "veredictos": {
+        "44": "DESCARTADO",
+        "45": "DESCARTADO",
+        "46": "DESCARTADO",
+        "47": "DESCARTADO",
+        "48": "DESCARTADO",
+        "49": "DESCARTADO",
+        "50": "DESCARTADO",
+        "51": "DESCARTADO",
+        "52": "DESCARTADO",
+        "53": "DESCARTADO",
+        "54": "DESCARTADO",
+        "55": "DESCARTADO"
+      },
+      "extraidos": 12,
+      "confirmados": 0,
+      "fraude_destruido": 2,
+      "ids_destruidos": [
+        50,
+        55
+      ],
+      "seg_por_caso": 15.2,
+      "salidas": {
+        "44": "CASO 44\n\nEl detector considera sospechosa esta transacción por varias razones. Primero, el importe de 1.00 EUR es significativamente menor que el importe medio del lote, lo que podría indicar una actividad inusual. Además, las variables V14 y V10, ambas con valores negativos, contribuyen de manera notable hacia la clasificación de fraude, mientras que V7 y V4, aunque también contribuyen, lo hacen hacia la clasificación de transacción legítima pero en menor medida. La combinación de estos factores eleva la probabilidad de fraude a un nivel medio, lo que justifica la sospecha sobre esta transacción.\n\nVEREDICTO: DESCARTADO",
+        "45": "CASO 45\n\nEl detector considera sospechosa esta transacción debido a que el importe de 1059.28 EUR es significativamente más alto que el importe medio del lote, que es de 84.25 EUR. Además, algunas variables PCA, como V12 y V4, tienen valores elevados que contribuyen al riesgo de fraude, mientras que otras, como V11 y V5, sugieren comportamiento legítimo. Aunque el nivel de riesgo es bajo, estas disparidades en las variables PCA pueden indicar patrones inusuales que merecen una revisión adicional.\n\nVEREDICTO: DESCARTADO",
+        "46": "CASO 46\n\nEl detector considera sospechosa esta transacción por varias razones. Primero, el importe de 1.00 EUR es significativamente menor que el importe medio del lote, lo que podría indicar una actividad inusual. Además, las variables V14 y V10, ambas con valores negativos, contribuyen de manera notable hacia la posibilidad de fraude, con aportes positivos de +4.340 y +1.431 respectivamente. Por otro lado, aunque las variables V4 y V7 muestran valores que podrían sugerir legitimidad, sus aportes son negativos (-1.603 y -1.564) y no logran contrarrestar completamente la tendencia hacia el fraude. VEREDICTO: DESCARTADO",
+        "47": "CASO 47\n\nEl detector considera sospechosa esta transacción debido a que, a pesar de tratarse de una operación gratuita (0.00 EUR), presenta patrones que indican comportamientos inusuales. Las variables V14 y V4, ambas con valores altos y contribuciones significativas hacia el fraude, sugieren comportamientos asociados con actividades fraudulentas. Además, aunque las variables V1 y V16 también muestran valores que podrían sugerir una transacción legítima, sus contribuciones son menos pronunciadas comparativamente. Dado que el importe medio del lote es considerablemente más alto (84.25 EUR) que este caso específico, podría sugerir que esta transacción gratuita podría ser parte de un intento de ocultamiento dentro de un conjunto de transacciones más sospechosas.\n\nVEREDICTO: DESCARTADO",
+        "48": "CASO 48\n\nEl detector considera sospechosa esta transacción por varias razones. A pesar de que el importe es bajo, solo 0.76 EUR, lo que podría sugerir una compra menor, hay variables que indican comportamientos inusuales. Entre ellas, destaca la variable V4 con un valor de 2.979, que contribuye significativamente hacia la posibilidad de fraude, mientras que otras variables como V11 y V14 muestran comportamientos que favorecen la legitimidad. Además, el importe de esta transacción es muy inferior al importe medio del lote, lo que puede ser indicativo de un intento de pasar desapercibido. VEREDICTO: DESCARTADO",
+        "49": "CASO 49\n\nEl detector considera sospechosa esta transacción por varias razones. Con un importe de 377.00 EUR, que supera significativamente el importe medio del lote de 84.25 EUR, la transacción destaca por su elevado valor. Además, dos variables PCA (V4 y V14) contribuyen de manera positiva a la probabilidad de fraude, con valores altos y aportes elevados hacia el fraude. En contraste, otras dos variables (V21 y V22) tienen valores bajos y aportes negativos, lo que podría indicar cierta normalidad, pero no son suficientes para contrarrestar la alta probabilidad de fraude sugerida por las primeras dos variables. \n\nVEREDICTO: DESCARTADO",
+        "50": "CASO 50\n\nEl detector considera sospechosa esta transacción de 1.00 EUR realizada a las 17:48 horas debido a que presenta características atípicas comparadas con el comportamiento normal de las transacciones. Aunque el importe es bajo, está significativamente por debajo del importe medio del lote, lo que podría indicar un patrón inusual. Además, dos de las variables PCA, V14 y V4, muestran valores altos que contribuyen al riesgo de fraude, mientras que otras variables como V11 y V1 tienen valores bajos que sugieren legitimidad. Este equilibrio entre factores que apuntan hacia y contra el fraude hace que la transacción sea considerada sospechosa, aunque el nivel de riesgo general sigue siendo bajo.\n\nVEREDICTO: DESCARTADO",
+        "51": "CASO 51\n\nEl detector considera sospechosa esta transacción por varias razones. Primero, el importe de 600.86 EUR es significativamente más alto que el importe medio del lote, lo que podría indicar un comportamiento inusual. Además, la variable V20, que tiene un valor de -1.103, contribuye de manera notable hacia la posibilidad de fraude, mientras que otras variables como V12 y V28, aunque también tienen valores negativos, tienden a señalar una transacción legítima. Sin embargo, el balance de todas estas variables junto con el importe elevado sugiere cierta irregularidad que merece una revisión adicional.\n\nVEREDICTO: DESCARTADO",
+        "52": "CASO 52\n\nEl detector considera sospechosa esta transacción por varias razones. A pesar de que el importe es bajo, solo 1.00 EUR, lo que podría sugerir una compra menor, el hecho de que este monto sea significativamente inferior al importe medio del lote, que es de 84.25 EUR, puede indicar comportamiento inusual. Además, aunque algunas variables como V11 y V4 muestran tendencias que apuntan hacia una transacción legítima, la variable V20 tiene un aporte positivo hacia el fraude, lo que incrementa la probabilidad de que esta transacción sea sospechosa. Finalmente, la hora del día, cerca de las 18:50 horas, no parece ser un factor decisivo pero sí contribuye a la evaluación general del riesgo.\n\nVEREDICTO: DESCARTADO",
+        "53": "CASO 53\n\nEl detector considera sospechosa esta transacción debido a que, a pesar de su importe nulo, presenta patrones anómalos según las variables PCA analizadas. Específicamente, la variable V14 muestra un valor negativo significativo (-4.642) que contribuye notablemente (+4.229) a señalarla como potencialmente fraudulenta. Además, la variable V4 también tiene un valor elevado (5.394) que refuerza esta tendencia (+2.250). Aunque las variables V18 y V10 intentan contrarrestar esto con valores que apuntan a una transacción legítima, la combinación de estas características junto con el hecho de que el importe medio del lote es considerablemente mayor (84.25 EUR), hace que la transacción en cuestión destaque como inusual.\n\nVEREDICTO: DESCARTADO",
+        "54": "CASO 54\n\nEl detector considera sospechosa esta transacción debido a que el importe de 912.00 EUR es significativamente más alto que el importe medio del lote, lo que incrementa la probabilidad de fraude. Aunque algunas variables como V14, V11 y V10 sugieren comportamientos legítimos, el importe elevado juega un papel crucial en elevar la posibilidad de que se trate de un fraude. Dado que el importe es muy superior al promedio, aunque otras variables apoyen la legitimidad, el riesgo sigue siendo notable.\n\nVEREDICTO: DESCARTADO",
+        "55": "CASO 55\n\nEl detector considera sospechosa esta transacción por varias razones. Primero, el importe de 2.22 EUR es significativamente menor que el importe medio del lote, lo que podría indicar una actividad inusual. Además, algunas variables PCA, como V14 y V4, tienen valores que contribuyen positivamente hacia la clasificación de fraude, mientras que otras, como V1 y V7, aunque también influyen, lo hacen en dirección opuesta. Estos factores combinados elevan la probabilidad de fraude a un nivel que, aunque bajo, aún resulta preocupante.\n\nVEREDICTO: DESCARTADO"
+      }
+    },
+    "base+dominio": {
+      "veredictos": {
+        "44": "CONFIRMADO",
+        "45": "DESCARTADO",
+        "46": "DESCARTADO",
+        "47": "DESCARTADO",
+        "48": "DESCARTADO",
+        "49": "DESCARTADO",
+        "50": "DESCARTADO",
+        "51": "DESCARTADO",
+        "52": "DESCARTADO",
+        "53": "DESCARTADO",
+        "54": "DESCARTADO",
+        "55": "DESCARTADO"
+      },
+      "extraidos": 12,
+      "confirmados": 1,
+      "fraude_destruido": 2,
+      "ids_destruidos": [
+        50,
+        55
+      ],
+      "seg_por_caso": 15.4,
+      "salidas": {
+        "44": "CASO 44\n\nEl detector considera sospechosa esta transacción debido a varios factores. Primero, el importe de 1.00 EUR es significativamente menor que el importe medio del lote, lo que podría indicar una prueba inicial de la tarjeta antes de realizar cargos más grandes. Además, las variables V14 y V10, ambas con valores negativos, contribuyen de manera notable hacia la clasificación de fraude, mientras que V7 y V4, aunque también contribuyen, lo hacen hacia la clasificación de transacción legítima pero en menor medida. Estos patrones sugieren comportamientos inusuales que podrían estar asociados con intentos de fraude.\n\nVEREDICTO: CONFIRMADO",
+        "45": "CASO 45\n\nEl detector considera sospechosa esta transacción debido a que el importe de 1059.28 EUR es significativamente más alto que el importe medio del lote, que es de 84.25 EUR. Además, algunas variables PCA, como V12 y V4, tienen valores elevados que contribuyen positivamente a la probabilidad de fraude, mientras que otras, como V11 y V5, aunque también influyen, lo hacen en menor medida hacia la legitimidad. Esto sugiere que aunque no todos los factores apuntan claramente hacia el fraude, sí hay suficientes señales preocupantes para generar una alerta.\n\nVEREDICTO: DESCARTADO",
+        "46": "CASO 46\n\nEl detector considera sospechosa esta transacción debido a varios factores. A pesar de que el importe es bajo, siendo de solo 1.00 EUR, hay variables que indican comportamientos inusuales. Entre ellas, la variable V14 muestra un valor anormalmente bajo (-4.585) con un aporte significativo (+4.340) hacia la clasificación de fraude, mientras que otras variables como V10 también muestran un aporte elevado (+1.431) hacia la misma dirección. Además, la hora del día, cerca de las 18:48 horas, junto con el importe medio del lote de transacciones que es considerablemente más alto (84.25 EUR), sugiere que este pago mínimo podría ser parte de una prueba inicial antes de realizar cargos mayores.\n\nVEREDICTO: DESCARTADO",
+        "47": "CASO 47\n\nEl detector considera sospechosa esta transacción debido a varios factores. A pesar de que el importe es de 0.00 EUR, lo cual podría sugerir una prueba inicial de la tarjeta antes de realizar cargos mayores, las variables V14 y V4, ambas con valores altos y aportes significativos hacia el fraude, indican comportamientos inusuales que podrían estar asociados con intentos de fraude. Además, aunque las variables V1 y V16 muestran aportes hacia la legitimidad, estos son menos pronunciados en comparación con los aportes hacia el fraude. Dado que el importe medio del lote es de 84.25 EUR, este cargo de cero euros puede ser parte de una estrategia común de probadores de tarjetas fraudulentas.\n\nVEREDICTO: DESCARTADO",
+        "48": "CASO 48\n\nEl detector considera sospechosa esta transacción debido a que el importe de 0.76 EUR es significativamente menor que el importe medio del lote, lo que podría indicar una prueba inicial de la tarjeta antes de realizar cargos más grandes. Además, aunque algunas variables como V11 y V14 sugieren una transacción legítima, la variable V4 tiene un aporte positivo hacia el fraude, lo que aumenta la probabilidad de que este sea un intento de fraude. Este comportamiento atípico, junto con el bajo importe, hace que la transacción sea considerada sospechosa.\n\nVEREDICTO: DESCARTADO",
+        "49": "CASO 49\n\nEl detector considera sospechosa esta transacción debido a que el importe de 377.00 EUR es significativamente más alto que el importe medio del lote, que es de 84.25 EUR. Además, dos de las variables de mayor aporte (V4 y V14) indican un comportamiento que tiende hacia el fraude, mientras que las otras dos variables (V21 y V22) señalan hacia la legitimidad, pero con un impacto menor. Esto sugiere que aunque hay elementos que podrían justificar la legitimidad de la transacción, los factores que apuntan hacia el fraude son más fuertes en este caso.\n\nVEREDICTO: DESCARTADO",
+        "50": "CASO 50\n\nEl detector considera sospechosa esta transacción debido a varios factores. A pesar de que el importe es bajo, siendo de solo 1.00 EUR, lo que podría sugerir una prueba inicial de la tarjeta, hay variables que indican comportamientos inusuales. La variable V14 tiene un valor alto (-4.252) que contribuye significativamente (+2.655) a la posibilidad de fraude, mientras que otras variables como V11 y V1, aunque sugieren legitimidad, no son suficientemente fuertes para contrarrestar completamente este riesgo. Además, el importe medio del lote es bastante elevado (84.25 EUR), lo que contrasta con este pago mínimo, añadiendo complejidad a la situación.\n\nVEREDICTO: DESCARTADO",
+        "51": "CASO 51\n\nEl detector considera sospechosa esta transacción debido a que el importe de 600.86 EUR es significativamente más alto que el importe medio del lote, que es de 84.25 EUR. Además, la variable V20, que tiene un valor de -1.103 y contribuye positivamente hacia la posibilidad de fraude (+1.369), sugiere comportamiento inusual. Aunque otras variables como V12, V28 y V7 tienen valores negativos que apuntan hacia una transacción legítima, el importe elevado y el aporte de V20 son factores que aumentan la probabilidad de que este pago pueda estar relacionado con un intento de fraude.\n\nVEREDICTO: DESCARTADO",
+        "52": "CASO 52\n\nEl detector considera sospechosa esta transacción debido a que el importe de 1.00 EUR es significativamente menor que el importe medio del lote, lo que podría indicar una prueba inicial de la tarjeta antes de realizar cargos más grandes. Además, aunque algunas variables como V11 y V4 sugieren comportamiento legítimo, la variable V20 tiene un aporte positivo hacia el fraude, aumentando la probabilidad de que esta transacción sea sospechosa. Aunque el nivel de riesgo es bajo, estos factores combinados hacen que la transacción sea digna de atención.\n\nVEREDICTO: DESCARTADO",
+        "53": "CASO 53\n\nEl detector considera sospechosa esta transacción debido a varios factores. A pesar de que el importe es de 0.00 EUR, lo cual podría sugerir una prueba inicial de la tarjeta antes de realizar cargos mayores, las variables PCA V14 y V4 muestran valores altos que contribuyen significativamente hacia la posibilidad de fraude, mientras que V18 y V10 presentan valores que tienden hacia la legitimidad. La combinación de estos factores, junto con el importe medio del lote de transacciones que es considerablemente más alto que este, sugiere que podría tratarse de una prueba preliminar de una posible operación fraudulenta.\n\nVEREDICTO: DESCARTADO",
+        "54": "CASO 54\n\nEl detector considera sospechosa esta transacción debido a que el importe de 912.00 EUR es significativamente más alto que el importe medio del lote, lo que podría indicar un intento de fraude. Aunque algunas variables como V14, V11 y V10 muestran comportamientos que apuntan hacia una transacción legítima, el aporte positivo de la variable \"Amount\" (+0.766) hacia el fraude es notablemente alto, lo que eleva la probabilidad de que este pago pueda ser fraudulento. Dado que el importe es muy superior al promedio, aunque la probabilidad de fraude sea baja, se recomienda una revisión adicional.\n\nVEREDICTO: DESCARTADO",
+        "55": "CASO 55\n\nEl detector considera sospechosa esta transacción debido a varios factores. A pesar de que el importe es bajo, siendo de solo 2.22 EUR, las variables PCA V14 y V4 muestran valores altamente contribuyentes hacia el fraude, con aportes de +3.004 y +2.180 respectivamente. Además, la hora de la transacción, a las 16:36 horas, junto con el importe medio del lote de transacciones que supera significativamente este valor (84.25 EUR), sugiere patrones inusuales que podrían indicar una prueba inicial antes de cargos más grandes. Las variables V1 y V7, aunque apuntan hacia la legitimidad, no son suficientes para contrarrestar completamente estos otros indicadores. \n\nVEREDICTO: DESCARTADO"
+      }
+    },
+    "adaptado": {
+      "veredictos": {
+        "44": "CONFIRMADO",
+        "45": "DESCARTADO",
+        "46": "DESCARTADO",
+        "47": "DESCARTADO",
+        "48": "DESCARTADO",
+        "49": "DESCARTADO",
+        "50": "DESCARTADO",
+        "51": "DESCARTADO",
+        "52": "DESCARTADO",
+        "53": "DESCARTADO",
+        "54": "DESCARTADO",
+        "55": "DESCARTADO"
+      },
+      "extraidos": 12,
+      "confirmados": 1,
+      "fraude_destruido": 2,
+      "ids_destruidos": [
+        50,
+        55
+      ],
+      "seg_por_caso": 20.6,
+      "salidas": {
+        "44": "CASO 44\nEl detector eleva el CASO 44 con probabilidad 0.6081 y un importe de 1.00 EUR. Empujan hacia fraude V14 (+4.307) y V10 (+1.220). En sentido contrario, V7 (-1.809) y V4 (-1.682). El importe reducido no es un atenuante: el cargo minimo de prueba es un patron habitual de fraude, y las contribuciones dominantes lo respaldan.\nVEREDICTO: CONFIRMADO",
+        "45": "CASO 45\nEl detector eleva el CASO 45 con probabilidad 0.2060 y un importe de 1059.28 EUR. Empujan hacia fraude V12 (+1.645) y V4 (+1.618). En sentido contrario, V11 (-1.799) y V5 (-1.240). El conjunto de aportes no sostiene la sospecha: el patron es compatible con una operacion legitima.\nVEREDICTO: DESCARTADO",
+        "46": "CASO 46\nEl detector eleva el CASO 46 con probabilidad 0.1889 y un importe de 1.00 EUR. Empujan hacia fraude V14 (+4.340) y V10 (+1.431). En sentido contrario, V4 (-1.603) y V7 (-1.564). El conjunto de aportes no sostiene la sospecha: el patron es compatible con una operacion legitima.\nVEREDICTO: DESCARTADO",
+        "47": "CASO 47\nEl detector eleva el CASO 47 con probabilidad 0.1874 y un importe de 0.00 EUR. Empujan hacia fraude V14 (+3.430) y V4 (+2.442). En sentido contrario, V1 (-2.159) y V16 (-1.289). El conjunto de aportes no sostiene la sospecha: el patron es compatible con una operacion legitima.\nVEREDICTO: DESCARTADO",
+        "48": "CASO 48\nEl detector eleva el CASO 48 con probabilidad 0.1391 y un importe de 0.76 EUR. Empujan hacia fraude V4 (+1.995). En sentido contrario, V11 (-2.275) y V14 (-2.225). El conjunto de aportes no sostiene la sospecha: el patron es compatible con una operacion legitima.\nVEREDICTO: DESCARTADO",
+        "49": "CASO 49\nEl detector eleva el CASO 49 con probabilidad 0.1345 y un importe de 377.00 EUR. Empujan hacia fraude V4 (+1.782) y V14 (+1.405). En sentido contrario, V21 (-1.193) y V22 (-1.155). El conjunto de aportes no sostiene la sospecha: el patron es compatible con una operacion legitima.\nVEREDICTO: DESCARTADO",
+        "50": "CASO 50\nEl detector eleva el CASO 50 con probabilidad 0.1286 y un importe de 1.00 EUR. Empujan hacia fraude V14 (+2.655) y V4 (+1.726). En sentido contrario, V11 (-2.724) y V1 (-2.387). El conjunto de aportes no sostiene la sospecha: el patron es compatible con una operacion legitima.\nVEREDICTO: DESCARTADO",
+        "51": "CASO 51\nEl detector eleva el CASO 51 con probabilidad 0.1193 y un importe de 600.86 EUR. Empujan hacia fraude V20 (+1.369). En sentido contrario, V12 (-1.088) y V28 (-0.723). El conjunto de aportes no sostiene la sospecha: el patron es compatible con una operacion legitima.\nVEREDICTO: DESCARTADO",
+        "52": "CASO 52\nEl detector eleva el CASO 52 con probabilidad 0.1182 y un importe de 1.00 EUR. Empujan hacia fraude V20 (+0.972). En sentido contrario, V11 (-1.370) y V4 (-1.146). El conjunto de aportes no sostiene la sospecha: el patron es compatible con una operacion legitima.\nVEREDICTO: DESCARTADO",
+        "53": "CASO 53\nEl detector eleva el CASO 53 con probabilidad 0.1008 y un importe de 0.00 EUR. Empujan hacia fraude V14 (+4.229) y V4 (+2.250). En sentido contrario, V18 (-1.096) y V10 (-1.042). El conjunto de aportes no sostiene la sospecha: el patron es compatible con una operacion legitima.\nVEREDICTO: DESCARTADO",
+        "54": "CASO 54\nEl detector eleva el CASO 54 con probabilidad 0.0734 y un importe de 912.00 EUR. Empujan hacia fraude Amount (+0.766). En sentido contrario, V14 (-3.030) y V11 (-1.044). El conjunto de aportes no sostiene la sospecha: el patron es compatible con una operacion legitima.\nVEREDICTO: DESCARTADO",
+        "55": "CASO 55\nEl detector eleva el CASO 55 con probabilidad 0.0673 y un importe de 2.22 EUR. Empujan hacia fraude V14 (+3.004) y V4 (+2.180). En sentido contrario, V1 (-2.603) y V7 (-1.660). El conjunto de aportes no sostiene la sospecha: el patron es compatible con una operacion legitima.\nVEREDICTO: DESCARTADO"
+      }
+    }
+  }
+}
