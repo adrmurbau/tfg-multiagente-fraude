@@ -1,0 +1,94 @@
+{
+  "casos": [
+    {
+      "n": 1,
+      "comercio": "Lind, Huel and McClure",
+      "categoria": "gas_transport",
+      "importe": 93.28,
+      "probabilidad": 0.0018493948737159371,
+      "es_fraude": true,
+      "dossier_completo": "CASO 1\nComercio: Lind, Huel and McClure\nCategoria de comercio: gas_transport\nImporte: 93.28 USD\nHora del dia: 2.7 h\nEdad del titular: 40 anios\nDistancia domicilio-comercio: 10.5 km\nPoblacion de la ciudad del titular: 1,382,480\nProbabilidad de fraude segun el detector: 0.0018\nContribuciones principales del detector (Shapley, XGBoost):\n  importe: -5.754\n  edad: -0.591\n  poblacion_ciudad: -0.572\n  hora: +0.409\n  dia_semana: +0.256\n  sesgo_base: +0.239",
+      "dossier_reducido": "CASO 1\nImporte: 93.28 USD\nHora del dia: 2.7 h\nProbabilidad de fraude segun el detector: 0.0018\nContribuciones principales del detector (Shapley, XGBoost), variables sin identificar salvo importe y hora:\n  importe: -5.754\n  var_1: -0.591\n  var_2: -0.572\n  hora: +0.409\n  var_3: +0.256\n  sesgo_base: +0.239"
+    },
+    {
+      "n": 2,
+      "comercio": "Lakin, Ferry and Beatty",
+      "categoria": "food_dining",
+      "importe": 101.07,
+      "probabilidad": 0.0031167708802968264,
+      "es_fraude": true,
+      "dossier_completo": "CASO 2\nComercio: Lakin, Ferry and Beatty\nCategoria de comercio: food_dining\nImporte: 101.07 USD\nHora del dia: 12.4 h\nEdad del titular: 67 anios\nDistancia domicilio-comercio: 109.0 km\nPoblacion de la ciudad del titular: 49,659\nProbabilidad de fraude segun el detector: 0.0031\nContribuciones principales del detector (Shapley, XGBoost):\n  importe: -2.553\n  categoria_food_dining: -1.627\n  hora: -1.079\n  distancia_km: -0.491\n  dia_semana: -0.341\n  sesgo_base: +0.239",
+      "dossier_reducido": "CASO 2\nImporte: 101.07 USD\nHora del dia: 12.4 h\nProbabilidad de fraude segun el detector: 0.0031\nContribuciones principales del detector (Shapley, XGBoost), variables sin identificar salvo importe y hora:\n  importe: -2.553\n  var_1: -1.627\n  hora: -1.079\n  var_2: -0.491\n  var_3: -0.341\n  sesgo_base: +0.239"
+    },
+    {
+      "n": 3,
+      "comercio": "Hoppe, Harris and Bednar",
+      "categoria": "entertainment",
+      "importe": 103.25,
+      "probabilidad": 0.008268852718174458,
+      "es_fraude": true,
+      "dossier_completo": "CASO 3\nComercio: Hoppe, Harris and Bednar\nCategoria de comercio: entertainment\nImporte: 103.25 USD\nHora del dia: 3.9 h\nEdad del titular: 48 anios\nDistancia domicilio-comercio: 108.4 km\nPoblacion de la ciudad del titular: 120,577\nProbabilidad de fraude segun el detector: 0.0083\nContribuciones principales del detector (Shapley, XGBoost):\n  importe: -2.244\n  edad: -1.304\n  categoria_entertainment: -1.158\n  hora: +0.468\n  dia_semana: -0.284\n  sesgo_base: +0.239",
+      "dossier_reducido": "CASO 3\nImporte: 103.25 USD\nHora del dia: 3.9 h\nProbabilidad de fraude segun el detector: 0.0083\nContribuciones principales del detector (Shapley, XGBoost), variables sin identificar salvo importe y hora:\n  importe: -2.244\n  var_1: -1.304\n  var_2: -1.158\n  hora: +0.468\n  var_3: -0.284\n  sesgo_base: +0.239"
+    },
+    {
+      "n": 4,
+      "comercio": "Berge-Ullrich",
+      "categoria": "home",
+      "importe": 26.09,
+      "probabilidad": 0.009310474619269371,
+      "es_fraude": true,
+      "dossier_completo": "CASO 4\nComercio: Berge-Ullrich\nCategoria de comercio: home\nImporte: 26.09 USD\nHora del dia: 15.9 h\nEdad del titular: 30 anios\nDistancia domicilio-comercio: 68.8 km\nPoblacion de la ciudad del titular: 1,331\nProbabilidad de fraude segun el detector: 0.0093\nContribuciones principales del detector (Shapley, XGBoost):\n  importe: -2.535\n  hora: -1.425\n  categoria_home: -0.706\n  edad: -0.587\n  poblacion_ciudad: +0.339\n  sesgo_base: +0.239",
+      "dossier_reducido": "CASO 4\nImporte: 26.09 USD\nHora del dia: 15.9 h\nProbabilidad de fraude segun el detector: 0.0093\nContribuciones principales del detector (Shapley, XGBoost), variables sin identificar salvo importe y hora:\n  importe: -2.535\n  hora: -1.425\n  var_1: -0.706\n  var_2: -0.587\n  var_3: +0.339\n  sesgo_base: +0.239"
+    },
+    {
+      "n": 5,
+      "comercio": "McGlynn-Jaskolski",
+      "categoria": "misc_pos",
+      "importe": 156.52,
+      "probabilidad": 0.011013804003596306,
+      "es_fraude": true,
+      "dossier_completo": "CASO 5\nComercio: McGlynn-Jaskolski\nCategoria de comercio: misc_pos\nImporte: 156.52 USD\nHora del dia: 1.9 h\nEdad del titular: 33 anios\nDistancia domicilio-comercio: 76.4 km\nPoblacion de la ciudad del titular: 2,906,700\nProbabilidad de fraude segun el detector: 0.0110\nContribuciones principales del detector (Shapley, XGBoost):\n  importe: -4.367\n  categoria_misc_pos: -1.101\n  hora: +0.569\n  edad: +0.324\n  sesgo_base: +0.239\n  dia_semana: +0.232",
+      "dossier_reducido": "CASO 5\nImporte: 156.52 USD\nHora del dia: 1.9 h\nProbabilidad de fraude segun el detector: 0.0110\nContribuciones principales del detector (Shapley, XGBoost), variables sin identificar salvo importe y hora:\n  importe: -4.367\n  var_1: -1.101\n  hora: +0.569\n  var_2: +0.324\n  sesgo_base: +0.239\n  var_3: +0.232"
+    },
+    {
+      "n": 6,
+      "comercio": "Graham and Sons",
+      "categoria": "health_fitness",
+      "importe": 9.67,
+      "probabilidad": 0.02049814537167549,
+      "es_fraude": true,
+      "dossier_completo": "CASO 6\nComercio: Graham and Sons\nCategoria de comercio: health_fitness\nImporte: 9.67 USD\nHora del dia: 22.2 h\nEdad del titular: 60 anios\nDistancia domicilio-comercio: 110.5 km\nPoblacion de la ciudad del titular: 757,530\nProbabilidad de fraude segun el detector: 0.0205\nContribuciones principales del detector (Shapley, XGBoost):\n  categoria_health_fitness: -3.862\n  hora: +1.504\n  importe: -0.713\n  poblacion_ciudad: -0.542\n  dia_semana: -0.325\n  sesgo_base: +0.239",
+      "dossier_reducido": "CASO 6\nImporte: 9.67 USD\nHora del dia: 22.2 h\nProbabilidad de fraude segun el detector: 0.0205\nContribuciones principales del detector (Shapley, XGBoost), variables sin identificar salvo importe y hora:\n  var_1: -3.862\n  hora: +1.504\n  importe: -0.713\n  var_2: -0.542\n  var_3: -0.325\n  sesgo_base: +0.239"
+    },
+    {
+      "n": 7,
+      "comercio": "Pouros, Walker and Spencer",
+      "categoria": "kids_pets",
+      "importe": 955.36,
+      "probabilidad": 0.9999986886978149,
+      "es_fraude": false,
+      "dossier_completo": "CASO 7\nComercio: Pouros, Walker and Spencer\nCategoria de comercio: kids_pets\nImporte: 955.36 USD\nHora del dia: 22.8 h\nEdad del titular: 60 anios\nDistancia domicilio-comercio: 52.3 km\nPoblacion de la ciudad del titular: 425,636\nProbabilidad de fraude segun el detector: 1.0000\nContribuciones principales del detector (Shapley, XGBoost):\n  categoria_kids_pets: +5.087\n  importe: +3.873\n  hora: +3.098\n  edad: +1.002\n  categoria_home: +0.256\n  sesgo_base: +0.239",
+      "dossier_reducido": "CASO 7\nImporte: 955.36 USD\nHora del dia: 22.8 h\nProbabilidad de fraude segun el detector: 1.0000\nContribuciones principales del detector (Shapley, XGBoost), variables sin identificar salvo importe y hora:\n  var_1: +5.087\n  importe: +3.873\n  hora: +3.098\n  var_2: +1.002\n  var_3: +0.256\n  sesgo_base: +0.239"
+    },
+    {
+      "n": 8,
+      "comercio": "Hagenes, Hermann and Stroman",
+      "categoria": "travel",
+      "importe": 2135.09,
+      "probabilidad": 0.9999990463256836,
+      "es_fraude": false,
+      "dossier_completo": "CASO 8\nComercio: Hagenes, Hermann and Stroman\nCategoria de comercio: travel\nImporte: 2135.09 USD\nHora del dia: 23.0 h\nEdad del titular: 81 anios\nDistancia domicilio-comercio: 84.4 km\nPoblacion de la ciudad del titular: 206,095\nProbabilidad de fraude segun el detector: 1.0000\nContribuciones principales del detector (Shapley, XGBoost):\n  categoria_travel: +4.698\n  hora: +3.985\n  importe: +3.104\n  edad: +1.460\n  categoria_home: +0.332\n  poblacion_ciudad: -0.306",
+      "dossier_reducido": "CASO 8\nImporte: 2135.09 USD\nHora del dia: 23.0 h\nProbabilidad de fraude segun el detector: 1.0000\nContribuciones principales del detector (Shapley, XGBoost), variables sin identificar salvo importe y hora:\n  var_1: +4.698\n  hora: +3.985\n  importe: +3.104\n  var_2: +1.460\n  var_3: +0.332\n  var_4: -0.306"
+    },
+    {
+      "n": 9,
+      "comercio": "Erdman-Ebert",
+      "categoria": "personal_care",
+      "importe": 984.83,
+      "probabilidad": 0.9999995231628418,
+      "es_fraude": false,
+      "dossier_completo": "CASO 9\nComercio: Erdman-Ebert\nCategoria de comercio: personal_care\nImporte: 984.83 USD\nHora del dia: 23.3 h\nEdad del titular: 68 anios\nDistancia domicilio-comercio: 16.7 km\nPoblacion de la ciudad del titular: 641,349\nProbabilidad de fraude segun el detector: 1.0000\nContribuciones principales del detector (Shapley, XGBoost):\n  categoria_personal_care: +4.980\n  importe: +4.157\n  hora: +3.368\n  edad: +1.371\n  categoria_home: +0.280\n  categoria_health_fitness: +0.245",
+      "dossier_reducido": "CASO 9\nImporte: 984.83 USD\nHora del dia: 23.3 h\nProbabilidad de fraude segun el detector: 1.0000\nContribuciones principales del detector (Shapley, XGBoost), variables sin identificar salvo importe y hora:\n  var_1: +4.980\n  importe: +4.157\n  hora: +3.368\n  var_2: +1.371\n  var_3: +0.280\n  var_4: +0.245"
+    }
+  ]
+}
