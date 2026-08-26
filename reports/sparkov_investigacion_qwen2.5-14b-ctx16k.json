@@ -1,0 +1,42 @@
+[
+  {
+    "caso": 1,
+    "comercio": "Kozey-Kuhlman",
+    "categoria": "personal_care",
+    "importe": 744.54,
+    "respuesta": "CASO 1\n\nEl detector marca como sospechoso el pago de 744.54 USD en Kozey-Kuhlman, una tienda de cuidado personal, debido a varias señales preocupantes: la transacción ocurrió muy tarde en la noche (22.8 horas), el importe es significativamente alto para el tipo de comercio, y el titular, de 76 años, realizó la compra a una distancia considerable de su domicilio (109.7 km), lo que sugiere un comportamiento poco común. Estos factores, junto con la categoría del comercio, llevan al sistema a asignar una alta probabilidad de fraude.\n\nVEREDICTO: CONFIRMADO",
+    "veredicto": "CONFIRMADO"
+  },
+  {
+    "caso": 2,
+    "comercio": "Weimann-Lockman",
+    "categoria": "kids_pets",
+    "importe": 910.51,
+    "respuesta": "CASO 2\n\nEl detector marca como sospechoso el pago de 910.51 USD en Weimann-Lockman, un comercio de la categoría kids_pets, debido a que el importe es significativamente alto para este tipo de establecimiento, la hora de la transacción es muy avanzada (23:00 h), y el titular, de 64 años, realiza la compra a una distancia considerable de su domicilio (30.3 km). Estos factores, junto con la poca población de la ciudad del titular (18,248 habitantes), contribuyen a elevar la probabilidad de fraude.\n\nVEREDICTO: CONFIRMADO",
+    "veredicto": "CONFIRMADO"
+  },
+  {
+    "caso": 3,
+    "comercio": "Medhurst, Cartwright and Ebert",
+    "categoria": "personal_care",
+    "importe": 902.19,
+    "respuesta": "CASO 3\n\nEl detector marca como sospechoso el pago de 902.19 USD en Medhurst, Cartwright and Ebert, un comercio de la categoría personal_care, debido a que el importe es significativamente alto para este tipo de establecimiento, especialmente considerando que la transacción se realizó a altas horas de la noche (22:00 h) y el titular es una persona de 85 años que vive a 120.7 km del comercio, lo que dificulta la verosimilitud de la transacción. Aunque la población de la ciudad del titular es considerable, el alto importe y la hora del día son factores que aumentan la probabilidad de fraude.\n\nVEREDICTO: CONFIRMADO",
+    "veredicto": "CONFIRMADO"
+  },
+  {
+    "caso": 4,
+    "comercio": "Zemlak, Tillman and Cremin",
+    "categoria": "personal_care",
+    "importe": 732.52,
+    "respuesta": "CASO 4\n\nEl detector marca con alta probabilidad de fraude la transacción en Zemlak, Tillman and Cremin, un establecimiento de cuidado personal, debido a varias señales preocupantes: el importe de 732.52 USD es significativamente alto para este tipo de comercio, la hora nocturna (22.4 h) es atípica para este tipo de compras, y la distancia considerable de 111.0 km entre el domicilio del titular de 84 años y el comercio añade dudas sobre la autenticidad de la transacción. VEREDICTO: CONFIRMADO",
+    "veredicto": "CONFIRMADO"
+  },
+  {
+    "caso": 5,
+    "comercio": "Mosciski Group",
+    "categoria": "travel",
+    "importe": 866.48,
+    "respuesta": "CASO 5\n\nEl detector marca con alta probabilidad de fraude la transacción de Mosciski Group en la categoría de viajes, principalmente debido a un importe elevado de 866.48 USD, una hora poco común para este tipo de gasto (22:30 h), y la edad avanzada del titular (71 años). Aunque la distancia entre el domicilio y el comercio es considerable (52.4 km) y la ciudad es pequeña (5,720 habitantes), lo que podría ser inusual, el aporte positivo de la categoría de viajes y el importe superan estas posibles anomalías geográficas. VEREDICTO: CONFIRMADO",
+    "veredicto": "CONFIRMADO"
+  }
+]
