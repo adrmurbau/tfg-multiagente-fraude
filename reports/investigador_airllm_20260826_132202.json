@@ -1,0 +1,23 @@
+{
+  "backend": "airllm",
+  "modelo": "Qwen/Qwen2.5-72B-Instruct",
+  "compresion": "4bit",
+  "casos_investigados": 1,
+  "casos_expediente": 55,
+  "zona": "cola",
+  "casos": [
+    55
+  ],
+  "dominio": false,
+  "veredictos": {
+    "55": "DESCARTADO"
+  },
+  "descartes_correctos": 0,
+  "fraude_destruido": 1,
+  "seg_por_caso": [
+    8887.4
+  ],
+  "salidas": [
+    "CASO 55  \nA pesar de que el importe de 2.22 EUR es relativamente bajo, el detector considera esta transacción sospechosa debido principalmente a las variables V14 y V4, que presentan valores que contribuyen significativamente hacia el fraude. V14 tiene un valor de -4.943, lo que indica una desviación importante que suele asociarse con transacciones fraudulentas. Aunque V1 y V7 aportan evidencia en contra del fraude, la influencia de V14 y V4 es lo suficientemente fuerte como para generar dudas sobre la legitimidad de la operación. Dado que el nivel de riesgo es bajo y el importe es modesto, considero que este caso es un posible falso positivo.  \nVEREDICTO: DESCARTADO"
+  ]
+}
