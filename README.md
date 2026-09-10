@@ -61,8 +61,7 @@ tfg-multiagente-fraude/
 ├── data/        dataset (ignorado: licencia y tamaño)
 ├── models/      modelos entrenados (ignorados: se regeneran)
 ├── reports/     resultados de todas las ejecuciones (VERSIONADOS)
-├── docs/        documentos de trabajo y estado del arte
-├── memoria/     el texto de la memoria y el guion que lo compone a .docx
+├── memoria/     memoria final (.docx), figuras y capturas
 ├── src/
 │   ├── config.py      rutas, constantes y umbrales
 │   ├── evaluacion.py  medida del sistema y auditoría de informes
@@ -134,26 +133,3 @@ python scripts\check_entorno.py
 Para la comparación con modelos que no caben en memoria hace falta un entorno
 aparte, con PyTorch compilado para la arquitectura de la GPU. El guion
 correspondiente lo comprueba antes de descargar nada y explica cómo crearlo.
-
-## Formato de la memoria
-
-El texto de la memoria está escrito en `memoria/content.js`, en Markdown
-simple (encabezados, tablas, figuras, párrafos). `memoria/generate.js` no
-redacta nada: aplica el formato que exige la Escuela —tipografía, interlineado,
-numeración, tabla de contenidos— y compone ese texto en el `.docx` final, del
-mismo modo que LaTeX compila un `.tex` a PDF sin escribir el contenido por ti.
-Separar texto y formato permite además revisar los cambios de la memoria con
-`git diff`, como el resto del código.
-
-```powershell
-cd memoria
-npm install docx
-node generate.js
-```
-
-El guion avisa de cuántas marcas de pendiente quedan en el documento.
-
-## Estado
-
-Fase experimental cerrada. Memoria completa a falta de revisión, formato de la
-escuela y verificación de una referencia bibliográfica.

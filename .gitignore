@@ -44,3 +44,10 @@ kaggle.json
 Thumbs.db
 desktop.ini
 .venv-airllm/
+
+# --- Documentos de trabajo internos, fuera del entregable ---
+# No aportan nada a quien revisa el resultado; se quedan en local.
+docs/
+memoria/content.js
+memoria/generate.js
+memoria/README.md
