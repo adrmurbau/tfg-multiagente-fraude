@@ -62,10 +62,16 @@ memoria/README.md
 memoria/video/
 memoria/*.zip
 
-# Versiones intermedias de la memoria. Se conserva una sola: la entregada.
-memoria/memoria_TFG.docx
-memoria/Memoria_TFG_corregida*.docx
-memoria/Memoria_TFG_v[1-4].docx
+# Versiones intermedias de la memoria: apartadas en una subcarpeta para que en
+# memoria/ solo quede la version entregada y no haya forma de subir la equivocada.
+memoria/versiones_anteriores/
+
+# Material preparado para la plataforma de entrega (enlace al repositorio, etc.).
+memoria/entrega/
+
+# Utilidades locales de maquetado de la memoria.
+memoria/node_modules/
+memoria/package*.json
 
 # Ficheros temporales de Word
 ~$*
