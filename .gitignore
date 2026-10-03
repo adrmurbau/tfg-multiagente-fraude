@@ -48,12 +48,10 @@ desktop.ini
 # --- Documentos de trabajo internos, fuera del entregable ---
 # No aportan nada a quien revisa el resultado; se quedan en local.
 #
-# Excepcion: Estado_de_resultados.docx SI se publica, porque la memoria lo
-# cita en el capitulo 6 como fuente de las cifras. Para poder exceptuarlo hay
-# que ignorar el CONTENIDO de docs/ y no el directorio: git no reabre un
-# directorio ya ignorado.
-docs/*
-!docs/Estado_de_resultados.docx
+# docs/ contiene borradores y notas de seguimiento del desarrollo, con cifras
+# de versiones intermedias que la memoria final corrige. La trazabilidad de
+# los resultados la dan los ficheros de reports/, que si se versionan.
+docs/
 memoria/content.js
 memoria/generate.js
 memoria/README.md

@@ -62,7 +62,6 @@ tfg-multiagente-fraude/
 ├── models/      modelos entrenados (ignorados: se regeneran)
 ├── reports/     resultados de todas las ejecuciones (VERSIONADOS)
 ├── memoria/     memoria final (.docx y .pdf), figuras y capturas
-├── docs/        estado de resultados citado en el capítulo 6
 ├── ollama/      variantes de contexto ampliado de los modelos
 ├── src/
 │   ├── config.py      rutas, constantes y umbrales
