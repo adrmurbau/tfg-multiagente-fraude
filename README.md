@@ -61,12 +61,15 @@ tfg-multiagente-fraude/
 ├── data/        dataset (ignorado: licencia y tamaño)
 ├── models/      modelos entrenados (ignorados: se regeneran)
 ├── reports/     resultados de todas las ejecuciones (VERSIONADOS)
-├── memoria/     memoria final (.docx), figuras y capturas
+├── memoria/     memoria final (.docx y .pdf), figuras y capturas
+├── docs/        estado de resultados citado en el capítulo 6
+├── ollama/      variantes de contexto ampliado de los modelos
 ├── src/
 │   ├── config.py      rutas, constantes y umbrales
 │   ├── evaluacion.py  medida del sistema y auditoría de informes
 │   ├── detector/      capa 1
-│   └── agents/        capa 2
+│   ├── agents/        capa 2
+│   └── web/           demostrador web
 └── scripts/     un guion por experimento
 ```
 
@@ -106,6 +109,31 @@ Que cuatro de los dieciséis guiones sean pruebas que no invocan al modelo no es
 casual: los fallos de este tipo de sistema no lanzan excepciones, de modo que
 la única defensa es comprobar de forma programática lo que devuelve.
 
+## Demostrador web
+
+Una aplicación local, construida con FastAPI, que permite usar el sistema sin
+escribir una sola orden y, sobre todo, ver qué recibe y qué devuelve el modelo
+de lenguaje en cada fase. No reimplementa nada: llama a las mismas funciones
+que los guiones de experimentación.
+
+```powershell
+.\iniciar_demostrador.bat      # activa el entorno, comprueba Ollama y arranca
+```
+
+Luego, en el navegador, `http://127.0.0.1:8000`. Son cuatro pantallas que
+siguen el recorrido de un turno:
+
+| Pantalla | Qué muestra |
+|---|---|
+| Turno | Construye el turno, lo puntúa y presenta el expediente |
+| Caso | Lo que calcula el detector frente al texto literal que recibe el modelo, con la ablación del expediente |
+| Investigación | El párrafo explicativo y el veredicto, en columnas separadas |
+| Informe | El departamento completo y la auditoría del resultado |
+
+La pantalla de investigación no es un adorno. Muestra la explicación y el
+veredicto por separado porque el resultado central del trabajo es que no
+siempre se corresponden.
+
 ## Conjunto de datos
 
 **Credit Card Fraud Detection** (ULB / Worldline): 284.807 transacciones
@@ -126,9 +154,15 @@ py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ollama pull llama3.1:8b
+.\preparar_ollama.bat          # descarga los modelos y crea las variantes -ctx16k
 # dejar creditcard.csv en data/
 python scripts\check_entorno.py
 ```
+
+Las variantes `-ctx16k` no son opcionales para ejecutar el departamento
+completo: Ollama usa una ventana de 4096 tokens por defecto y, al excederla,
+trunca el expediente **por el principio y en silencio**. El porqué está en
+`ollama/README.md`.
 
 Para la comparación con modelos que no caben en memoria hace falta un entorno
 aparte, con PyTorch compilado para la arquitectura de la GPU. El guion

@@ -17,6 +17,10 @@ package.json
 !capturas/
 !capturas/*.png
 
+# El PDF entregado SI se versiona: es el formato en el que se deposita la
+# memoria. La regla *.pdf de arriba es para los PDF de previsualizacion.
+!Memoria_TFG_v5.pdf
+
 # Temporales de LibreOffice, que aparecen al convertir el .docx para revisarlo
 .~lock.*#
 *.tmp

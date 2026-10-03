@@ -47,7 +47,28 @@ desktop.ini
 
 # --- Documentos de trabajo internos, fuera del entregable ---
 # No aportan nada a quien revisa el resultado; se quedan en local.
-docs/
+#
+# Excepcion: Estado_de_resultados.docx SI se publica, porque la memoria lo
+# cita en el capitulo 6 como fuente de las cifras. Para poder exceptuarlo hay
+# que ignorar el CONTENIDO de docs/ y no el directorio: git no reabre un
+# directorio ya ignorado.
+docs/*
+!docs/Estado_de_resultados.docx
 memoria/content.js
 memoria/generate.js
 memoria/README.md
+
+# --- Material de la entrega que no pertenece al repositorio ---
+# El video y el zip se suben a la plataforma, no aqui: pesan cientos de MB y
+# el zip es el propio repositorio comprimido.
+memoria/video/
+memoria/*.zip
+
+# Versiones intermedias de la memoria. Se conserva una sola: la entregada.
+memoria/memoria_TFG.docx
+memoria/Memoria_TFG_corregida*.docx
+memoria/Memoria_TFG_v[1-4].docx
+
+# Ficheros temporales de Word
+~$*
+*.dead.*
